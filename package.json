@@ -1,0 +1,23 @@
+{
+  "name": "teampp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test":  "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ernestognw/Teampp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ernestognw/Team-/issues"
+  },
+  "homepage": "https://github.com/ernestognw/Team-#readme",
+  "dependencies": {
+    "jison": "^0.4.18"
+  }
+}
