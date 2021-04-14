@@ -33,7 +33,15 @@
 * Gramatica LISTAIDS:
 * Gramatica PARAMS:
 * Gramatica ESTATUTO:
+* Gramatica ASIGNA:
+* Gramatica VARIABLE:
+* Gramatica TERMINO:
 
+#### 3 Gramaticas Agregadas: 
+
+* Gramatica EXPRESIONSUMA
+* Gramatica FACTOR
+* Gramatica EXPRESION
 
 
 
