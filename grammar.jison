@@ -1,32 +1,52 @@
-/* description: Parses end executes mathematical expressions. */
-
 /* lexical grammar */
 %lex
 
 %%
 
-"+"					{ return 'PLUS'; }
-"-"					{ return 'MINUS'; }
-"*"					{ return 'TIMES'; }
-"/"					{ return 'DIVIDES'; }
-"<>"				{ return 'NOT_EQUAL'; }
+"/"					{ return 'DIV'; }
+"*"					{ return 'MULT'; }
+"+"					{ return 'SUM'; }
+"-"					{ return 'SUB'; }
+"!="				{ return 'NOT_EQUAL'; }
+"=="				{ return 'EQUAL_EQUAL'; }
+">="				{ return 'GTE'; }
+"<="				{ return 'LTE'; }
+">"					{ return 'GT'; }
 "<"					{ return 'LT'; }
 ">"					{ return 'GT'; }
-"="					{ return 'EQUAL'; }
-"("					{ return 'OPEN_PARENTHESIS'; }
-")"					{ return 'CLOSE_PARENTHESIS'; }
-"{"					{ return 'OPEN_BRACKET'; }
-"}"					{ return 'CLOSE_BRACKET'; }
-","					{ return 'COMMA'; }
-";"					{ return 'SEMICOLON'; }
-":"					{ return 'COLON'; }
-if 					{ return 'IF'; }
-else				{ return 'ELSE'; }
-var					{ return 'VAR'; }
+"<"					{ return 'LT'; }
+"&&"				{ return 'AND'; }
+"||"				{ return 'OR'; }
+"!"					{ return 'NOT'; }
+"("					{ return 'LP'; }
+")"					{ return 'RP'; }
+"{"					{ return 'LB'; }
+"}"					{ return 'RB'; }
+"["					{ return 'LA'; }
+"]"					{ return 'RA'; }
 int 				{ return 'INT_TYPE'; }
 float 			{ return 'FLOAT_TYPE'; }
+char 				{ return 'CHAR_TYPE'; }
+if 					{ return 'IF'; }
+else				{ return 'ELSE'; }
+","					{ return 'COMMA'; }
+"."					{ return 'POINT'; }
+";"					{ return 'SEMICOLON'; }
+":"					{ return 'COLON'; }
+"="					{ return 'EQUAL'; }
+void				{ return 'VOID'; }
+vars				{ return 'VARS'; }
 print				{ return 'PRINT'; }
+read				{ return 'READ'; }
+write				{ return 'WRITE'; }
+main				{ return 'MAIN'; }
+function		{ return 'FUNCTION'; }
+return			{ return 'RETURN'; }
+while				{ return 'WHILE'; }
+for					{ return 'FOR'; }
 program			{ return 'PROGRAM'; }
+class				{ return 'CLASS'; }
+inherits    { return 'INHERITS'; }
 
 [0-9]+\.[0-9]+ 		  { return 'FLOAT'; }
 [0-9]+            	{ return 'INT'; }
@@ -39,153 +59,226 @@ program			{ return 'PROGRAM'; }
 
 /* operator associations and precedence */
 
-%left '+' '-'
-%left '*' '/'
-
-%start program
+%start init
 
 %% /* language grammar */
 
-program:
-	PROGRAM ID SEMICOLON a block { 
-    console.log(`Cuack cuack! Succesfully compiled with ${this._$.last_line} lines of code`)
+init: 
+	program { 
+    console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
 	;
 
-a:
-	vars
+program_header: 
+	PROGRAM ID SEMICOLON
+	;
+
+program:
+	program_header body
+	| program_header decclasses decvar modules body
+	| program_header decclasses decvar body
+	| program_header decclasses modules body
+	| program_header decclasses body
+	| program_header decvar body
+	| program_header modules body
+	;
+
+decclasses_header:
+	CLASS ID
+	;
+
+decclasses_inherits:
+	INHERITS ID
+	;
+
+decclasses_body: 
+	decvar modules
+	| modules
 	| {}
 	;
 
-block:
-	OPEN_BRACKET b CLOSE_BRACKET
+decclasses:
+	decclasses_header decclasses_inherits LB decclasses_body RB
+	| decclasses_header LB decclasses_body RB
 	;
 
-b:
-	statement b
-	| {}
-	;
-
-vars:
-	VAR c COLON type SEMICOLON q
-	;
-
-c:
-	ID d
-	;
-
-d:
-	COMMA ID d
-	| {}
-	;
-
-type:
-	e
-	;
-
-e:
+type: 
 	INT_TYPE
 	| FLOAT_TYPE
+	| CHAR_TYPE
+	| ID
 	;
 
-statement:
-	f
+lista_ids_aux:
+	COMMA ID lista_ids_aux
+	| dimensions ID lista_ids_aux
+	| dimensions
+	| {}
 	;
 
-f:
-	asignment
+lista_ids: 
+	ID lista_ids_aux
+	;
+
+dimensions:
+	LA expression RA
+	| LA expression COMMA expression RA
+	;
+
+decvar_aux: 
+	lista_ids COLON type SEMICOLON
+	| {}
+	;
+
+decvar:
+	VARS lista_ids COLON type SEMICOLON decvar_aux
+	;
+
+return_type:
+	type 
+	| VOID
+	;
+
+params:
+	type ID COMMA params
+	| type ID
+	| {}
+	;
+
+modules: 
+	return_type FUNCTION ID LP params RP SEMICOLON decvar LB statements RB
+	;
+
+body: 
+	main() LB statements RB
+	;
+
+var: 
+	ID POINT ID dimensions
+	| ID POINT ID
+	| ID dimensions
+	| ID
+	;
+
+statements:
+	assign
+	| call
+	| return
+	| read
+	| write
 	| condition
-	| writing
-	;
-
-asignment:
-	ID EQUAL expression SEMICOLON
-	;
-
-expression:
-	exp g
-	;
-
-g:
-	GT h
-	| LT h
-	| NOT_EQUAL h
+	| while
+	| for
+	| expression
+	| statements
 	| {}
 	;
 
-h:
-	exp
+assign:
+	var EQUAL expression SEMICOLON
+	| var EQUAL call sum_expression SEMICOLON
+	| var EQUAL call SEMICOLON
 	;
-
-writing:
-	PRINT OPEN_PARENTHESIS i CLOSE_PARENTHESIS SEMICOLON
-	;
-
-i:
-	expression j
-	| STRING j
-	;
-
-j:
-	COMMA i
+	
+call_aux:
+	expression COMMA
+	| expression
 	| {}
 	;
 
-exp:
-	term k
+call:
+	ID POINT ID LP call_aux RP SEMICOLON
+	ID LP call_aux RP SEMICOLON
 	;
 
-k:
-	PLUS term k
-	| MINUS term k
+return:
+	RETURN LP expression RP
+	;
+
+input_output_aux:
+	var COMMA
+	| var
 	| {}
 	;
 
-term:
-	factor l
+read:
+	READ LP input_output_aux RP
 	;
 
-l:
-	TIMES factor l
-	| DIVIDES factor l
-	| {}
+writable:
+	expression
+	| STRING
+	;
+
+write:
+	WRITE LP input_output_aux RP
 	;
 
 condition:
-	IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS block m SEMICOLON
+	IF LP expression RP LB statements RB ELSE LB statements RB
+	| IF LP expression RP LB statements RB
 	;
 
-m:
-	ELSE block
-	| {}
+while:
+	WHILE LP expression RP do LB statements RB
 	;
 
-varcte:
-	n
+for_aux:
+	expression TO expression do LB statements RB
 	;
 
-n:
-	ID
-	| INT {}
-	| FLOAT {}
+for:
+	FOR ID dimensions for_aux
+	| FOR ID for_aux
 	;
 
 factor:
-	o
+	ID dimensions
+	| ID POINT ID
+	| ID
+	| LP expression RP
 	;
 
-o:
-	OPEN_PARENTHESIS expression CLOSE_PARENTHESIS
-	| p varcte
-	;
-
-p:
-	PLUS
-	| MINUS
+term_aux:
+	*
+	| /
 	| {}
 	;
 
-q:
-	c COLON type SEMICOLON q
+term: 
+	factor term_aux
+	;
+
+sum_expression_aux:
+	+
+	| -
 	| {}
+	;
+
+sum_expression:
+	term sum_expression_aux
+	;
+
+expression_comp_aux:
+	LT sum_expression
+	| LTE sum_expression
+	| GT sum_expression
+	| GTE sum_expression
+	| NOT_EQUAL sum_expression
+	| EQUAL_EQUAL sum_expression
+	| {}
+	;
+
+expression_comp:
+	sum_expression expression_comp_aux
+	;
+
+bool_aux:
+	AND
+	| OR
+	| {}
+	;
+
+expression:
+	expression_comp bool_aux
 	;
