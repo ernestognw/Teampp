@@ -10,7 +10,12 @@ if (!files || files.length === 0) {
   return
 }
 
+console.log("print files")
+console.log(files);
+
 const bnf = readFileSync('grammar.jison', 'utf8');
 const parser = new Parser(bnf);
+//console.log("bnf print")
+//console.log(bnf);
 
 files.forEach(file => parser.parse(file))

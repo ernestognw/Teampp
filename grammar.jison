@@ -2,7 +2,7 @@
 %lex
 
 %%
-
+[\s+]               {  }           	
 "/"					{ return 'DIV'; }
 "*"					{ return 'MULT'; }
 "+"					{ return 'SUM'; }
@@ -150,7 +150,7 @@ modules:
 	;
 
 body: 
-	main() LB statements RB
+	MAIN LP RP LB statements RB
 	;
 
 var: 
