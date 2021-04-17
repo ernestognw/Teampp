@@ -2,7 +2,7 @@
 %lex
 
 %%
-[\s+]               {  }           	
+[\s+]       {  }           	
 "/"					{ return 'DIV'; }
 "*"					{ return 'MULT'; }
 "+"					{ return 'SUM'; }
@@ -185,7 +185,7 @@ call:
 	;
 
 return:
-	RETURN OPEN_PARENTHESIS expression CLOSING_PARENTHESIS
+	RETURN OPEN_PARENTHESIS expression CLOSING_PARENTHESIS SEMICOLON
 	;
 
 input_output_aux:
@@ -195,7 +195,7 @@ input_output_aux:
 	;
 
 read:
-	READ OPEN_PARENTHESIS input_output_aux CLOSING_PARENTHESIS
+	READ OPEN_PARENTHESIS input_output_aux CLOSING_PARENTHESIS SEMICOLON
 	;
 
 writable:
@@ -204,7 +204,7 @@ writable:
 	;
 
 write:
-	WRITE OPEN_PARENTHESIS input_output_aux CLOSING_PARENTHESIS
+	WRITE OPEN_PARENTHESIS input_output_aux CLOSING_PARENTHESIS SEMICOLON
 	;
 
 condition:
@@ -230,8 +230,7 @@ for:
 	;
 
 factor:
-	var
-	| INT
+	INT
 	| FLOAT
 	| CHAR
 	| STRING
@@ -283,6 +282,6 @@ expression:
 	;
 
 expression_epsilon:
-	expression
+	expression SEMICOLON
 	| {}
 	;
