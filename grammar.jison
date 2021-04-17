@@ -170,10 +170,8 @@ assign:
 	;
 
 call:
-	ID POINT ID OPEN_PARENTHESIS expression_epsilon COMMA CLOSING_PARENTHESIS SEMICOLON
-	| ID POINT ID OPEN_PARENTHESIS expression_epsilon CLOSING_PARENTHESIS SEMICOLON
-	| ID OPEN_PARENTHESIS expression_epsilon COMMA CLOSING_PARENTHESIS SEMICOLON
-	| ID OPEN_PARENTHESIS expression_epsilon CLOSING_PARENTHESIS SEMICOLON
+	var OPEN_PARENTHESIS expression_epsilon COMMA CLOSING_PARENTHESIS SEMICOLON
+	| var OPEN_PARENTHESIS expression_epsilon CLOSING_PARENTHESIS SEMICOLON
 	;
 
 return:
@@ -222,24 +220,31 @@ for:
 	;
 
 factor:
-	var
-	| INT
+	INT
 	| FLOAT
 	| CHAR
 	| STRING
 	| OPEN_PARENTHESIS expression CLOSING_PARENTHESIS
 	;
 
+term_aux:
+	MULT term_aux
+	| DIV term_aux
+	| {}
+	;
+
 term: 
-	factor MULT
-  | factor DIV
-	| factor
+	factor term_aux
+	;
+
+sum_expression_aux:
+	SUM sum_expression
+	| SUB sum_expression
+	| {}
 	;
 
 sum_expression:
-	term SUM
-	| term SUB
-	| term
+	term sum_expression_aux
 	;
 
 expression_comp_aux:
@@ -257,8 +262,8 @@ expression_comp:
 	;
 
 bool_aux:
-	AND
-	| OR
+	AND expression_comp
+	| OR expression_comp
 	| {}
 	;
 
