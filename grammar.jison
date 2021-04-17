@@ -2,11 +2,11 @@
 %lex
 
 %%
-[\s+]       {  }           	
+\s+		      {  }           	
+"+"					{ return 'PLUS'; }
 "/"					{ return 'DIV'; }
 "*"					{ return 'MULT'; }
-"+"					{ return 'SUM'; }
-"-"					{ return 'SUB'; }
+"-"					{ return 'MINUS'; }
 "!="				{ return 'NOT_EQUAL'; }
 "=="				{ return 'EQUAL_EQUAL'; }
 ">="				{ return 'GTE'; }
@@ -123,8 +123,8 @@ return_type:
 	;
 
 params:
-	type ID COMMA params
-	| type ID
+	ID COLON type COMMA params
+	| ID COLON type
 	| {}
 	;
 
@@ -184,8 +184,8 @@ return:
 	;
 
 input_output_aux:
-	var COMMA
-	| var
+	expression COMMA
+	| expression
 	| {}
 	;
 
@@ -245,8 +245,8 @@ term:
 	;
 
 sum_expression_aux:
-	SUM sum_expression
-	| SUB sum_expression
+	PLUS sum_expression
+	| MINUS sum_expression
 	| {}
 	;
 
