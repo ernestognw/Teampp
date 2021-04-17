@@ -149,25 +149,20 @@ var:
 	ID var_aux dimensions
 	;
 
+statements_aux:
+	statements 
+	| {}
+	;
+
 statements:
-	assign statements
-	| assign 
-	| call statements
-	| call
-	| return statements
-	| return
-	| read statements
-	| read
-	| write statements
-	| write
-	| condition statements
-	| condition
-	| while statements
-	| while
-	| for statements
-	| for
-	| expression statements
-	| expression
+	assign statements_aux
+	| call statements_aux
+	| return statements_aux
+	| read statements_aux
+	| write statements_aux
+	| condition statements_aux
+	| while statements_aux
+	| for statements_aux
 	;
 
 assign:
@@ -230,7 +225,9 @@ for:
 	;
 
 factor:
-	INT
+	var
+	| call
+	| INT
 	| FLOAT
 	| CHAR
 	| STRING
