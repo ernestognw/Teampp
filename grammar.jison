@@ -239,24 +239,16 @@ factor:
 	| LP expression RP
 	;
 
-term_aux:
-	*
-	| /
-	| {}
-	;
-
 term: 
-	factor term_aux
-	;
-
-sum_expression_aux:
-	+
-	| -
-	| {}
+	factor MULT
+  | factor DIV
+	| factor
 	;
 
 sum_expression:
-	term sum_expression_aux
+	term SUM
+	| term SUB
+	| term
 	;
 
 expression_comp_aux:
