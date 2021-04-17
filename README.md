@@ -11,7 +11,10 @@
 ### Semana # 1 "12-16" Diciembre:
 
 * 1 Revision de lo anterior como diagramas
-* 2 Revision Gramatica 
+* 2 Revision Gramatica
+* 3 Agregar Gramatica
+* 4 Ajustar Gramatica a Jison
+* 5 Tabla de consideraciones semanticas
 
 #### 1 Cambios a diagramas : 
 
