@@ -168,10 +168,15 @@ statements:
 assign:
 	var EQUAL expression SEMICOLON
 	;
+	
+call_aux:
+	expression COMMA call_aux
+	| expression
+	| {}
+	;
 
 call:
-	var OPEN_PARENTHESIS expression_epsilon COMMA CLOSING_PARENTHESIS SEMICOLON
-	| var OPEN_PARENTHESIS expression_epsilon CLOSING_PARENTHESIS SEMICOLON
+	var OPEN_PARENTHESIS call_aux CLOSING_PARENTHESIS SEMICOLON
 	;
 
 return:
