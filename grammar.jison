@@ -148,10 +148,12 @@ params:
 
 modules: 
 	return_type FUNCTION ID LP params RP SEMICOLON decvar LB statements RB
+	| return_type FUNCTION ID LP params RP SEMICOLON decvar LB RB
 	;
 
 body: 
 	MAIN LP RP LB statements RB
+	| MAIN LP RP LB RB
 	;
 
 var: 
@@ -162,23 +164,28 @@ var:
 	;
 
 statements:
-	assign
+	assign statements
+	| assign 
+	| call statements
 	| call
+	| return statements
 	| return
+	| read statements
 	| read
+	| write statements
 	| write
+	| condition statements
 	| condition
+	| while statements
 	| while
+	| for statements
 	| for
+	| expression statements
 	| expression
-	| statements
-	| {}
 	;
 
 assign:
 	var EQUAL expression SEMICOLON
-	| var EQUAL call sum_expression SEMICOLON
-	| var EQUAL call SEMICOLON
 	;
 	
 call_aux:
@@ -189,7 +196,7 @@ call_aux:
 
 call:
 	ID POINT ID LP call_aux RP SEMICOLON
-	ID LP call_aux RP SEMICOLON
+	| ID LP call_aux RP SEMICOLON
 	;
 
 return:
@@ -217,15 +224,20 @@ write:
 
 condition:
 	IF LP expression RP LB statements RB ELSE LB statements RB
+	| IF LP expression RP LB statements RB ELSE LB RB
 	| IF LP expression RP LB statements RB
+	| IF LP expression RP LB RB ELSE LB statements RB
+	| IF LP expression RP LB RB ELSE LB RB
 	;
 
 while:
 	WHILE LP expression RP do LB statements RB
+	| WHILE LP expression RP do LB RB
 	;
 
 for_aux:
 	expression TO expression do LB statements RB
+	| expression TO expression do LB RB
 	;
 
 for:
@@ -234,7 +246,8 @@ for:
 	;
 
 factor:
-	ID dimensions
+	call
+	| ID dimensions
 	| ID POINT ID
 	| ID
 	| LP expression RP
