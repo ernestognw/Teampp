@@ -131,7 +131,8 @@ decvar_aux:
 	;
 
 decvar:
-	VARS lista_ids COLON type SEMICOLON decvar_aux
+	VARS lista_ids COLON type SEMICOLON decvar
+	| {}
 	;
 
 return_type:

@@ -1,5 +1,6 @@
 program team; 
 vars uno, dos, tres : int;
+vars uno, dos, tres : int;
 main(){
 	leer.el();
 	otro();
