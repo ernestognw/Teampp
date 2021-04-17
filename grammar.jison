@@ -51,6 +51,7 @@ inherits    { return 'INHERITS'; }
 [0-9]+\.[0-9]+ 		  { return 'FLOAT'; }
 [0-9]+            	{ return 'INT'; }
 [A-z0-9]+    	      { return 'ID'; }
+([A-Za-z]|[0-9])		{ return 'CHAR'; }
 \".*\"				      { return 'STRING'; }
 [\n]           		  { }
 .                	  { }
@@ -233,8 +234,8 @@ factor:
 	;
 
 term_aux:
-	MULT term_aux
-	| DIV term_aux
+	MULT term
+	| DIV term
 	| {}
 	;
 
