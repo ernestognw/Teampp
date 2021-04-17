@@ -140,9 +140,13 @@ body:
 	| {}
 	;
 
+var_aux:
+	POINT ID var_aux
+	| {}
+	;
+
 var: 
-	ID POINT ID dimensions
-	| ID dimensions
+	ID var_aux dimensions
 	;
 
 statements:
@@ -226,7 +230,8 @@ for:
 	;
 
 factor:
-	INT
+	var
+	| INT
 	| FLOAT
 	| CHAR
 	| STRING
