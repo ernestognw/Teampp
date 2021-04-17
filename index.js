@@ -6,8 +6,8 @@ const filepaths = process.argv.slice(2)
 const files = filepaths.map(filepath => readFileSync(filepath, 'utf8'))
 
 if (!files || files.length === 0) {
-  console.log('Cuack? Files missing')
-  return
+  console.log('Files missing')
+  return;
 }
 
 const bnf = readFileSync('grammar.jison', 'utf8');
