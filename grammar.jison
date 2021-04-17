@@ -18,10 +18,10 @@
 "&&"				{ return 'AND'; }
 "||"				{ return 'OR'; }
 "!"					{ return 'NOT'; }
-"("					{ return 'LP'; }
-")"					{ return 'RP'; }
-"{"					{ return 'LB'; }
-"}"					{ return 'RB'; }
+"("					{ return 'OPEN_PARENTHESIS'; }
+")"					{ return 'CLOSING_PARENTHESIS'; }
+"{"					{ return 'OPEN_BRACKET'; }
+"}"					{ return 'CLOSING_BRACKET'; }
 "["					{ return 'LA'; }
 "]"					{ return 'RA'; }
 int 				{ return 'INT_TYPE'; }
@@ -69,37 +69,18 @@ init:
   }
 	;
 
-program_header: 
-	PROGRAM ID SEMICOLON
-	;
-
 program:
-	program_header body
-	| program_header decclasses decvar modules body
-	| program_header decclasses decvar body
-	| program_header decclasses modules body
-	| program_header decclasses body
-	| program_header decvar body
-	| program_header modules body
+	PROGRAM ID SEMICOLON decclasses decvar modules body
 	;
 
-decclasses_header:
-	CLASS ID
-	;
-
-decclasses_inherits:
+inheritance:
 	INHERITS ID
-	;
-
-decclasses_body: 
-	decvar modules
-	| modules
 	| {}
 	;
 
 decclasses:
-	decclasses_header decclasses_inherits LB decclasses_body RB
-	| decclasses_header LB decclasses_body RB
+	CLASS ID inheritance OPEN_BRACKET decvar modules CLOSING_BRACKET
+	| {}
 	;
 
 type: 
@@ -113,7 +94,6 @@ lista_ids_aux:
 	COMMA ID lista_ids_aux
 	| dimensions ID lista_ids_aux
 	| dimensions
-	| {}
 	;
 
 lista_ids: 
@@ -123,6 +103,7 @@ lista_ids:
 dimensions:
 	LA expression RA
 	| LA expression COMMA expression RA
+	| {}
 	;
 
 decvar_aux: 
@@ -147,20 +128,20 @@ params:
 	;
 
 modules: 
-	return_type FUNCTION ID LP params RP SEMICOLON decvar LB statements RB
-	| return_type FUNCTION ID LP params RP SEMICOLON decvar LB RB
+	return_type FUNCTION ID OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar OPEN_BRACKET statements CLOSING_BRACKET
+	| return_type FUNCTION ID OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar OPEN_BRACKET CLOSING_BRACKET
+	| {}
 	;
 
 body: 
-	MAIN LP RP LB statements RB
-	| MAIN LP RP LB RB
+	MAIN OPEN_PARENTHESIS CLOSING_PARENTHESIS OPEN_BRACKET statements CLOSING_BRACKET
+	| MAIN OPEN_PARENTHESIS CLOSING_PARENTHESIS OPEN_BRACKET CLOSING_BRACKET
+	| {}
 	;
 
 var: 
 	ID POINT ID dimensions
-	| ID POINT ID
 	| ID dimensions
-	| ID
 	;
 
 statements:
@@ -187,20 +168,16 @@ statements:
 assign:
 	var EQUAL expression SEMICOLON
 	;
-	
-call_aux:
-	expression COMMA
-	| expression
-	| {}
-	;
 
 call:
-	ID POINT ID LP call_aux RP SEMICOLON
-	| ID LP call_aux RP SEMICOLON
+	ID POINT ID OPEN_PARENTHESIS expression_epsilon COMMA CLOSING_PARENTHESIS SEMICOLON
+	| ID POINT ID OPEN_PARENTHESIS expression_epsilon CLOSING_PARENTHESIS SEMICOLON
+	| ID OPEN_PARENTHESIS expression_epsilon COMMA CLOSING_PARENTHESIS SEMICOLON
+	| ID OPEN_PARENTHESIS expression_epsilon CLOSING_PARENTHESIS SEMICOLON
 	;
 
 return:
-	RETURN LP expression RP
+	RETURN OPEN_PARENTHESIS expression CLOSING_PARENTHESIS
 	;
 
 input_output_aux:
@@ -210,7 +187,7 @@ input_output_aux:
 	;
 
 read:
-	READ LP input_output_aux RP
+	READ OPEN_PARENTHESIS input_output_aux CLOSING_PARENTHESIS
 	;
 
 writable:
@@ -219,38 +196,38 @@ writable:
 	;
 
 write:
-	WRITE LP input_output_aux RP
+	WRITE OPEN_PARENTHESIS input_output_aux CLOSING_PARENTHESIS
 	;
 
 condition:
-	IF LP expression RP LB statements RB ELSE LB statements RB
-	| IF LP expression RP LB statements RB ELSE LB RB
-	| IF LP expression RP LB statements RB
-	| IF LP expression RP LB RB ELSE LB statements RB
-	| IF LP expression RP LB RB ELSE LB RB
+	IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET statements CLOSING_BRACKET ELSE OPEN_BRACKET statements CLOSING_BRACKET
+	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET statements CLOSING_BRACKET ELSE OPEN_BRACKET CLOSING_BRACKET
+	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET statements CLOSING_BRACKET
+	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET CLOSING_BRACKET ELSE OPEN_BRACKET statements CLOSING_BRACKET
+	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET CLOSING_BRACKET ELSE OPEN_BRACKET CLOSING_BRACKET
 	;
 
 while:
-	WHILE LP expression RP do LB statements RB
-	| WHILE LP expression RP do LB RB
+	WHILE OPEN_PARENTHESIS expression CLOSING_PARENTHESIS do OPEN_BRACKET statements CLOSING_BRACKET
+	| WHILE OPEN_PARENTHESIS expression CLOSING_PARENTHESIS do OPEN_BRACKET CLOSING_BRACKET
 	;
 
 for_aux:
-	expression TO expression do LB statements RB
-	| expression TO expression do LB RB
+	expression TO expression do OPEN_BRACKET statements CLOSING_BRACKET
+	| expression TO expression do OPEN_BRACKET CLOSING_BRACKET
 	;
 
 for:
 	FOR ID dimensions for_aux
-	| FOR ID for_aux
 	;
 
 factor:
-	call
-	| ID dimensions
-	| ID POINT ID
-	| ID
-	| LP expression RP
+	var
+	| INT
+	| FLOAT
+	| CHAR
+	| STRING
+	| OPEN_PARENTHESIS expression CLOSING_PARENTHESIS
 	;
 
 term: 
@@ -287,4 +264,9 @@ bool_aux:
 
 expression:
 	expression_comp bool_aux
+	;
+
+expression_epsilon:
+	expression
+	| {}
 	;
