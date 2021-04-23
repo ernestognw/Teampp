@@ -88,9 +88,15 @@ program_aux:
 	console.log("End");
 	};
 
+program_finish:
+	{
+		console.log(yy.variables)
+		console.log(yy.functions)
+		console.log("finish program");
+	};
+
 program:
-	PROGRAM program_aux SEMICOLON decclasses decvar modules body
-	; 
+	PROGRAM program_aux SEMICOLON decclasses decvar modules body program_finish;
 
 inheritance:
 	INHERITS ID
