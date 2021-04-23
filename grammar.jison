@@ -1,5 +1,11 @@
 /* lexical grammar */
 %lex
+%options flex
+
+%{
+	yy.variables = {}
+	yy.functions = {}
+%}
 
 %%
 \s+		      {  }           	
@@ -66,6 +72,8 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
+		console.log(yy.variables)
+		console.log(yy.functions)
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
 	;
