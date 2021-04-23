@@ -70,6 +70,7 @@ inherits    { return 'INHERITS'; }
 
 %% /* language grammar */
 
+// Muestra los valores de las variables al inicio
 init: 
 	program { 
 		console.log(yy.variables)
@@ -78,9 +79,19 @@ init:
   }
 	;
 
+//Add the global scope 
+program_aux:
+	ID{ 
+	console.log( "hola")
+	console.log(this);
+	yy.functions[this.$] = {name: this.$, typeReturn: "noReturn" } 
+	console.log(yy.functions);
+	console.log("End");
+	};
+
 program:
-	PROGRAM ID SEMICOLON decclasses decvar modules body
-	;
+	PROGRAM program_aux SEMICOLON decclasses decvar modules body
+	; 
 
 inheritance:
 	INHERITS ID
