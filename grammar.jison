@@ -70,7 +70,7 @@ inherits    { return 'INHERITS'; }
 
 %% /* language grammar */
 
-// Muestra los valores de las variables al inicio
+// Just shows variables at start 
 init: 
 	program { 
 		console.log(yy.variables)
@@ -84,7 +84,7 @@ program_aux:
 	ID{ 
 	console.log( "hola")
 	console.log(this);
-	yy.functions[this.$] = {name: this.$, typeReturn: "noReturn" } 
+	yy.functions[this.$] = {name: this.$, typeReturn: "noReturn } 
 	console.log(yy.functions);
 	console.log("End");
 	};
