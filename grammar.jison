@@ -146,9 +146,20 @@ params:
 	| {}
 	;
 
+
+//Add the modules scope 
+modules_aux:
+	ID{
+	console.log(this);
+	yy.functions[this.$] = {name: this.$, typeReturn: "noReturn" } 
+	console.log(yy.functions);
+	console.log("End");
+	};
+
+
+
 modules: 
-	return_type FUNCTION ID OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar OPEN_BRACKET statements CLOSING_BRACKET
-	| return_type FUNCTION ID OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar OPEN_BRACKET CLOSING_BRACKET
+	return_type FUNCTION modules_aux OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar OPEN_BRACKET statements CLOSING_BRACKET
 	| {}
 	;
 
