@@ -1,10 +1,40 @@
 /* lexical grammar */
 %lex
-%options flex
 
 %{
-	yy.variables = {}
-	yy.functions = {}
+	if(!yy.started) {
+		yy.started = true
+
+		yy.varsDirectory = {};
+		yy.currentDirectory = yy;
+		yy.varTypes = {
+			PROGRAM: 'program',
+			CLASS: 'class'
+		};
+
+		yy.addToDirectory = (id, type) => {
+			yy.a++;
+			yy.currentDirectory.varsDirectory[id] = {
+				type,
+				varsDirectory: {}
+			}
+			yy.prevDirectory = yy.currentDirectory;
+			yy.currentDirectory = yy.currentDirectory.varsDirectory[id];
+		}
+
+
+		yy.getAndValidateFromCurrentDirectory = (id, expectedType, line, column) => {
+			const toCheck = yy.currentDirectory[id]
+
+			if(!toCheck || toCheck.type !== expectedType) {
+				// throw new Error(`at line ${line}, column: ${column}. Identifier ${id} not declared`)
+			}
+		}
+
+		yy.backDirectory = () => {
+			yy.currentDirectory = yy.prevDirectory;
+		}
+	}
 %}
 
 %%
@@ -70,41 +100,44 @@ inherits    { return 'INHERITS'; }
 
 %% /* language grammar */
 
-// Just shows variables at start 
 init: 
 	program { 
-		console.log(yy.variables)
-		console.log(yy.functions)
+		console.log(yy.varsDirectory);
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
 	;
 
-//Add the global scope 
-program_aux:
-	ID{
-	//console.log(this);
-	yy.functions[this.$] = {name: this.$, typeReturn: "noReturn" } 
-	console.log(yy.functions);
-	console.log("End");
-	};
-
-program_finish:
-	{
-		console.log(yy.variables)
-		console.log(yy.functions)
-		console.log("finish program");
-	};
+programid: 
+	PROGRAM ID {
+		yy.addToDirectory($2.toString(), yy.varTypes.PROGRAM)
+	}
+	;
 
 program:
-	PROGRAM program_aux SEMICOLON decclasses decvar modules body program_finish;
+	programid SEMICOLON decclasses decvar modules body
+	;
 
 inheritance:
-	INHERITS ID
+	INHERITS ID {
+		yy.getAndValidateFromCurrentDirectory($2.toString(), yy.varTypes.CLASS, this._$.last_line, this._$.last_column)
+	}
 	| {}
 	;
 
+classid: 
+	CLASS ID {
+		yy.addToDirectory($2.toString(), yy.varTypes.CLASS)
+	}
+	;
+
+closeblock:
+	CLOSING_BRACKET {
+		yy.backDirectory()
+	}
+	;
+
 decclasses:
-	CLASS ID inheritance OPEN_BRACKET decvar modules CLOSING_BRACKET
+	classid inheritance OPEN_BRACKET decvar modules closeblock decclasses
 	| {}
 	;
 
@@ -152,20 +185,9 @@ params:
 	| {}
 	;
 
-
-//Add the modules scope 
-modules_aux:
-	ID{
-	console.log(this);
-	yy.functions[this.$] = {name: this.$, typeReturn: "noReturn" } 
-	console.log(yy.functions);
-	console.log("End");
-	};
-
-
-
 modules: 
-	return_type FUNCTION modules_aux OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar OPEN_BRACKET statements CLOSING_BRACKET
+	return_type FUNCTION ID OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar OPEN_BRACKET statements CLOSING_BRACKET
+	| return_type FUNCTION ID OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar OPEN_BRACKET CLOSING_BRACKET
 	| {}
 	;
 
