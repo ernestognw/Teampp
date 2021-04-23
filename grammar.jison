@@ -81,10 +81,9 @@ init:
 
 //Add the global scope 
 program_aux:
-	ID{ 
-	console.log( "hola")
-	console.log(this);
-	yy.functions[this.$] = {name: this.$, typeReturn: "noReturn } 
+	ID{
+	//console.log(this);
+	yy.functions[this.$] = {name: this.$, typeReturn: "noReturn" } 
 	console.log(yy.functions);
 	console.log("End");
 	};
