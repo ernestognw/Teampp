@@ -16,21 +16,31 @@
 		};
 		yy.currentType = '';
 		yy.pendingVars = [];
+		yy.globalDirectory;
 
 		yy.addToDirectory = ({ 
 			id, 
 			type,
-			addNextLevel = false
+			addNextLevel = false,
+			isGlobal = false
 		}) => {
 			yy.a++;
+
 			yy.currentDirectory.varsDirectory[id] = {
+				name: id,
 				type,
 				varsDirectory: {},
 				dimensions: 0
 			}
+
 			if(addNextLevel) {
 				yy.prevDirectory = yy.currentDirectory;
 				yy.currentDirectory = yy.currentDirectory.varsDirectory[id];
+			}
+			
+			if(isGlobal) {
+				if(yy.globalDirectory) throw new Error('Cannot define global directory twice');
+				yy.globalDirectory = yy.currentDirectory.varsDirectory;
 			}
 		}
 
@@ -41,14 +51,20 @@
 			line, 
 			column
 		}) => {
-			const toCheck = yy.currentDirectory[id]
+			let toCheck = yy.currentDirectory[id]
+			const scope = yy.currentDirectory.name
 
 			if(!toCheck) {
-				// throw new Error(`at line ${line}, column: ${column}. Identifier ${id} not declared`)
+				// Try global scope
+				toCheck = yy.globalDirectory[id]
+			}
+
+			if(!toCheck) {
+				throw new Error(`at line ${line}, column: ${column}. Identifier ${id} not declared in scope: ${scope} or global`)
 			}
 
 			if(toCheck?.type !== expectedType) {
-				// throw new Error(`at line ${line}, column: ${column}. Identifier ${id} is not of type ${expectedType}, but is ${toCheck.type}`)
+				throw new Error(`at line ${line}, column: ${column}. Identifier ${id} is not of type ${expectedType}, but is ${toCheck.type}`)
 			}
 		}
 
@@ -148,6 +164,7 @@ programid:
 			id: $2.toString(), 
 			type: yy.genericTypes.PROGRAM,
 			addNextLevel: true,
+			isGlobal: true,
 		})
 	}
 	;
@@ -160,7 +177,7 @@ inheritance:
 	INHERITS ID {
 		yy.getAndValidateFromCurrentDirectory({
 			id: $2.toString(), 
-			type: yy.genericTypes.CLASS, 
+			expectedType: yy.genericTypes.CLASS, 
 			line: this._$.last_line, 
 			column: this._$.last_column
 		})
