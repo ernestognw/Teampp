@@ -4,86 +4,10 @@
 %{
 	if(!yy.started) {
 		yy.started = true
+		
+		const Grammar = require('../../utils/grammar.js');
 
-		yy.varsDirectory = {};
-		yy.currentDirectory = yy;
-		yy.genericTypes = {
-			PROGRAM: 'program',
-			CLASS: 'class',
-			INT: 'int',
-			FLOAT: 'float',
-			CHAR: 'char',
-		};
-		yy.currentType = '';
-		yy.pendingVars = [];
-		yy.globalDirectory;
-
-		yy.addToDirectory = ({ 
-			id, 
-			type,
-			addNextLevel = false,
-			isGlobal = false
-		}) => {
-			yy.a++;
-
-			yy.currentDirectory.varsDirectory[id] = {
-				name: id,
-				type,
-				varsDirectory: {}
-			}
-
-			if(addNextLevel) {
-				yy.prevDirectory = yy.currentDirectory;
-				yy.currentDirectory = yy.currentDirectory.varsDirectory[id];
-			}
-			
-			if(isGlobal) {
-				if(yy.globalDirectory) throw new Error('Cannot define global directory twice');
-				yy.globalDirectory = yy.currentDirectory.varsDirectory;
-			}
-		}
-
-
-		yy.getAndValidateFromCurrentDirectory = ({
-			id,
-			expectedType, 
-			line, 
-			column
-		}) => {
-			let toCheck = yy.currentDirectory[id]
-			const scope = yy.currentDirectory.name
-
-			if(!toCheck) {
-				// Try global scope
-				toCheck = yy.globalDirectory[id]
-			}
-
-			if(!toCheck) {
-				throw new Error(`at line ${line}, column: ${column}. Identifier ${id} not declared in scope: ${scope} or global`)
-			}
-
-			if(toCheck?.type !== expectedType) {
-				throw new Error(`at line ${line}, column: ${column}. Identifier ${id} is not of type ${expectedType}, but is ${toCheck.type}`)
-			}
-		}
-
-		yy.pushToPendingVars = ({ name }) => {
-			yy.pendingVars.push({ name })
-		}
-
-		yy.registerPendingVars = ({ type }) => {
-			yy.pendingVars.forEach(({ name }) => {
-				yy.addToDirectory({ 
-					id: name, 
-					type,
-				})
-			})
-			yy.pendingVars = []
-		}
-
-		yy.backDirectory = () => {
-			yy.currentDirectory = yy.prevDirectory;
-		}
+		yy.grammar = new Grammar();
 	}
 %}
 
@@ -152,16 +76,16 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		console.log(JSON.stringify(yy.varsDirectory));
+		console.log(JSON.stringify(yy.grammar.main));
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
 	;
 
 programid: 
 	PROGRAM ID {
-		yy.addToDirectory({
+		yy.grammar.addVar({
 			id: $2.toString(), 
-			type: yy.genericTypes.PROGRAM,
+			type: yy.grammar.genericTypes.PROGRAM,
 			addNextLevel: true,
 			isGlobal: true,
 		})
@@ -174,9 +98,9 @@ program:
 
 inheritance:
 	INHERITS ID {
-		yy.getAndValidateFromCurrentDirectory({
+		yy.grammar.getAndValidateVar({
 			id: $2.toString(), 
-			expectedType: yy.genericTypes.CLASS, 
+			expectedType: yy.grammar.genericTypes.CLASS, 
 			line: this._$.last_line, 
 			column: this._$.last_column
 		})
@@ -186,9 +110,9 @@ inheritance:
 
 classid: 
 	CLASS ID {
-		yy.addToDirectory({
+		yy.grammar.addVar({
 			id: $2.toString(), 
-			type: yy.genericTypes.CLASS,
+			type: yy.grammar.genericTypes.CLASS,
 			addNextLevel: true
 		})
 	}
@@ -196,7 +120,7 @@ classid:
 
 closeblock:
 	CLOSING_BRACKET {
-		yy.backDirectory()
+		yy.grammar.backDirectory()
 	}
 	;
 
@@ -207,25 +131,25 @@ decclasses:
 
 inttype: 
 	INT_TYPE {
-		yy.currentType = yy.genericTypes.INT
+		yy.grammar.currentType = yy.grammar.genericTypes.INT
 	}
 	;
 
 floattype: 
 	FLOAT_TYPE {
-		yy.currentType = yy.genericTypes.FLOAT
+		yy.grammar.currentType = yy.grammar.genericTypes.FLOAT
 	}
 	;
 
 chartype: 
 	CHAR_TYPE {
-		yy.currentType = yy.genericTypes.CHAR
+		yy.grammar.currentType = yy.grammar.genericTypes.CHAR
 	}
 	;
 
 classtype: 
 	ID {
-		yy.currentType = $1
+		yy.grammar.currentType = $1
 	}
 	;
 
@@ -244,7 +168,7 @@ list_ids_aux:
 
 list_id:
 	ID {
-		yy.pushToPendingVars({ name: $1 })
+		yy.grammar.pushToPendingVars({ name: $1 })
 	}
 	;
 
@@ -265,7 +189,7 @@ decvar_aux:
 
 closedecvar: 
 	COLON type SEMICOLON {
-		yy.registerPendingVars({ type: $2 })
+		yy.grammar.addPendingVars({ type: $2 })
 	}
 	;
 
