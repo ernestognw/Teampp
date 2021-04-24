@@ -119,6 +119,9 @@ program:
 
 inheritance:
 	INHERITS ID {
+	console.log("value")
+	console.log($2)
+	console.log("End value");
 		yy.getAndValidateFromCurrentDirectory($2.toString(), yy.varTypes.CLASS, this._$.last_line, this._$.last_column)
 	}
 	| {}

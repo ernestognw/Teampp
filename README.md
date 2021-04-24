@@ -8,7 +8,7 @@
 
 * 3 crear el repositorio de github 
 
-### Semana # 1 "12-16" Diciembre:
+### Semana # 2 "12-16" Diciembre:
 
 * 1 Revision de lo anterior como diagramas
 * 2 Revision Gramatica
@@ -46,6 +46,9 @@
 * Gramatica FACTOR
 * Gramatica EXPRESION
 
+### Semana # 3 "19-23" Diciembre:
 
+* 1 Semantica de Variables: Directorio de Procedimientos
+* 2 Semantica de Variables: Directorio de Variables
 
 
