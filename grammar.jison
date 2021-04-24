@@ -7,28 +7,63 @@
 
 		yy.varsDirectory = {};
 		yy.currentDirectory = yy;
-		yy.varTypes = {
+		yy.genericTypes = {
 			PROGRAM: 'program',
-			CLASS: 'class'
+			CLASS: 'class',
+			INT: 'int',
+			FLOAT: 'float',
+			CHAR: 'char',
 		};
+		yy.currentType = '';
+		yy.pendingVars = [];
 
-		yy.addToDirectory = (id, type) => {
+		yy.addToDirectory = ({ 
+			id, 
+			type,
+			addNextLevel = false
+		}) => {
 			yy.a++;
 			yy.currentDirectory.varsDirectory[id] = {
 				type,
-				varsDirectory: {}
+				varsDirectory: {},
+				dimensions: 0
 			}
-			yy.prevDirectory = yy.currentDirectory;
-			yy.currentDirectory = yy.currentDirectory.varsDirectory[id];
+			if(addNextLevel) {
+				yy.prevDirectory = yy.currentDirectory;
+				yy.currentDirectory = yy.currentDirectory.varsDirectory[id];
+			}
 		}
 
 
-		yy.getAndValidateFromCurrentDirectory = (id, expectedType, line, column) => {
+		yy.getAndValidateFromCurrentDirectory = ({
+			id,
+			expectedType, 
+			line, 
+			column
+		}) => {
 			const toCheck = yy.currentDirectory[id]
 
-			if(!toCheck || toCheck.type !== expectedType) {
+			if(!toCheck) {
 				// throw new Error(`at line ${line}, column: ${column}. Identifier ${id} not declared`)
 			}
+
+			if(toCheck?.type !== expectedType) {
+				// throw new Error(`at line ${line}, column: ${column}. Identifier ${id} is not of type ${expectedType}, but is ${toCheck.type}`)
+			}
+		}
+
+		yy.pushToPendingVars = ({ name }) => {
+			yy.pendingVars.push({ name })
+		}
+
+		yy.registerPendingVars = ({ type }) => {
+			yy.pendingVars.forEach(({ name }) => {
+				yy.addToDirectory({ 
+					id: name, 
+					type,
+				})
+			})
+			yy.pendingVars = []
 		}
 
 		yy.backDirectory = () => {
@@ -102,14 +137,18 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		console.log(yy.varsDirectory);
+		console.log(JSON.stringify(yy.varsDirectory));
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
 	;
 
 programid: 
 	PROGRAM ID {
-		yy.addToDirectory($2.toString(), yy.varTypes.PROGRAM)
+		yy.addToDirectory({
+			id: $2.toString(), 
+			type: yy.genericTypes.PROGRAM,
+			addNextLevel: true,
+		})
 	}
 	;
 
@@ -119,14 +158,23 @@ program:
 
 inheritance:
 	INHERITS ID {
-		yy.getAndValidateFromCurrentDirectory($2.toString(), yy.varTypes.CLASS, this._$.last_line, this._$.last_column)
+		yy.getAndValidateFromCurrentDirectory({
+			id: $2.toString(), 
+			type: yy.genericTypes.CLASS, 
+			line: this._$.last_line, 
+			column: this._$.last_column
+		})
 	}
 	| {}
 	;
 
 classid: 
 	CLASS ID {
-		yy.addToDirectory($2.toString(), yy.varTypes.CLASS)
+		yy.addToDirectory({
+			id: $2.toString(), 
+			type: yy.genericTypes.CLASS,
+			addNextLevel: true
+		})
 	}
 	;
 
@@ -141,21 +189,51 @@ decclasses:
 	| {}
 	;
 
-type: 
-	INT_TYPE
-	| FLOAT_TYPE
-	| CHAR_TYPE
-	| ID
+inttype: 
+	INT_TYPE {
+		yy.currentType = yy.genericTypes.INT
+	}
 	;
 
-lista_ids_aux:
-	COMMA ID lista_ids_aux
-	| dimensions ID lista_ids_aux
+floattype: 
+	FLOAT_TYPE {
+		yy.currentType = yy.genericTypes.FLOAT
+	}
+	;
+
+chartype: 
+	CHAR_TYPE {
+		yy.currentType = yy.genericTypes.CHAR
+	}
+	;
+
+classtype: 
+	ID {
+		yy.currentType = $1
+	}
+	;
+
+type: 
+	inttype
+	| floattype
+	| chartype
+	| classtype
+	;
+
+list_ids_aux:
+	COMMA list_id list_ids_aux
+	| dimensions list_id list_ids_aux
 	| dimensions
 	;
 
-lista_ids: 
-	ID lista_ids_aux
+list_id:
+	ID {
+		yy.pushToPendingVars({ name: $1 })
+	}
+	;
+
+list_ids: 
+	list_id list_ids_aux
 	;
 
 dimensions:
@@ -165,12 +243,18 @@ dimensions:
 	;
 
 decvar_aux: 
-	lista_ids COLON type SEMICOLON
+	list_ids COLON type SEMICOLON
 	| {}
 	;
 
+closedecvar: 
+	COLON type SEMICOLON {
+		yy.registerPendingVars({ type: $2 })
+	}
+	;
+
 decvar:
-	VARS lista_ids COLON type SEMICOLON decvar
+	VARS list_ids closedecvar decvar
 	| {}
 	;
 
