@@ -7,7 +7,9 @@
 
 		const Grammar = require('../../utils/grammar.js');
 
-		yy.grammar = new Grammar();
+		yy.grammar = new Grammar(this);
+	} else {
+		yy.grammar.parentCtx = this
 	}
 %}
 
@@ -87,7 +89,7 @@ programid:
 			id: $2.toString(), 
 			type: yy.grammar.genericTypes.PROGRAM,
 			addNextLevel: true,
-			isGlobal: true,
+			isGlobal: true
 		})
 	}
 	;
@@ -98,11 +100,9 @@ program:
 
 inheritance:
 	INHERITS ID {
-		yy.grammar.getAndValidateVar({
+		yy.grammar.validateId({
 			id: $2.toString(), 
-			expectedType: yy.grammar.genericTypes.CLASS, 
-			line: this._$.last_line, 
-			column: this._$.last_column
+			expectedType: yy.grammar.genericTypes.CLASS,
 		})
 	}
 	| {}
@@ -120,7 +120,6 @@ classid:
 
 closeblock:
 	CLOSING_BRACKET {
-		console.log(this._$.last_line)
 		yy.grammar.backDirectory()
 	}
 	;

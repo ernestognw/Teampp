@@ -1,12 +1,12 @@
 program teamPP; 
 
 class Person {
-  vars age : integer;
+  vars age : int;
   vars name[30] : char;
 
   int function example(x : int, y : float);
     vars another[100] : char;
-    vars example, example2 : string; 
+    vars example, example2 : char; 
   {
     read(variable);
     write(1/31+14*223 && 276*22231-2123*1.23);
@@ -15,12 +15,12 @@ class Person {
 }
 
 class SpecialPerson inherits Person {
-  vars age : integer;
+  vars age : int;
   vars name[30] : char;
 
   int function example(x : int, y : float);
     vars another[100] : char;
-    vars example, example2 : string; 
+    vars example, example2 : char; 
   {
     read(variable);
     write(1/31+14*223 && 276*22231-2123*1.23);
@@ -31,7 +31,7 @@ class SpecialPerson inherits Person {
 vars one, two, three : int;
 vars four, five : float;
 vars six : char;
-vars seven, eight, nine, ten : string;
+vars seven, eight, nine, ten : char;
 
 main(){
 	leer.el();

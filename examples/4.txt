@@ -1,12 +1,12 @@
 program teamPP; 
 
 class Person {
-  vars age : integer;
+  vars age : int;
   vars name[30] : char;
 
   int function example(x : int, y : float);
     vars another[100] : char;
-    vars example, example2 : string; 
+    vars example, example2 : char; 
   {
     return(id);
   }
@@ -15,7 +15,7 @@ class Person {
 vars one, two, three : int;
 vars four, five : float;
 vars six : char;
-vars seven, eight, nine, ten : string;
+vars seven, eight, nine, ten : char;
 
 main(){
 	leer.el();

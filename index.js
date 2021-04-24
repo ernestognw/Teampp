@@ -13,4 +13,10 @@ if (!files || files.length === 0) {
 const bnf = readFileSync('grammar.jison', 'utf8');
 const parser = new Parser(bnf);
 
-files.forEach(file => parser.parse(file))
+files.forEach(file => {
+  try {
+    parser.parse(file)
+  } catch(err) {
+    console.error(err.message)
+  }
+})

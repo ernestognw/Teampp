@@ -1,5 +1,7 @@
 class Grammar {
-  constructor() {
+  constructor(parentCtx) {
+    this.parentCtx = parentCtx;
+    
     this.genericTypes = {
       PROGRAM: "program",
       CLASS: "class",
@@ -27,9 +29,26 @@ class Grammar {
    * @param {isFunction} boolean whether the variable is for a function or not
    * @param {isGlobal} boolean whether to set this variable as the global directory. Can only be used once
    */
-  addVar = ({ id, type, isFunction = false, addNextLevel = false, isGlobal = false }) => {
+  addVar = ({
+    id,
+    type,
+    isFunction = false,
+    addNextLevel = false,
+    isGlobal = false,
+  }) => {
+    const typeExists = this.validateGenericType({ type });
+
+    if (!typeExists) {
+      this.validateId({
+        id: type,
+        expectedType: this.genericTypes.CLASS,
+      });
+    }
+
     if (!!this.currentDirectory.varsDirectory[id]) {
-      throw new Error(`Variable ${id} already exists in ${this.currentDirectory.name} scope`)
+      throw new Error(
+        `Variable ${id} already exists in ${this.currentDirectory.name} scope`
+      );
     }
 
     this.currentDirectory.varsDirectory[id] = {
@@ -52,19 +71,27 @@ class Grammar {
   };
 
   /**
+   *
+   * @param {type} string a type
+   * @returns boolean if the type is a generic type
+   */
+  validateGenericType = ({ type }) =>
+    Object.values(this.genericTypes).some((value) => value === type);
+
+  /**
    * Add function by using the current type saved previously
-   * 
-   * @param {id} name of the function 
+   *
+   * @param {id} name of the function
    */
   addFunction = ({ id }) => {
-    this.addVar({ 
-			id,
-			type: this.currentType,
-			isFunction: true,
-			addNextLevel: true
-		})
-		this.currentType = null
-  }
+    this.addVar({
+      id,
+      type: this.currentType,
+      isFunction: true,
+      addNextLevel: true,
+    });
+    this.currentType = null;
+  };
 
   /**
    * Gets variable from current directory and validates it against an expected type
@@ -72,10 +99,8 @@ class Grammar {
    *
    * @param {id} string id of the variable
    * @param {expectedType} string the type that the variable is expected to have
-   * @param {line} integer number of line where the validation is being executed
-   * @param {column} integer number of column where the validation is being executed
    */
-  getAndValidateVar = ({ id, expectedType, line, column }) => {
+  validateId = ({ id, expectedType }) => {
     let toCheck = this.currentDirectory[id];
     const scope = this.currentDirectory.name;
 
@@ -86,13 +111,13 @@ class Grammar {
 
     if (!toCheck) {
       throw new Error(
-        `at line ${line}, column: ${column}. Identifier ${id} not declared in scope: ${scope} or global`
+        `Error at line ${this.parentCtx.yylloc.last_line}, column: ${this.parentCtx.yylloc.last_column}. Identifier ${id} not declared in scope: ${scope} or global`
       );
     }
 
     if (toCheck.type !== expectedType) {
       throw new Error(
-        `at line ${line}, column: ${column}. Identifier ${id} is not of type ${expectedType}, but is ${toCheck.type}`
+        `Error at line ${lithis.parentCtx.yylloc.last_line}, column: ${this.parentCtx.yylloc.last_column}. Identifier ${id} is not of type ${expectedType}, but is ${toCheck.type}`
       );
     }
   };
