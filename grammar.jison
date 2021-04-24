@@ -29,8 +29,7 @@
 			yy.currentDirectory.varsDirectory[id] = {
 				name: id,
 				type,
-				varsDirectory: {},
-				dimensions: 0
+				varsDirectory: {}
 			}
 
 			if(addNextLevel) {
@@ -135,13 +134,13 @@ program			{ return 'PROGRAM'; }
 class				{ return 'CLASS'; }
 inherits    { return 'INHERITS'; }
 
-[0-9]+\.[0-9]+ 		  { return 'FLOAT'; }
-[0-9]+            	{ return 'INT'; }
-[A-z0-9]+    	      { return 'ID'; }
-([A-Za-z]|[0-9])		{ return 'CHAR'; }
-\".*\"				      { return 'STRING'; }
-[\n]           		  { }
-.                	  { }
+[0-9]+\.[0-9]+ 		  			{ return 'FLOAT'; }
+[0-9]+            				{ return 'INT'; }
+[A-Za-z_][A-Za-z0-9_]*		{ return 'ID'; }
+([A-Za-z]|[0-9])					{ return 'CHAR'; }
+\".*\"				      			{ return 'STRING'; }
+[\n]           		 			 	{ }
+.                	  			{ }
 
 /lex
 
