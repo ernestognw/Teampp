@@ -31,7 +31,7 @@ class SpecialPerson inherits Person {
 vars one, two, three : int;
 vars four, five : float;
 vars six : char;
-vars seven, eight, ninve, ten : string;
+vars seven, eight, nine, ten : string;
 
 main(){
 	leer.el();

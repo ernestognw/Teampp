@@ -4,7 +4,7 @@
 %{
 	if(!yy.started) {
 		yy.started = true
-		
+
 		const Grammar = require('../../utils/grammar.js');
 
 		yy.grammar = new Grammar();
@@ -120,6 +120,7 @@ classid:
 
 closeblock:
 	CLOSING_BRACKET {
+		console.log(this._$.last_line)
 		yy.grammar.backDirectory()
 	}
 	;
@@ -198,20 +199,47 @@ decvar:
 	| {}
 	;
 
+voidtype: 
+	VOID {
+		yy.grammar.currentType = yy.grammar.genericTypes.VOID
+	}
+	;
+
 return_type:
 	type 
-	| VOID
+	| voidtype
+	;
+
+param_dec: 
+	ID COLON type {
+		yy.grammar.addVar({
+			id: $1,
+			type: $3
+		})
+	}
 	;
 
 params:
-	ID COLON type COMMA params
-	| ID COLON type
+	param_dec COMMA params
+	| param_dec
 	| {}
 	;
 
+module_dec:
+	return_type FUNCTION ID {
+		yy.grammar.addFunction({ 
+			id: $3
+		})
+	}
+	;
+
+module_header: 
+	 module_dec OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar
+	;
+
 modules: 
-	return_type FUNCTION ID OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar OPEN_BRACKET statements CLOSING_BRACKET
-	| return_type FUNCTION ID OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar OPEN_BRACKET CLOSING_BRACKET
+	module_header OPEN_BRACKET statements closeblock
+	| module_header OPEN_BRACKET closeblock
 	| {}
 	;
 

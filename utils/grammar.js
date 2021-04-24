@@ -6,14 +6,16 @@ class Grammar {
       INT: "int",
       FLOAT: "float",
       CHAR: "char",
+      VOID: "void",
     };
     this.main = {
       varsDirectory: {},
-    }
+    };
     this.currentDirectory = this.main;
     this.currentType = null;
     this.pendingVars = [];
     this.globalDirectory = null;
+    this.prevDirectories = [];
   }
 
   /**
@@ -22,17 +24,23 @@ class Grammar {
    * @param {id} string identifier of the variable
    * @param {type} string type of variable
    * @param {addNextLevel} boolean whether is going to start a new sub variable directory
+   * @param {isFunction} boolean whether the variable is for a function or not
    * @param {isGlobal} boolean whether to set this variable as the global directory. Can only be used once
    */
-  addVar = ({ id, type, addNextLevel = false, isGlobal = false }) => {
+  addVar = ({ id, type, isFunction = false, addNextLevel = false, isGlobal = false }) => {
+    if (!!this.currentDirectory.varsDirectory[id]) {
+      throw new Error(`Variable ${id} already exists in ${this.currentDirectory.name} scope`)
+    }
+
     this.currentDirectory.varsDirectory[id] = {
       name: id,
       type,
+      isFunction,
       varsDirectory: {},
     };
 
     if (addNextLevel) {
-      this.prevDirectory = this.currentDirectory;
+      this.prevDirectories.push(this.currentDirectory);
       this.currentDirectory = this.currentDirectory.varsDirectory[id];
     }
 
@@ -42,6 +50,21 @@ class Grammar {
       this.globalDirectory = this.currentDirectory.varsDirectory;
     }
   };
+
+  /**
+   * Add function by using the current type saved previously
+   * 
+   * @param {id} name of the function 
+   */
+  addFunction = ({ id }) => {
+    this.addVar({ 
+			id,
+			type: this.currentType,
+			isFunction: true,
+			addNextLevel: true
+		})
+		this.currentType = null
+  }
 
   /**
    * Gets variable from current directory and validates it against an expected type
@@ -104,7 +127,7 @@ class Grammar {
    * Goes to the previous directory. Used when a block ends
    */
   backDirectory = () => {
-    this.currentDirectory = this.prevDirectory;
+    this.currentDirectory = this.prevDirectories.pop();
   };
 }
 
