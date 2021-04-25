@@ -9,7 +9,7 @@
 
 		yy.semantics = new Semantics(this);
 	} else {
-		yy.semantics.parentCtx = this
+		yy.semantics.parentCtx = this;
 	}
 %}
 
@@ -39,6 +39,7 @@
 int 				{ return 'INT_TYPE'; }
 float 			{ return 'FLOAT_TYPE'; }
 char 				{ return 'CHAR_TYPE'; }
+bool 				{ return 'BOOL_TYPE'; }
 if 					{ return 'IF'; }
 else				{ return 'ELSE'; }
 ","					{ return 'COMMA'; }
@@ -56,12 +57,15 @@ function		{ return 'FUNCTION'; }
 return			{ return 'RETURN'; }
 while				{ return 'WHILE'; }
 for					{ return 'FOR'; }
+to					{ return 'TO'; }
+do					{ return 'DO'; }
 program			{ return 'PROGRAM'; }
 class				{ return 'CLASS'; }
 inherits    { return 'INHERITS'; }
 
 [0-9]+\.[0-9]+ 		  			{ return 'FLOAT'; }
 [0-9]+            				{ return 'INT'; }
+(true|false)							{ return 'BOOLEAN'; }
 [A-Za-z_][A-Za-z0-9_]*		{ return 'ID'; }
 \'([A-Za-z]|[0-9])\'			{ return 'CHAR'; }
 \".*\"				      			{ return 'STRING'; }
@@ -148,6 +152,12 @@ chartype:
 	}
 	;
 
+booleantype: 
+	BOOL_TYPE {
+		yy.semantics.currentType = yy.semantics.genericTypes.BOOLEAN
+	}
+	;
+
 classtype: 
 	ID {
 		yy.semantics.currentType = $1
@@ -158,6 +168,7 @@ type:
 	inttype
 	| floattype
 	| chartype
+	| booleantype
 	| classtype
 	;
 
@@ -347,20 +358,25 @@ condition:
 	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET statements CLOSING_BRACKET
 	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET CLOSING_BRACKET ELSE OPEN_BRACKET statements CLOSING_BRACKET
 	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET CLOSING_BRACKET ELSE OPEN_BRACKET CLOSING_BRACKET
+	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET CLOSING_BRACKET
+	;
+
+while_header: 
+	WHILE OPEN_PARENTHESIS expression CLOSING_PARENTHESIS DO OPEN_BRACKET
 	;
 
 while:
-	WHILE OPEN_PARENTHESIS expression CLOSING_PARENTHESIS do OPEN_BRACKET statements CLOSING_BRACKET
-	| WHILE OPEN_PARENTHESIS expression CLOSING_PARENTHESIS do OPEN_BRACKET CLOSING_BRACKET
+	while_header statements CLOSING_BRACKET
+	| while_header CLOSING_BRACKET
 	;
 
 for_aux:
-	expression TO expression do OPEN_BRACKET statements CLOSING_BRACKET
-	| expression TO expression do OPEN_BRACKET CLOSING_BRACKET
+	statements CLOSING_BRACKET
+	| CLOSING_BRACKET
 	;
 
 for:
-	FOR ID dimensions_check for_aux
+	FOR var EQUAL expression TO expression DO OPEN_BRACKET for_aux
 	;
 
 factor:
@@ -369,6 +385,7 @@ factor:
 	| INT
 	| FLOAT
 	| CHAR
+	| BOOLEAN
 	| OPEN_PARENTHESIS expression CLOSING_PARENTHESIS
 	;
 

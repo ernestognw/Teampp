@@ -10,6 +10,7 @@ class Semantics {
       INT: "int",
       FLOAT: "float",
       CHAR: "char",
+      BOOLEAN: "boolean",
       VOID: "void",
     };
     this.main = {
