@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/ernestognw/Team-#readme",
   "dependencies": {
+    "chalk": "^4.1.1",
     "jison": "^0.4.18"
   }
 }

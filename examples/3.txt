@@ -16,7 +16,7 @@ class Person {
 
 class SpecialPerson inherits Person {
   vars age : int;
-  vars name[30] : char;
+  vars name[30, 400] : char;
 
   int function example(x : int, y : float);
     vars another[100] : char;
@@ -33,7 +33,9 @@ vars four, five : float;
 vars six : char;
 vars seven, eight, nine, ten : char;
 
+vars person : Person;
+
 main(){
-	leer.el();
+	person.el();
 	otro();
 }

@@ -1,7 +1,9 @@
+const chalk = require("chalk");
+
 class Grammar {
   constructor(parentCtx) {
     this.parentCtx = parentCtx;
-    
+
     this.genericTypes = {
       PROGRAM: "program",
       CLASS: "class",
@@ -94,13 +96,13 @@ class Grammar {
   };
 
   /**
-   * Gets variable from current directory and validates it against an expected type
+   * Gets variable from current directory and validates it against an expected type (if present)
    * If variable is not present at current directory, it will try to use globalDirectory
    *
    * @param {id} string id of the variable
    * @param {expectedType} string the type that the variable is expected to have
    */
-  validateId = ({ id, expectedType }) => {
+  validateId = ({ id, expectedType, goToNextLevel }) => {
     let toCheck = this.currentDirectory[id];
     const scope = this.currentDirectory.name;
 
@@ -111,13 +113,19 @@ class Grammar {
 
     if (!toCheck) {
       throw new Error(
-        `Error at line ${this.parentCtx.yylloc.last_line}, column: ${this.parentCtx.yylloc.last_column}. Identifier ${id} not declared in scope: ${scope} or global`
+        `Error at line ${this.parentCtx.yylineno}. Identifier ${chalk.blue(
+          id
+        )} not declared neither in global or ${chalk.red(scope)} scope`
       );
     }
 
-    if (toCheck.type !== expectedType) {
+    if (expectedType && toCheck.type !== expectedType) {
       throw new Error(
-        `Error at line ${lithis.parentCtx.yylloc.last_line}, column: ${this.parentCtx.yylloc.last_column}. Identifier ${id} is not of type ${expectedType}, but is ${toCheck.type}`
+        `Error at line ${lithis.parentCtx.yylineno}. Identifier ${chalk.blue(
+          id
+        )} is not of type ${chalk.yellow(expectedType)}, but is ${chalk.red(
+          toCheck.type
+        )}`
       );
     }
   };
