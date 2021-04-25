@@ -10,7 +10,7 @@ class Person {
   {
     read(another);
     write(1/31+14*223 && 276*22231-2123*1.23);
-    return(id);
+    return(example);
   }
 }
 
@@ -24,7 +24,7 @@ class SpecialPerson inherits Person {
   {
     read(another);
     write(1/31+14*223 && 276*22231-2123*1.23);
-    return(id);
+    return(example);
   }
 }
 
@@ -36,6 +36,4 @@ vars seven, eight, nine, ten : char;
 vars person : Person;
 
 main(){
-	person.el();
-	otro();
 }

@@ -72,7 +72,7 @@ class Semantics {
     if (isGlobal) {
       if (this.globalDirectory)
         throw new Error("Cannot define global directory twice");
-      this.globalDirectory = this.currentDirectory.varsDirectory;
+      this.globalDirectory = this.currentDirectory;
     }
   };
 
@@ -114,13 +114,13 @@ class Semantics {
    * @param {expectedType} string the type that the variable is expected to have
    * @returns {toCheck} object variable directory
    */
-  validateId = ({ id, expectedType, goToNextLevel }) => {
-    let toCheck = this.currentDirectory[id];
+  validateId = ({ id, expectedType }) => {
+    let toCheck = this.currentDirectory.varsDirectory[id];
     const scope = this.currentDirectory.name;
 
     if (!toCheck) {
       // Try global scope
-      toCheck = this.globalDirectory[id];
+      toCheck = this.globalDirectory.varsDirectory[id];
     }
 
     if (!toCheck) {
@@ -186,6 +186,7 @@ class Semantics {
   //  * @param {id} string variable id to check 
   //  */
   // setCurrentVariable = ({ id }) => {
+  //   // console.log(this.currentDirectory)
   //   const variable = this.validateId({ id }); // Check if variable is available in current scope
 
   //   this.currentVariable = variable;
