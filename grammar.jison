@@ -5,7 +5,7 @@
 	if(!yy.started) {
 		yy.started = true
 
-		const Semantics = require('../../utils/semantics.js');
+		const Semantics = require('../../classes/semantics.js');
 
 		yy.semantics = new Semantics(this);
 	} else {
@@ -254,8 +254,8 @@ module_header:
 	;
 
 modules: 
-	module_header OPEN_BRACKET statements closeblock
-	| module_header OPEN_BRACKET closeblock
+	module_header OPEN_BRACKET statements closeblock modules
+	| module_header OPEN_BRACKET closeblock modules
 	| {}
 	;
 
@@ -305,18 +305,18 @@ statements_aux:
 	;
 
 statements:
-	assign statements_aux
-	| call statements_aux
-	| return statements_aux
-	| read statements_aux
-	| write statements_aux
+	assign SEMICOLON statements_aux
+	| call SEMICOLON statements_aux
+	| return SEMICOLON statements_aux
+	| read SEMICOLON statements_aux
+	| write SEMICOLON statements_aux
 	| condition statements_aux
 	| while statements_aux
 	| for statements_aux
 	;
 
 assign:
-	var EQUAL expression SEMICOLON
+	var EQUAL expression
 	;
 	
 call_aux:
@@ -326,11 +326,11 @@ call_aux:
 	;
 
 call:
-	var OPEN_PARENTHESIS call_aux CLOSING_PARENTHESIS SEMICOLON
+	var OPEN_PARENTHESIS call_aux CLOSING_PARENTHESIS
 	;
 
 return:
-	RETURN OPEN_PARENTHESIS expression CLOSING_PARENTHESIS SEMICOLON
+	RETURN OPEN_PARENTHESIS expression CLOSING_PARENTHESIS
 	;
 
 input_output_aux:
@@ -340,7 +340,7 @@ input_output_aux:
 	;
 
 read:
-	READ OPEN_PARENTHESIS input_output_aux CLOSING_PARENTHESIS SEMICOLON
+	READ OPEN_PARENTHESIS input_output_aux CLOSING_PARENTHESIS
 	;
 
 writable:
@@ -349,7 +349,7 @@ writable:
 	;
 
 write:
-	WRITE OPEN_PARENTHESIS writable CLOSING_PARENTHESIS SEMICOLON
+	WRITE OPEN_PARENTHESIS writable CLOSING_PARENTHESIS
 	;
 
 condition:
@@ -424,16 +424,11 @@ expression_comp:
 	;
 
 bool_aux:
-	AND expression_comp
-	| OR expression_comp
+	AND expression_comp bool_aux
+	| OR expression_comp bool_aux
 	| {}
 	;
 
 expression:
 	expression_comp bool_aux
-	;
-
-expression_epsilon:
-	expression SEMICOLON
-	| {}
 	;
