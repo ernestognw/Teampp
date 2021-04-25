@@ -78,7 +78,8 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		console.log(JSON.stringify(yy.semantics.main));
+		const directory = yy.semantics.removePreviousDirectories(yy.semantics.main)
+		console.log(JSON.stringify(directory));
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
 	;

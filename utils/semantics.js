@@ -19,7 +19,7 @@ class Semantics {
     this.currentType = null;
     this.pendingVars = [];
     this.globalDirectory = null;
-    this.prevDirectoriesStack = [];
+    this.previousDirectoriesStack = [];
     this.currentVariableStack = [];
     this.isPointPending = false;
     this.pointsAdvanced = 0;
@@ -72,11 +72,11 @@ class Semantics {
       isFunction,
       dimensions,
       varsDirectory,
-      // previousDirectory: this.currentDirectory
+      previousDirectory: this.currentDirectory,
     };
 
     if (addNextLevel) {
-      this.prevDirectoriesStack.push(this.currentDirectory);
+      this.previousDirectoriesStack.push(this.currentDirectory);
       this.currentDirectory = this.currentDirectory.varsDirectory[id];
     }
 
@@ -119,26 +119,29 @@ class Semantics {
 
   /**
    * Gets variable from current directory and validates it against an expected type (if present)
-   * If variable is not present at current directory, it will try to use globalDirectory
+   * If variable is not present at current directory, it will try check previous directory scopes
+   * until it finds it or goes to the root, at which it will throw an error
    *
    * @param {id} string id of the variable
    * @param {expectedType} string the type that the variable is expected to have
    * @returns {toCheck} object variable directory
    */
   validateId = ({ id, expectedType }) => {
-    let toCheck = this.currentDirectory.varsDirectory[id];
     const scope = this.currentDirectory.name;
 
-    if (!toCheck) {
-      // Try global scope
-      toCheck = this.globalDirectory.varsDirectory[id];
+    let directory = this.currentDirectory;
+    let toCheck = this.currentDirectory.varsDirectory[id];
+
+    while (!toCheck && directory) {
+      directory = directory.previousDirectory;
+      if (directory) {
+        toCheck = directory.varsDirectory[id];
+      }
     }
 
     if (!toCheck) {
       throw new Error(
-        `Identifier ${chalk.blue(
-          id
-        )} not declared neither in global or ${chalk.red(
+        `Identifier ${chalk.blue(id)} not declared neither in ${chalk.red(
           scope
         )} scope at line ${this.parentCtx.yylineno}.`
       );
@@ -188,7 +191,7 @@ class Semantics {
    * Goes to the previous directory. Used when a block ends
    */
   backDirectory = () => {
-    this.currentDirectory = this.prevDirectoriesStack.pop();
+    this.currentDirectory = this.previousDirectoriesStack.pop();
   };
 
   /**
@@ -237,6 +240,19 @@ class Semantics {
     if (!this.isPointPending) {
       this.currentVariableStack.push({ ...variable, dimensionsToCheck: 0 });
     } else {
+      let currentVariable = this.currentVariableStack[
+        this.currentVariableStack.length - 1
+      ];
+
+      if (currentVariable.isFunction)
+        throw new Error(
+          `You cannot access to ${chalk.red(id)} property of ${chalk.blue(
+            currentVariable.name
+          )} since it is a function`
+        );
+
+      // Do not use currentVariable on the next line since it is just a copy of
+      // the correct directory. Doing it will make this update to not have effect
       this.currentVariableStack[this.currentVariableStack.length - 1] = {
         ...variable,
         // Preserve dimensions to check
@@ -290,6 +306,39 @@ class Semantics {
   addDimensionToCheck = () => {
     this.currentVariableStack[this.currentVariableStack.length - 1]
       .dimensionsToCheck++;
+  };
+
+  /**
+   * Takes a directory, COPIES IT, and remove the references so it can be logged in console
+   * for debugging purposes
+   *
+   * @param {directory} object Directory to copy
+   */
+  removePreviousDirectories = (directory) => {
+    // If directory has no varsDirectory, it is a varsDirectory
+    if (!directory.varsDirectory) {
+      const keys = Object.keys(directory);
+
+      // When is a varsDirectory, it could be empty, in that case, we just return empty
+      if (keys.length === 0) return {};
+
+      // Otherwise we return the variables with the previousDirectories removed
+      return keys.reduce((acc, key) => {
+        acc[key] = { ...this.removePreviousDirectories(directory[key]) };
+        return acc;
+      }, {});
+    }
+
+    // If it has a varsDirectory, it is a variable directory
+    // with a previousDirectory so we remove it
+    delete directory.previousDirectory;
+
+    return {
+      ...directory,
+      varsDirectory: {
+        ...this.removePreviousDirectories(directory.varsDirectory),
+      },
+    };
   };
 }
 
