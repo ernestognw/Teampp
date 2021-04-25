@@ -5,11 +5,11 @@
 	if(!yy.started) {
 		yy.started = true
 
-		const Grammar = require('../../utils/grammar.js');
+		const Semantics = require('../../utils/semantics.js');
 
-		yy.grammar = new Grammar(this);
+		yy.semantics = new Semantics(this);
 	} else {
-		yy.grammar.parentCtx = this
+		yy.semantics.parentCtx = this
 	}
 %}
 
@@ -78,16 +78,16 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		console.log(JSON.stringify(yy.grammar.main));
+		console.log(JSON.stringify(yy.semantics.main));
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
 	;
 
 programid: 
 	PROGRAM ID {
-		yy.grammar.addVar({
+		yy.semantics.addVar({
 			id: $2.toString(), 
-			type: yy.grammar.genericTypes.PROGRAM,
+			type: yy.semantics.genericTypes.PROGRAM,
 			addNextLevel: true,
 			isGlobal: true
 		})
@@ -100,9 +100,9 @@ program:
 
 inheritance:
 	INHERITS ID {
-		yy.grammar.validateId({
+		yy.semantics.validateId({
 			id: $2.toString(), 
-			expectedType: yy.grammar.genericTypes.CLASS,
+			expectedType: yy.semantics.genericTypes.CLASS,
 		})
 	}
 	| {}
@@ -110,9 +110,9 @@ inheritance:
 
 classid: 
 	CLASS ID {
-		yy.grammar.addVar({
+		yy.semantics.addVar({
 			id: $2.toString(), 
-			type: yy.grammar.genericTypes.CLASS,
+			type: yy.semantics.genericTypes.CLASS,
 			addNextLevel: true
 		})
 	}
@@ -120,7 +120,7 @@ classid:
 
 closeblock:
 	CLOSING_BRACKET {
-		yy.grammar.backDirectory()
+		yy.semantics.backDirectory()
 	}
 	;
 
@@ -131,25 +131,25 @@ decclasses:
 
 inttype: 
 	INT_TYPE {
-		yy.grammar.currentType = yy.grammar.genericTypes.INT
+		yy.semantics.currentType = yy.semantics.genericTypes.INT
 	}
 	;
 
 floattype: 
 	FLOAT_TYPE {
-		yy.grammar.currentType = yy.grammar.genericTypes.FLOAT
+		yy.semantics.currentType = yy.semantics.genericTypes.FLOAT
 	}
 	;
 
 chartype: 
 	CHAR_TYPE {
-		yy.grammar.currentType = yy.grammar.genericTypes.CHAR
+		yy.semantics.currentType = yy.semantics.genericTypes.CHAR
 	}
 	;
 
 classtype: 
 	ID {
-		yy.grammar.currentType = $1
+		yy.semantics.currentType = $1
 	}
 	;
 
@@ -168,7 +168,7 @@ list_ids_aux:
 
 list_id:
 	ID {
-		yy.grammar.pushToPendingVars({ name: $1 })
+		yy.semantics.pushToPendingVars({ name: $1 })
 	}
 	;
 
@@ -189,7 +189,7 @@ decvar_aux:
 
 closedecvar: 
 	COLON type SEMICOLON {
-		yy.grammar.addPendingVars({ type: $2 })
+		yy.semantics.addPendingVars({ type: $2 })
 	}
 	;
 
@@ -200,7 +200,7 @@ decvar:
 
 voidtype: 
 	VOID {
-		yy.grammar.currentType = yy.grammar.genericTypes.VOID
+		yy.semantics.currentType = yy.semantics.genericTypes.VOID
 	}
 	;
 
@@ -211,7 +211,7 @@ return_type:
 
 param_dec: 
 	ID COLON type {
-		yy.grammar.addVar({
+		yy.semantics.addVar({
 			id: $1,
 			type: $3
 		})
@@ -226,7 +226,7 @@ params:
 
 module_dec:
 	return_type FUNCTION ID {
-		yy.grammar.addFunction({ 
+		yy.semantics.addFunction({ 
 			id: $3
 		})
 	}

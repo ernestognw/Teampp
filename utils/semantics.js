@@ -1,6 +1,6 @@
 const chalk = require("chalk");
 
-class Grammar {
+class Semantics {
   constructor(parentCtx) {
     this.parentCtx = parentCtx;
 
@@ -164,4 +164,4 @@ class Grammar {
   };
 }
 
-module.exports = Grammar;
+module.exports = Semantics;
