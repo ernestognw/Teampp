@@ -6,8 +6,10 @@
 		yy.started = true
 
 		const Semantics = require('../../classes/semantics.js');
+		const Quadruples = require('../../classes/quadruples.js');
 
 		yy.semantics = new Semantics(this);
+		yy.quadruples = new Quadruples(this);
 	} else {
 		yy.semantics.parentCtx = this;
 	}
@@ -25,15 +27,13 @@
 "<="				{ return 'LTE'; }
 ">"					{ return 'GT'; }
 "<"					{ return 'LT'; }
-">"					{ return 'GT'; }
-"<"					{ return 'LT'; }
 "&&"				{ return 'AND'; }
 "||"				{ return 'OR'; }
 "!"					{ return 'NOT'; }
 "("					{ return 'OPEN_PARENTHESIS'; }
-")"					{ return 'CLOSING_PARENTHESIS'; }
+")"					{ return 'CLOSE_PARENTHESIS'; }
 "{"					{ return 'OPEN_BRACKET'; }
-"}"					{ return 'CLOSING_BRACKET'; }
+"}"					{ return 'CLOSE_BRACKET'; }
 "["					{ return 'LA'; }
 "]"					{ return 'RA'; }
 int 				{ return 'INT_TYPE'; }
@@ -93,8 +93,7 @@ programid:
 		yy.semantics.addVar({
 			id: $2.toString(), 
 			type: yy.semantics.genericTypes.PROGRAM,
-			addNextLevel: true,
-			isGlobal: true
+			addNextLevel: true
 		})
 	}
 	;
@@ -124,7 +123,7 @@ classid:
 	;
 
 closeblock:
-	CLOSING_BRACKET {
+	CLOSE_BRACKET {
 		yy.semantics.backDirectory()
 	}
 	;
@@ -250,7 +249,7 @@ module_dec:
 	;
 
 module_header: 
-	 module_dec OPEN_PARENTHESIS params CLOSING_PARENTHESIS SEMICOLON decvar
+	 module_dec OPEN_PARENTHESIS params CLOSE_PARENTHESIS SEMICOLON decvar
 	;
 
 modules: 
@@ -260,8 +259,8 @@ modules:
 	;
 
 body: 
-	MAIN OPEN_PARENTHESIS CLOSING_PARENTHESIS OPEN_BRACKET statements CLOSING_BRACKET
-	| MAIN OPEN_PARENTHESIS CLOSING_PARENTHESIS OPEN_BRACKET CLOSING_BRACKET
+	MAIN OPEN_PARENTHESIS CLOSE_PARENTHESIS OPEN_BRACKET statements CLOSE_BRACKET
+	| MAIN OPEN_PARENTHESIS CLOSE_PARENTHESIS OPEN_BRACKET CLOSE_BRACKET
 	| {}
 	;
 
@@ -326,11 +325,11 @@ call_aux:
 	;
 
 call:
-	var OPEN_PARENTHESIS call_aux CLOSING_PARENTHESIS
+	var OPEN_PARENTHESIS call_aux CLOSE_PARENTHESIS
 	;
 
 return:
-	RETURN OPEN_PARENTHESIS expression CLOSING_PARENTHESIS
+	RETURN OPEN_PARENTHESIS expression CLOSE_PARENTHESIS
 	;
 
 input_output_aux:
@@ -340,7 +339,7 @@ input_output_aux:
 	;
 
 read:
-	READ OPEN_PARENTHESIS input_output_aux CLOSING_PARENTHESIS
+	READ OPEN_PARENTHESIS input_output_aux CLOSE_PARENTHESIS
 	;
 
 writable:
@@ -349,44 +348,65 @@ writable:
 	;
 
 write:
-	WRITE OPEN_PARENTHESIS writable CLOSING_PARENTHESIS
+	WRITE OPEN_PARENTHESIS writable CLOSE_PARENTHESIS
 	;
 
 condition:
-	IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET statements CLOSING_BRACKET ELSE OPEN_BRACKET statements CLOSING_BRACKET
-	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET statements CLOSING_BRACKET ELSE OPEN_BRACKET CLOSING_BRACKET
-	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET statements CLOSING_BRACKET
-	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET CLOSING_BRACKET ELSE OPEN_BRACKET statements CLOSING_BRACKET
-	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET CLOSING_BRACKET ELSE OPEN_BRACKET CLOSING_BRACKET
-	| IF OPEN_PARENTHESIS expression CLOSING_PARENTHESIS OPEN_BRACKET CLOSING_BRACKET
+	IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET statements CLOSE_BRACKET ELSE OPEN_BRACKET statements CLOSE_BRACKET
+	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET statements CLOSE_BRACKET ELSE OPEN_BRACKET CLOSE_BRACKET
+	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET statements CLOSE_BRACKET
+	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET CLOSE_BRACKET ELSE OPEN_BRACKET statements CLOSE_BRACKET
+	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET CLOSE_BRACKET ELSE OPEN_BRACKET CLOSE_BRACKET
+	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET CLOSE_BRACKET
 	;
 
 while_header: 
-	WHILE OPEN_PARENTHESIS expression CLOSING_PARENTHESIS DO OPEN_BRACKET
+	WHILE OPEN_PARENTHESIS expression CLOSE_PARENTHESIS DO OPEN_BRACKET
 	;
 
 while:
-	while_header statements CLOSING_BRACKET
-	| while_header CLOSING_BRACKET
+	while_header statements CLOSE_BRACKET
+	| while_header CLOSE_BRACKET
 	;
 
 for_aux:
-	statements CLOSING_BRACKET
-	| CLOSING_BRACKET
+	statements CLOSE_BRACKET
+	| CLOSE_BRACKET
 	;
 
 for:
 	FOR var EQUAL expression TO expression DO OPEN_BRACKET for_aux
 	;
 
+factor_open_parenthesis:
+	OPEN_PARENTHESIS {
+		yy.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+	
+factor_close_parenthesis:
+	CLOSE_PARENTHESIS {
+
+	}
+	;
+
+not: 
+	NOT {
+
+	}
+	;
+
 factor:
 	var
+	| not var
 	| call
 	| INT
 	| FLOAT
 	| CHAR
+	| not BOOLEAN
 	| BOOLEAN
-	| OPEN_PARENTHESIS expression CLOSING_PARENTHESIS
+	| not factor_open_parenthesis expression factor_close_parenthesis
+	| factor_open_parenthesis expression factor_close_parenthesis
 	;
 
 term_aux:

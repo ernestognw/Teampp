@@ -4,6 +4,17 @@ class Semantics {
   constructor(parentCtx) {
     this.parentCtx = parentCtx;
 
+    this.main = {
+      varsDirectory: {},
+    };
+    this.currentDirectory = this.main;
+    this.currentType = null;
+    this.pendingVars = [];
+    this.previousDirectoriesStack = [];
+    this.currentVariableStack = [];
+    this.isPointPending = false;
+    this.pointsAdvanced = 0;
+
     this.genericTypes = {
       PROGRAM: "program",
       CLASS: "class",
@@ -13,17 +24,13 @@ class Semantics {
       BOOLEAN: "boolean",
       VOID: "void",
     };
-    this.main = {
-      varsDirectory: {},
-    };
-    this.currentDirectory = this.main;
-    this.currentType = null;
-    this.pendingVars = [];
-    this.globalDirectory = null;
-    this.previousDirectoriesStack = [];
-    this.currentVariableStack = [];
-    this.isPointPending = false;
-    this.pointsAdvanced = 0;
+    this.inverseGenericTypes = Object.entries(this.genericTypes).reduce(
+      (acc, [key, value]) => {
+        acc[value] = key;
+        return acc;
+      },
+      {}
+    );
   }
 
   /**
@@ -33,14 +40,13 @@ class Semantics {
    * @param {type} string type of variable
    * @param {addNextLevel} boolean whether is going to start a new sub variable directory
    * @param {isFunction} boolean whether the variable is for a function or not
-   * @param {isGlobal} boolean whether to set this variable as the global directory. Can only be used once
+   * @param {dimensions} number number of dimensions for the variable
    */
   addVar = ({
     id,
     type,
     isFunction = false,
     addNextLevel = false,
-    isGlobal = false,
     dimensions = 0,
   }) => {
     const typeExists = this.validateGenericType({ type });
@@ -61,9 +67,9 @@ class Semantics {
 
     if (!!this.currentDirectory.varsDirectory[id]) {
       throw new Error(
-        `Variable ${chalk.red(id)} already exists in ${chalk.blue(
-          this.currentDirectory.name
-        )} scope`
+        `${this.lineError()} Variable ${chalk.red(
+          id
+        )} already exists in ${chalk.blue(this.currentDirectory.name)} scope.`
       );
     }
 
@@ -80,12 +86,6 @@ class Semantics {
       this.previousDirectoriesStack.push(this.currentDirectory);
       this.currentDirectory = this.currentDirectory.varsDirectory[id];
     }
-
-    if (isGlobal) {
-      if (this.globalDirectory)
-        throw new Error("Cannot define global directory twice");
-      this.globalDirectory = this.currentDirectory;
-    }
   };
 
   /**
@@ -100,8 +100,7 @@ class Semantics {
    * @param {type} string a type
    * @returns boolean if the type is a generic type
    */
-  validateGenericType = ({ type }) =>
-    Object.values(this.genericTypes).some((value) => value === type);
+  validateGenericType = ({ type }) => !!this.inverseGenericTypes[type];
 
   /**
    * Add function by using the current type saved previously
@@ -142,19 +141,19 @@ class Semantics {
 
     if (!toCheck) {
       throw new Error(
-        `Identifier ${chalk.blue(id)} not declared neither in ${chalk.red(
-          scope
-        )} scope at line ${this.parentCtx.yylineno}.`
+        `${this.lineError()} Identifier ${chalk.blue(
+          id
+        )} not declared neither in ${chalk.red(scope)} scope.`
       );
     }
 
     if (expectedType && toCheck.type !== expectedType) {
       throw new Error(
-        `Identifier ${chalk.blue(id)} is not of type ${chalk.yellow(
-          expectedType
-        )}, but is ${chalk.red(toCheck.type)} line ${
-          lithis.parentCtx.yylineno
-        }.`
+        `${this.lineError()} Identifier ${chalk.blue(
+          id
+        )} is not of type ${chalk.yellow(expectedType)}, but is ${chalk.red(
+          toCheck.type
+        )}.`
       );
     }
 
@@ -219,7 +218,7 @@ class Semantics {
 
     if (!toCheck) {
       throw new Error(
-        `Error at line ${this.parentCtx.yylineno}. Identifier ${chalk.blue(
+        `${this.lineError()} Identifier ${chalk.blue(
           id
         )} not declared in ${chalk.red(variableName)}`
       );
@@ -247,9 +246,11 @@ class Semantics {
 
       if (currentVariable.isFunction)
         throw new Error(
-          `You cannot access to ${chalk.red(id)} property of ${chalk.blue(
+          `${this.lineError()} You cannot access to ${chalk.red(
+            id
+          )} property of ${chalk.blue(
             currentVariable.name
-          )} since it is a function`
+          )} since it is a function.`
         );
 
       // Do not use currentVariable on the next line since it is just a copy of
@@ -277,11 +278,11 @@ class Semantics {
 
     if (currentVariable.dimensions !== currentVariable.dimensionsToCheck) {
       throw new Error(
-        `Error at line ${this.parentCtx.yylineno}. Identifier ${chalk.blue(
+        `${this.lineError()} Identifier ${chalk.blue(
           currentVariable.name
         )} is trying to use ${chalk.red(
           currentVariable.dimensionsToCheck
-        )} dimensions but has ${chalk.green(currentVariable.dimensions)}`
+        )} dimensions but has ${chalk.green(currentVariable.dimensions)}.`
       );
     }
 
@@ -341,6 +342,12 @@ class Semantics {
       },
     };
   };
+  
+  /**
+   * Returns a generic error string with the line in which the error was detected
+   */
+  lineError = () =>
+    `Semantic error at line ${chalk.yellow(this.parentCtx.yylineno)}.`;
 }
 
 module.exports = Semantics;

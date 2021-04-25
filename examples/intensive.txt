@@ -74,7 +74,7 @@ main(){
       for one = 10 + 2 to 20 do {
         three = three + 1;
       }
-      while(ten) do {
+      while(!ten) do {
         one = one + 1;
         if(one > 10) {
           ten = true;
