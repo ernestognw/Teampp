@@ -21,10 +21,8 @@ class Semantics {
     this.globalDirectory = null;
     this.prevDirectoriesStack = [];
     this.currentVariableStack = [];
-    this.currentVariableDimensionsToCheckStack = [];
     this.isPointPending = false;
     this.pointsAdvanced = 0;
-    // this.tmpDimensionsToCheck = 0;
   }
 
   /**
@@ -237,12 +235,15 @@ class Semantics {
     const variable = this.validateCurrentVariable({ id }); // Check if variable is available in current scope
 
     if (!this.isPointPending) {
-      this.currentVariableStack.push(variable);
-      this.currentVariableDimensionsToCheckStack.push(0);
+      this.currentVariableStack.push({ ...variable, dimensionsToCheck: 0 });
     } else {
-      this.currentVariableStack[
-        this.currentVariableStack.length - 1
-      ] = variable;
+      this.currentVariableStack[this.currentVariableStack.length - 1] = {
+        ...variable,
+        // Preserve dimensions to check
+        dimensionsToCheck: this.currentVariableStack[
+          this.currentVariableStack.length - 1
+        ].dimensionsToCheck,
+      };
     }
 
     this.isPointPending = false; // At this point, every point needed decisions were made. So reset
@@ -256,26 +257,19 @@ class Semantics {
     let currentVariable = this.currentVariableStack[
       this.currentVariableStack.length - 1
     ];
-    let currentVariableDimensionsToCheck = this
-      .currentVariableDimensionsToCheckStack[
-      this.currentVariableDimensionsToCheckStack.length - 1
-    ];
 
-    console.log(this.currentVariableStack);
-
-    if (currentVariable.dimensions !== currentVariableDimensionsToCheck) {
+    if (currentVariable.dimensions !== currentVariable.dimensionsToCheck) {
       throw new Error(
         `Error at line ${this.parentCtx.yylineno}. Identifier ${chalk.blue(
           currentVariable.name
         )} is trying to use ${chalk.red(
-          currentVariableDimensionsToCheck
+          currentVariable.dimensionsToCheck
         )} dimensions but has ${chalk.green(currentVariable.dimensions)}`
       );
     }
 
     for (let i = 0; i < this.pointsAdvanced + 1; i++) {
       this.currentVariableStack.pop();
-      this.currentVariableDimensionsToCheckStack.pop();
       this.pointsAdvanced = 0;
     }
   };
@@ -294,9 +288,8 @@ class Semantics {
    * if the variable has enough dimensions at the end of declaration
    */
   addDimensionToCheck = () => {
-    this.currentVariableDimensionsToCheckStack[
-      this.currentVariableDimensionsToCheckStack.length - 1
-    ]++;
+    this.currentVariableStack[this.currentVariableStack.length - 1]
+      .dimensionsToCheck++;
   };
 }
 
