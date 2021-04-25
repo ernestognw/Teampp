@@ -20,6 +20,7 @@ class Semantics {
     this.pendingVars = [];
     this.globalDirectory = null;
     this.prevDirectories = [];
+    // this.tmpDimensionsToCheck = 0;
   }
 
   /**
@@ -37,6 +38,7 @@ class Semantics {
     isFunction = false,
     addNextLevel = false,
     isGlobal = false,
+    dimensions = 0,
   }) => {
     const typeExists = this.validateGenericType({ type });
 
@@ -57,7 +59,9 @@ class Semantics {
       name: id,
       type,
       isFunction,
+      dimensions,
       varsDirectory: {},
+      // previousDirectory: this.currentDirectory
     };
 
     if (addNextLevel) {
@@ -70,6 +74,13 @@ class Semantics {
         throw new Error("Cannot define global directory twice");
       this.globalDirectory = this.currentDirectory.varsDirectory;
     }
+  };
+
+  /**
+   * Adds dimension to current variable
+   */
+  addDimensionToLastPendingVar = () => {
+    this.pendingVars[this.pendingVars.length - 1].dimensions++;
   };
 
   /**
@@ -101,6 +112,7 @@ class Semantics {
    *
    * @param {id} string id of the variable
    * @param {expectedType} string the type that the variable is expected to have
+   * @returns {toCheck} object variable directory
    */
   validateId = ({ id, expectedType, goToNextLevel }) => {
     let toCheck = this.currentDirectory[id];
@@ -128,6 +140,8 @@ class Semantics {
         )}`
       );
     }
+
+    return toCheck;
   };
 
   /**
@@ -136,7 +150,7 @@ class Semantics {
    * @param {name} string name of the variable to push into pending vars
    */
   pushToPendingVars = ({ name }) => {
-    this.pendingVars.push({ name });
+    this.pendingVars.push({ name, dimensions: 0 });
   };
 
   /**
@@ -145,10 +159,11 @@ class Semantics {
    * @param {type} string type to assing to every single pending var
    */
   addPendingVars = ({ type }) => {
-    this.pendingVars.forEach(({ name }) => {
+    this.pendingVars.forEach(({ name, dimensions }) => {
       this.addVar({
         id: name,
         type,
+        dimensions,
       });
     });
 
@@ -162,6 +177,31 @@ class Semantics {
   backDirectory = () => {
     this.currentDirectory = this.prevDirectories.pop();
   };
+
+  // /**
+  //  * Whenever there is a variable usage, we need to track it
+  //  * so at the end we verify if it has the properties expected.
+  //  * This function sets the current variable to be checked 
+  //  * 
+  //  * @param {id} string variable id to check 
+  //  */
+  // setCurrentVariable = ({ id }) => {
+  //   const variable = this.validateId({ id }); // Check if variable is available in current scope
+
+  //   this.currentVariable = variable;
+  // };
+
+  // /**
+  //  * Adds a dimension to tmpDimensionsToCheck in order to know
+  //  * if the variable has enough dimensions at the end of declaration
+  //  */
+  // addDimensionToCheck = () => {
+  //   this.tmpDimensionsToCheck++;
+  // };
+
+  /**
+   * Validates that current variable has enough number of dimensions
+   */
 }
 
 module.exports = Semantics;

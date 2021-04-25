@@ -176,9 +176,14 @@ list_ids:
 	list_id list_ids_aux
 	;
 
+dimension:
+	LA expression RA {
+		yy.semantics.addDimensionToLastPendingVar()
+	}
+	;
+
 dimensions:
-	LA expression RA
-	| LA expression COMMA expression RA
+	dimension dimensions
 	| {}
 	;
 
@@ -248,13 +253,34 @@ body:
 	| {}
 	;
 
+dimension_check:
+	LA expression RA {}
+	;
+
+dimensions_check:
+	dimension_check dimensions_check
+	| {}
+	;
+
+var_usage: 
+	ID {
+		// yy.semantics.setCurrentVariable({ id: $1 });
+	}
+	;
+
+point:
+	POINT {
+		// yy.semantics.advanceToCurrentVariableDirectory();
+	}
+	;
+
 var_aux:
-	POINT ID var_aux
+	POINT var_usage var_aux
 	| {}
 	;
 
 var: 
-	ID var_aux dimensions
+	var_usage var_aux dimensions_check
 	;
 
 statements_aux:
@@ -329,7 +355,7 @@ for_aux:
 	;
 
 for:
-	FOR ID dimensions for_aux
+	FOR ID dimensions_check for_aux
 	;
 
 factor:
