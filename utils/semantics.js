@@ -19,7 +19,11 @@ class Semantics {
     this.currentType = null;
     this.pendingVars = [];
     this.globalDirectory = null;
-    this.prevDirectories = [];
+    this.prevDirectoriesStack = [];
+    this.currentVariableStack = [];
+    this.currentVariableDimensionsToCheckStack = [];
+    this.isPointPending = false;
+    this.pointsAdvanced = 0;
     // this.tmpDimensionsToCheck = 0;
   }
 
@@ -42,16 +46,25 @@ class Semantics {
   }) => {
     const typeExists = this.validateGenericType({ type });
 
+    let varsDirectory = {};
+
     if (!typeExists) {
-      this.validateId({
+      const { varsDirectory: classVarsDirectory } = this.validateId({
         id: type,
         expectedType: this.genericTypes.CLASS,
       });
+
+      // When type is not generic, it is needed to copy a pointer to the varsDirectory
+      // of the variable, since they will not change, and will be useful to address
+      // future calls such as foo.bar
+      varsDirectory = { ...classVarsDirectory };
     }
 
     if (!!this.currentDirectory.varsDirectory[id]) {
       throw new Error(
-        `Variable ${id} already exists in ${this.currentDirectory.name} scope`
+        `Variable ${chalk.red(id)} already exists in ${chalk.blue(
+          this.currentDirectory.name
+        )} scope`
       );
     }
 
@@ -60,12 +73,12 @@ class Semantics {
       type,
       isFunction,
       dimensions,
-      varsDirectory: {},
+      varsDirectory,
       // previousDirectory: this.currentDirectory
     };
 
     if (addNextLevel) {
-      this.prevDirectories.push(this.currentDirectory);
+      this.prevDirectoriesStack.push(this.currentDirectory);
       this.currentDirectory = this.currentDirectory.varsDirectory[id];
     }
 
@@ -125,19 +138,21 @@ class Semantics {
 
     if (!toCheck) {
       throw new Error(
-        `Error at line ${this.parentCtx.yylineno}. Identifier ${chalk.blue(
+        `Identifier ${chalk.blue(
           id
-        )} not declared neither in global or ${chalk.red(scope)} scope`
+        )} not declared neither in global or ${chalk.red(
+          scope
+        )} scope at line ${this.parentCtx.yylineno}.`
       );
     }
 
     if (expectedType && toCheck.type !== expectedType) {
       throw new Error(
-        `Error at line ${lithis.parentCtx.yylineno}. Identifier ${chalk.blue(
-          id
-        )} is not of type ${chalk.yellow(expectedType)}, but is ${chalk.red(
-          toCheck.type
-        )}`
+        `Identifier ${chalk.blue(id)} is not of type ${chalk.yellow(
+          expectedType
+        )}, but is ${chalk.red(toCheck.type)} line ${
+          lithis.parentCtx.yylineno
+        }.`
       );
     }
 
@@ -175,34 +190,114 @@ class Semantics {
    * Goes to the previous directory. Used when a block ends
    */
   backDirectory = () => {
-    this.currentDirectory = this.prevDirectories.pop();
+    this.currentDirectory = this.prevDirectoriesStack.pop();
   };
 
-  // /**
-  //  * Whenever there is a variable usage, we need to track it
-  //  * so at the end we verify if it has the properties expected.
-  //  * This function sets the current variable to be checked 
-  //  * 
-  //  * @param {id} string variable id to check 
-  //  */
-  // setCurrentVariable = ({ id }) => {
-  //   // console.log(this.currentDirectory)
-  //   const variable = this.validateId({ id }); // Check if variable is available in current scope
+  /**
+   * Checks if a subvariable is available under currentVariable
+   * Its useful for when using variables with submethods or subvariables like foo.bar
+   *
+   * @param {id} string id of the variable
+   * @param {expectedType} string the type that the variable is expected to have
+   * @returns {toCheck} object variable directory
+   */
+  validateCurrentVariable = ({ id }) => {
+    if (!this.isPointPending) {
+      // If there is not a current variable
+      // we validate as a normal variable
+      return this.validateId({ id });
+    }
 
-  //   this.currentVariable = variable;
-  // };
+    let currentVariable = this.currentVariableStack[
+      this.currentVariableStack.length - 1
+    ];
 
-  // /**
-  //  * Adds a dimension to tmpDimensionsToCheck in order to know
-  //  * if the variable has enough dimensions at the end of declaration
-  //  */
-  // addDimensionToCheck = () => {
-  //   this.tmpDimensionsToCheck++;
-  // };
+    const toCheck = currentVariable.varsDirectory[id];
+    const variableName = currentVariable.name;
+
+    if (!toCheck) {
+      throw new Error(
+        `Error at line ${this.parentCtx.yylineno}. Identifier ${chalk.blue(
+          id
+        )} not declared in ${chalk.red(variableName)}`
+      );
+    }
+
+    return toCheck;
+  };
 
   /**
-   * Validates that current variable has enough number of dimensions
+   * Whenever there is a variable usage, we need to track it
+   * so at the end we verify if it has the properties expected.
+   * This function sets the current variable to be checked
+   *
+   * @param {id} string variable id to check
    */
+  setCurrentVariable = ({ id }) => {
+    const variable = this.validateCurrentVariable({ id }); // Check if variable is available in current scope
+
+    if (!this.isPointPending) {
+      this.currentVariableStack.push(variable);
+      this.currentVariableDimensionsToCheckStack.push(0);
+    } else {
+      this.currentVariableStack[
+        this.currentVariableStack.length - 1
+      ] = variable;
+    }
+
+    this.isPointPending = false; // At this point, every point needed decisions were made. So reset
+  };
+
+  /**
+   * Resets current variable at the end of a variable use and checks if dimensions
+   * are correct
+   */
+  resetCurrentVariable = () => {
+    let currentVariable = this.currentVariableStack[
+      this.currentVariableStack.length - 1
+    ];
+    let currentVariableDimensionsToCheck = this
+      .currentVariableDimensionsToCheckStack[
+      this.currentVariableDimensionsToCheckStack.length - 1
+    ];
+
+    console.log(this.currentVariableStack);
+
+    if (currentVariable.dimensions !== currentVariableDimensionsToCheck) {
+      throw new Error(
+        `Error at line ${this.parentCtx.yylineno}. Identifier ${chalk.blue(
+          currentVariable.name
+        )} is trying to use ${chalk.red(
+          currentVariableDimensionsToCheck
+        )} dimensions but has ${chalk.green(currentVariable.dimensions)}`
+      );
+    }
+
+    for (let i = 0; i < this.pointsAdvanced + 1; i++) {
+      this.currentVariableStack.pop();
+      this.currentVariableDimensionsToCheckStack.pop();
+      this.pointsAdvanced = 0;
+    }
+  };
+
+  /**
+   * Tells the semantics to search for a subdirectory when there is a point
+   * in calls such as foo.bar
+   */
+  searchForSubvariable = () => {
+    this.isPointPending = true;
+    this.pointsAdvanced++;
+  };
+
+  /**
+   * Adds a dimension to currentVariableDimensionsToCheck in order to know
+   * if the variable has enough dimensions at the end of declaration
+   */
+  addDimensionToCheck = () => {
+    this.currentVariableDimensionsToCheckStack[
+      this.currentVariableDimensionsToCheckStack.length - 1
+    ]++;
+  };
 }
 
 module.exports = Semantics;

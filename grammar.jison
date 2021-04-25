@@ -63,7 +63,7 @@ inherits    { return 'INHERITS'; }
 [0-9]+\.[0-9]+ 		  			{ return 'FLOAT'; }
 [0-9]+            				{ return 'INT'; }
 [A-Za-z_][A-Za-z0-9_]*		{ return 'ID'; }
-([A-Za-z]|[0-9])					{ return 'CHAR'; }
+\'([A-Za-z]|[0-9])\'			{ return 'CHAR'; }
 \".*\"				      			{ return 'STRING'; }
 [\n]           		 			 	{ }
 .                	  			{ }
@@ -254,7 +254,9 @@ body:
 	;
 
 dimension_check:
-	LA expression RA {}
+	LA expression RA {
+		yy.semantics.addDimensionToCheck();
+	}
 	;
 
 dimensions_check:
@@ -264,23 +266,25 @@ dimensions_check:
 
 var_usage: 
 	ID {
-		// yy.semantics.setCurrentVariable({ id: $1 });
+		yy.semantics.setCurrentVariable({ id: $1 });
 	}
 	;
 
-point:
+point: 
 	POINT {
-		// yy.semantics.advanceToCurrentVariableDirectory();
+		yy.semantics.searchForSubvariable();
 	}
 	;
 
 var_aux:
-	POINT var_usage var_aux
+	point var_usage var_aux
 	| {}
 	;
 
 var: 
-	var_usage var_aux dimensions_check
+	var_usage var_aux dimensions_check {
+		yy.semantics.resetCurrentVariable();
+	}
 	;
 
 statements_aux:
@@ -328,12 +332,12 @@ read:
 	;
 
 writable:
-	expression
-	| STRING
+	STRING 
+	| input_output_aux 
 	;
 
 write:
-	WRITE OPEN_PARENTHESIS input_output_aux CLOSING_PARENTHESIS SEMICOLON
+	WRITE OPEN_PARENTHESIS writable CLOSING_PARENTHESIS SEMICOLON
 	;
 
 condition:
@@ -364,7 +368,6 @@ factor:
 	| INT
 	| FLOAT
 	| CHAR
-	| STRING
 	| OPEN_PARENTHESIS expression CLOSING_PARENTHESIS
 	;
 

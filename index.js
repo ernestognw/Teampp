@@ -17,7 +17,7 @@ files.forEach(file => {
   try {
     parser.parse(file)
   } catch(err) {
-    console.error(err.message)
+    // console.error(err.message)
     console.log(err)
   }
 })
