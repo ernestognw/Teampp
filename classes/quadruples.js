@@ -1,41 +1,17 @@
 const chalk = require("chalk");
+const { inverseOperators, inverseTypes, types } = require("./utils");
 
 class Quadruples {
-  constructor(parentCtx) {
-    this.parentCtx = parentCtx;
+  constructor(semantics) {
+    this.semantics = semantics;
 
     this.intermediateCode = [];
     this.tmps = [];
 
     this.operatorsStack = [];
     this.operationsStack = [];
-    this.typesStack = [];
 
-    this.operators = {
-      PLUS: "+",
-      DIV: "/",
-      MULT: "*",
-      MINUS: "-",
-      NOT_EQUAL: "!",
-      EQUAL_EQUAL: "!=",
-      GTE: ">=",
-      LTE: "<=",
-      GT: ">",
-      LT: "<",
-      AND: "&&",
-      OR: "||",
-      NOT: "!",
-      OPEN_PARENTHESIS: "(",
-      CLOSE_PARENTHESIS: ")",
-    };
-
-    this.inverseOperators = Object.entries(this.operators).reduce(
-      (acc, [key, value]) => {
-        acc[value] = key;
-        return acc;
-      },
-      {}
-    );
+    this.types = types;
   }
 
   /**
@@ -43,22 +19,32 @@ class Quadruples {
    * @param {operator} string an operator
    * @returns boolean if the operator is a valid operator
    */
-  validateOperator = ({ operator }) => !!this.inverseOperators[operator];
+  validateOperator = ({ operator }) => !!inverseOperators[operator];
+
+  /**
+   *
+   * @param {type} string a type
+   * @returns boolean if the type is a generic type
+   */
+  validateType = ({ type }) => !!inverseTypes[type];
 
   pushToOperatorsStack = ({ operator }) => {
     if (!this.validateOperator({ operator }))
       throw new Error(
-        `Operator ${chalk.red(operator)} is not a valid operator`
+        `${this.semantics.lineError()} Operator ${chalk.red(operator)} is not a valid operator`
       );
 
     this.operatorsStack.push(operator);
   };
 
-  /**
-   * Returns a generic error string with the line in which the error was detected
-   */
-  lineError = () =>
-    `Semantic error at line ${chalk.yellow(this.parentCtx.yylineno)}.`;
+  pushToOperationsStack = ({ type, value }) => {
+    if (!this.validateType({ type }))
+      throw new Error(
+        `${this.semantics.lineError()} Type ${chalk.red(operator)} is not a valid type`
+      );
+
+    this.operationsStack.push({ type, value });
+  };
 }
 
 module.exports = Quadruples;

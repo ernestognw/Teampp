@@ -10,8 +10,8 @@ if (!files || files.length === 0) {
   return;
 }
 
-const bnf = readFileSync("./grammar.jison", "utf8");
-const parser = new Parser(bnf);
+const grammar = readFileSync("./grammar.jison", "utf8");
+const parser = new Parser(grammar);
 
 files.forEach((file) => {
   try {

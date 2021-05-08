@@ -1,8 +1,10 @@
 const chalk = require("chalk");
+const Quadruples = require("./quadruples.js");
+const { genericTypes, inverseGenericTypes } = require("./utils");
 
 class Semantics {
-  constructor(parentCtx) {
-    this.parentCtx = parentCtx;
+  constructor(grammar) {
+    this.grammar = grammar;
 
     this.main = {
       varsDirectory: {},
@@ -15,22 +17,9 @@ class Semantics {
     this.isPointPending = false;
     this.pointsAdvanced = 0;
 
-    this.genericTypes = {
-      PROGRAM: "program",
-      CLASS: "class",
-      INT: "int",
-      FLOAT: "float",
-      CHAR: "char",
-      BOOLEAN: "boolean",
-      VOID: "void",
-    };
-    this.inverseGenericTypes = Object.entries(this.genericTypes).reduce(
-      (acc, [key, value]) => {
-        acc[value] = key;
-        return acc;
-      },
-      {}
-    );
+    this.genericTypes = genericTypes;
+
+    this.quadruples = new Quadruples(this);
   }
 
   /**
@@ -56,7 +45,7 @@ class Semantics {
     if (!typeExists) {
       const { varsDirectory: classVarsDirectory } = this.validateId({
         id: type,
-        expectedType: this.genericTypes.CLASS,
+        expectedType: genericTypes.CLASS,
       });
 
       // When type is not generic, it is needed to copy a pointer to the varsDirectory
@@ -100,7 +89,7 @@ class Semantics {
    * @param {type} string a type
    * @returns boolean if the type is a generic type
    */
-  validateGenericType = ({ type }) => !!this.inverseGenericTypes[type];
+  validateGenericType = ({ type }) => !!inverseGenericTypes[type];
 
   /**
    * Add function by using the current type saved previously
@@ -209,9 +198,7 @@ class Semantics {
       return this.validateId({ id });
     }
 
-    let currentVariable = this.currentVariableStack[
-      this.currentVariableStack.length - 1
-    ];
+    let currentVariable = this.getCurrentVariable();
 
     const toCheck = currentVariable.varsDirectory[id];
     const variableName = currentVariable.name;
@@ -240,9 +227,7 @@ class Semantics {
     if (!this.isPointPending) {
       this.currentVariableStack.push({ ...variable, dimensionsToCheck: 0 });
     } else {
-      let currentVariable = this.currentVariableStack[
-        this.currentVariableStack.length - 1
-      ];
+      let currentVariable = this.getCurrentVariable();
 
       if (currentVariable.isFunction)
         throw new Error(
@@ -268,13 +253,17 @@ class Semantics {
   };
 
   /**
+   * Gets current variable
+   */
+  getCurrentVariable = () =>
+    this.currentVariableStack[this.currentVariableStack.length - 1];
+
+  /**
    * Resets current variable at the end of a variable use and checks if dimensions
    * are correct
    */
   resetCurrentVariable = () => {
-    let currentVariable = this.currentVariableStack[
-      this.currentVariableStack.length - 1
-    ];
+    let currentVariable = this.getCurrentVariable();
 
     if (currentVariable.dimensions !== currentVariable.dimensionsToCheck) {
       throw new Error(
@@ -306,8 +295,7 @@ class Semantics {
    * if the variable has enough dimensions at the end of declaration
    */
   addDimensionToCheck = () => {
-    this.currentVariableStack[this.currentVariableStack.length - 1]
-      .dimensionsToCheck++;
+    this.getCurrentVariable().dimensionsToCheck++;
   };
 
   /**
@@ -342,12 +330,12 @@ class Semantics {
       },
     };
   };
-  
+
   /**
    * Returns a generic error string with the line in which the error was detected
    */
   lineError = () =>
-    `Semantic error at line ${chalk.yellow(this.parentCtx.yylineno)}.`;
+    `Semantic error at line ${chalk.yellow(this.grammar.yylineno)}.`;
 }
 
 module.exports = Semantics;

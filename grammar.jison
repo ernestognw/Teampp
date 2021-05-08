@@ -6,10 +6,8 @@
 		yy.started = true
 
 		const Semantics = require('../../classes/semantics.js');
-		const Quadruples = require('../../classes/quadruples.js');
 
 		yy.semantics = new Semantics(this);
-		yy.quadruples = new Quadruples(this);
 	} else {
 		yy.semantics.parentCtx = this;
 	}
@@ -81,8 +79,9 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		const directory = yy.semantics.removePreviousDirectories(yy.semantics.main)
-		console.log(JSON.stringify(directory));
+		// const directory = yy.semantics.removePreviousDirectories(yy.semantics.main)
+		// console.log(JSON.stringify(directory));
+		console.log(yy.semantics.quadruples.operatorsStack)
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
 	;
@@ -293,6 +292,10 @@ var_aux:
 
 var: 
 	var_usage var_aux dimensions_check {
+		yy.semantics.quadruples.pushToOperationsStack({ 
+			value: yy.semantics.getCurrentVariable().type.name, 
+			type: yy.semantics.getCurrentVariable().type
+		})
 		yy.semantics.resetCurrentVariable();
 	}
 	;
@@ -379,13 +382,13 @@ for:
 
 factor_open_parenthesis:
 	OPEN_PARENTHESIS {
-		yy.quadruples.pushToOperatorsStack({ operator: $1 })
+		yy.semantics.quadruples.operatorsStack.push($1) // Add fake bottom
 	}
 	;
 	
 factor_close_parenthesis:
 	CLOSE_PARENTHESIS {
-
+		yy.semantics.quadruples.operatorsStack.pop(); // Remove fake bottom
 	}
 	;
 
@@ -399,18 +402,50 @@ factor:
 	var
 	| not var
 	| call
-	| INT
-	| FLOAT
-	| CHAR
+	| INT {
+		yy.semantics.quadruples.pushToOperationsStack({ 
+			value: $1, 
+			type: yy.semantics.quadruples.types.INT 
+		})
+	}
+	| FLOAT {
+		yy.semantics.quadruples.pushToOperationsStack({ 
+			value: $1, 
+			type: yy.semantics.quadruples.types.FLOAT 
+		})
+	}
+	| CHAR {
+		yy.semantics.quadruples.pushToOperationsStack({ 
+			value: $1, 
+			type: yy.semantics.quadruples.types.CHAR 
+		})
+	}
 	| not BOOLEAN
-	| BOOLEAN
+	| BOOLEAN {
+		yy.semantics.quadruples.pushToOperationsStack({ 
+			value: $1, 
+			type: yy.semantics.quadruples.types.BOOLEAN 
+		})
+	}
 	| not factor_open_parenthesis expression factor_close_parenthesis
 	| factor_open_parenthesis expression factor_close_parenthesis
 	;
 
+mult: 
+	MULT {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
+div: 
+	DIV {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
 term_aux:
-	MULT term
-	| DIV term
+	mult term
+	| div term
 	| {}
 	;
 
@@ -418,9 +453,21 @@ term:
 	factor term_aux
 	;
 
+plus: 
+	PLUS {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
+minus: 
+	MINUS {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
 sum_expression_aux:
-	PLUS sum_expression
-	| MINUS sum_expression
+	plus sum_expression
+	| minus sum_expression
 	| {}
 	;
 
@@ -428,13 +475,49 @@ sum_expression:
 	term sum_expression_aux
 	;
 
+lt: 
+	LT {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
+gt: 
+	GT {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
+lte: 
+	LTE {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
+GTE: 
+	GTE {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
+not_equal: 
+	NOT_EQUAL {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
+equal_equal: 
+	EQUAL_EQUAL {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
 expression_comp_aux:
-	LT sum_expression
-	| LTE sum_expression
-	| GT sum_expression
-	| GTE sum_expression
-	| NOT_EQUAL sum_expression
-	| EQUAL_EQUAL sum_expression
+	lt sum_expression
+	| lte sum_expression
+	| gt sum_expression
+	| gte sum_expression
+	| not_equal sum_expression
+	| equal_equal sum_expression
 	| {}
 	;
 
@@ -442,12 +525,26 @@ expression_comp:
 	sum_expression expression_comp_aux
 	;
 
+and: 
+	AND {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
+or: 
+	OR {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 })
+	}
+	;
+
 bool_aux:
-	AND expression_comp bool_aux
-	| OR expression_comp bool_aux
+	and expression_comp bool_aux
+	| or expression_comp bool_aux
 	| {}
 	;
 
 expression:
-	expression_comp bool_aux
+	expression_comp bool_aux {
+		
+	}
 	;
