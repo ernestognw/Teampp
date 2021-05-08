@@ -1,23 +1,22 @@
-const { readFileSync } = require('fs');
-const { Parser } = require('jison');
+const { readFileSync } = require("fs");
+const { Parser } = require("jison");
 
-const filepaths = process.argv.slice(2)
+const filepaths = process.argv.slice(2);
 
-const files = filepaths.map(filepath => readFileSync(filepath, 'utf8'))
+const files = filepaths.map((filepath) => readFileSync(filepath, "utf8"));
 
 if (!files || files.length === 0) {
-  console.log('Files missing')
+  console.log("Files missing");
   return;
 }
 
-const bnf = readFileSync('grammar.jison', 'utf8');
+const bnf = readFileSync("./grammar.jison", "utf8");
 const parser = new Parser(bnf);
 
-files.forEach(file => {
+files.forEach((file) => {
   try {
-    parser.parse(file)
-  } catch(err) {
-    // console.error(err.message)
-    console.log(err)
+    parser.parse(file);
+  } catch (err) {
+    console.log(err);
   }
-})
+});

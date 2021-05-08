@@ -2,9 +2,9 @@
   "name": "teampp",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": ".",
   "scripts": {
-    "test": "node index.js"
+    "test": "node ./index.js"
   },
   "repository": {
     "type": "git",

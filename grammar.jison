@@ -49,7 +49,6 @@ else				{ return 'ELSE'; }
 "="					{ return 'EQUAL'; }
 void				{ return 'VOID'; }
 vars				{ return 'VARS'; }
-print				{ return 'PRINT'; }
 read				{ return 'READ'; }
 write				{ return 'WRITE'; }
 main				{ return 'MAIN'; }
@@ -332,19 +331,19 @@ return:
 	RETURN OPEN_PARENTHESIS expression CLOSE_PARENTHESIS
 	;
 
-input_output_aux:
+output_aux:
 	expression COMMA
 	| expression
 	| {}
 	;
 
 read:
-	READ OPEN_PARENTHESIS input_output_aux CLOSE_PARENTHESIS
+	READ OPEN_PARENTHESIS var CLOSE_PARENTHESIS
 	;
 
 writable:
 	STRING 
-	| input_output_aux 
+	| output_aux 
 	;
 
 write:
