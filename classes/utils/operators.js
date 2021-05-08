@@ -4,7 +4,7 @@ const operators = {
   MULT: "*",
   MINUS: "-",
   NOT_EQUAL: "!",
-  EQUAL_EQUAL: "!=",
+  EQUAL_EQUAL: 3,
   GTE: ">=",
   LTE: "<=",
   GT: ">",
@@ -12,6 +12,21 @@ const operators = {
   AND: "&&",
   OR: "||",
   // NOT: "!",
+};
+
+const operatorsPriority = {
+  [operators.PLUS]: 2,
+  [operators.MINUS]: 2,
+  [operators.DIV]: 1,
+  [operators.MULT]: 1,
+  [operators.NOT_EQUAL]: 3,
+  [operators.EQUAL_EQUAL]: 3,
+  [operators.GTE]: 3,
+  [operators.LTE]: 3,
+  [operators.GT]: 3,
+  [operators.LT]: 3,
+  [operators.AND]: 4,
+  [operators.OR]: 4,
 };
 
 const inverseOperators = Object.entries(operators).reduce(
@@ -22,4 +37,4 @@ const inverseOperators = Object.entries(operators).reduce(
   {}
 );
 
-module.exports = { operators, inverseOperators };
+module.exports = { operators, inverseOperators, operatorsPriority };

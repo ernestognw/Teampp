@@ -1,12 +1,19 @@
 const chalk = require("chalk");
-const { inverseOperators, inverseTypes, types } = require("./utils");
+const {
+  inverseOperators,
+  inverseTypes,
+  types,
+  operatorToOpcode,
+  cube,
+  operatorsPriority,
+} = require("./utils");
 
 class Quadruples {
   constructor(semantics) {
     this.semantics = semantics;
 
     this.intermediateCode = [];
-    this.tmps = [];
+    this.tmpPointer = 1;
 
     this.operatorsStack = [];
     this.operationsStack = [];
@@ -28,22 +35,96 @@ class Quadruples {
    */
   validateType = ({ type }) => !!inverseTypes[type];
 
+  /**
+   * Validates an operator and push it to operators stack
+   *
+   * @param {string} operator operator to push
+   */
   pushToOperatorsStack = ({ operator }) => {
     if (!this.validateOperator({ operator }))
       throw new Error(
-        `${this.semantics.lineError()} Operator ${chalk.red(operator)} is not a valid operator`
+        `${this.semantics.lineError()} Operator ${chalk.red(
+          operator
+        )} is not a valid operator`
       );
 
     this.operatorsStack.push(operator);
   };
 
+  /**
+   * Validates a value and its type and push it to operations stack
+   *
+   * @param {string} operator operator to push
+   */
   pushToOperationsStack = ({ type, value }) => {
     if (!this.validateType({ type }))
       throw new Error(
-        `${this.semantics.lineError()} Type ${chalk.red(operator)} is not a valid type`
+        `${this.semantics.lineError()} Type ${chalk.red(
+          operator
+        )} is not a valid type`
       );
 
     this.operationsStack.push({ type, value });
+  };
+
+  /**
+   * Retrieves last operator on operators stack
+   * @returns Last operator
+   */
+  getLastOperator = () => this.operatorsStack[this.operatorsStack.length - 1];
+
+  /**
+   * Operates last operator with last two operations
+   */
+  operate = () => {
+    const right = this.operationsStack.pop();
+    const left = this.operationsStack.pop();
+    const operator = this.operatorsStack.pop();
+
+    const resultType = cube[right.type][left.type][operator];
+
+    if (!resultType)
+      throw new Error(
+        `${this.semantics.lineError()} 
+        Type Mismatch: Value ${chalk.red(right.value)} of type ${chalk.blue(
+          right.type
+        )} cannot be operated with value ${chalk.red(
+          left.value
+        )} of type ${chalk.blue(left.type)} using ${chalk.red(
+          operator
+        )} operator
+        `
+      );
+
+    const opcode = operatorToOpcode[operator];
+    this.intermediateCode.push([
+      opcode,
+      left.value,
+      right.value,
+      `t${this.tmpPointer}`,
+    ]);
+    this.pushToOperationsStack({
+      value: `t${this.tmpPointer}`,
+      type: resultType,
+    });
+    this.tmpPointer++;
+  };
+
+  /**
+   * Finish an operation block and checks hierarchy on the operators stack
+   * to operate accordingly
+   *
+   * @param {number} priority priority of the operation in which this function was called
+   */
+  checkOperation = ({ priority }) => {
+    const lastOperator = this.getLastOperator();
+
+    // Validation because it could be fake bottom
+    if (
+      this.validateOperator({ operator: lastOperator }) &&
+      operatorsPriority[lastOperator] == priority
+    )
+      this.operate();
   };
 }
 

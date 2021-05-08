@@ -81,7 +81,7 @@ init:
 	program { 
 		// const directory = yy.semantics.removePreviousDirectories(yy.semantics.main)
 		// console.log(JSON.stringify(directory));
-		console.log(yy.semantics.quadruples.operatorsStack)
+		console.log(yy.semantics.quadruples.intermediateCode)
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
 	;
@@ -293,9 +293,9 @@ var_aux:
 var: 
 	var_usage var_aux dimensions_check {
 		yy.semantics.quadruples.pushToOperationsStack({ 
-			value: yy.semantics.getCurrentVariable().type.name, 
+			value: yy.semantics.getCurrentVariable().name, 
 			type: yy.semantics.getCurrentVariable().type
-		})
+		});
 		yy.semantics.resetCurrentVariable();
 	}
 	;
@@ -449,8 +449,14 @@ term_aux:
 	| {}
 	;
 
+factor_check: 
+	factor {
+		yy.semantics.quadruples.checkOperation({ priority: 1 });
+	}
+	;
+
 term: 
-	factor term_aux
+	factor_check term_aux
 	;
 
 plus: 
@@ -471,8 +477,14 @@ sum_expression_aux:
 	| {}
 	;
 
+term_check:
+	term {
+		yy.semantics.quadruples.checkOperation({ priority: 2 });
+	}
+	;
+
 sum_expression:
-	term sum_expression_aux
+	term_check sum_expression_aux
 	;
 
 lt: 
@@ -512,17 +524,23 @@ equal_equal:
 	;
 
 expression_comp_aux:
-	lt sum_expression
-	| lte sum_expression
-	| gt sum_expression
-	| gte sum_expression
-	| not_equal sum_expression
-	| equal_equal sum_expression
+	lt expression_comp
+	| lte expression_comp
+	| gt expression_comp
+	| gte expression_comp
+	| not_equal expression_comp
+	| equal_equal expression_comp
 	| {}
 	;
 
+sum_expression_check: 
+	sum_expression {
+		yy.semantics.quadruples.checkOperation({ priority: 3 });
+	}
+	;
+
 expression_comp:
-	sum_expression expression_comp_aux
+	sum_expression_check expression_comp_aux
 	;
 
 and: 
@@ -537,14 +555,18 @@ or:
 	}
 	;
 
+expression_comp_check: 
+	expression_comp {
+		yy.semantics.quadruples.checkOperation({ priority: 4 });
+	}
+	;
+
 bool_aux:
-	and expression_comp bool_aux
-	| or expression_comp bool_aux
+	and expression
+	| or expression
 	| {}
 	;
 
 expression:
-	expression_comp bool_aux {
-		
-	}
+	expression_comp_check bool_aux
 	;

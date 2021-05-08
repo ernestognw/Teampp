@@ -150,6 +150,21 @@ class Semantics {
   };
 
   /**
+   * Validates that the current variable is a function or not
+   * @param {boolean} isFunction Wheter to expect the var to be a function or not
+   */
+  validateCurrentVariableFunction = ({ isFunction }) => {
+    const currentVariable = this.getCurrentVariable();
+
+    if (currentVariable.isFunction !== isFunction)
+      throw new Error(
+        `${this.lineError()} Identifier ${chalk.blue(
+          id
+        )} is ${isFunction ? 'not' : ''} a function`
+      );
+  };
+
+  /**
    * Add a variable to pending vars. Using during vars declaration when the type hasn't been specified
    *
    * @param {name} string name of the variable to push into pending vars
@@ -243,9 +258,7 @@ class Semantics {
       this.currentVariableStack[this.currentVariableStack.length - 1] = {
         ...variable,
         // Preserve dimensions to check
-        dimensionsToCheck: this.currentVariableStack[
-          this.currentVariableStack.length - 1
-        ].dimensionsToCheck,
+        dimensionsToCheck: this.getCurrentVariable().dimensionsToCheck,
       };
     }
 

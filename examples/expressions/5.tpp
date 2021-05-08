@@ -1,8 +1,6 @@
 program expression_test; 
 
-vars preresult, result : boolean;
-
-vars tmp1, tmp2 : float;
+vars result : boolean;
 
 vars a, c, d, f, g, i, k : int;
 vars b, e, h, j : float;
@@ -20,8 +18,5 @@ main(){
 	j = 10.1;
 	k = 11;
 
-	tmp1 = (a + b) * c / (d + e) - f * g;
-	tmp2 = h * (i + j) - k;
-	preresult = tmp1 > tmp2;
 	result = (a + b) * c / (d + e) - f * g > h * (i + j) - k;
 }
