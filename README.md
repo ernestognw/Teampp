@@ -46,9 +46,13 @@
 * Gramatica FACTOR
 * Gramatica EXPRESION
 
-### Semana # 3 "19-23" Diciembre:
+### Semana # 3 "19-23" Abril:
 
 * 1 Semantica de Variables: Directorio de Procedimientos
 * 2 Semantica de Variables: Directorio de Variables
 
+### Semana # 5 "3-7" Mayo:
 
+* Validaciones semánticas y de dimensiones de variables
+* Directorio de variables completo
+* Desarrollo y validación de cuadruplos para operaciones lineales
