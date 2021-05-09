@@ -1,6 +1,6 @@
 ## Proyecto de compiladores en equipo  Languaje Team ++ 
 
-### Semana # 1 "5-11" Diciembre:
+### Semana # 1 "5-11" Abril:
 
 * 1 definición de lexico con los tokens 
 
@@ -8,7 +8,7 @@
 
 * 3 crear el repositorio de github 
 
-### Semana # 2 "12-16" Diciembre:
+### Semana # 2 "12-16" Abril:
 
 * 1 Revision de lo anterior como diagramas
 * 2 Revision Gramatica
@@ -51,8 +51,13 @@
 * 1 Semantica de Variables: Directorio de Procedimientos
 * 2 Semantica de Variables: Directorio de Variables
 
+### Semana # 3 "19-23" Abril:
+
+* 1 Checar: Directorio de Procedimientos
+* 2 Checar: Directorio de Variables
+
 ### Semana # 5 "3-7" Mayo:
 
-* Validaciones semánticas y de dimensiones de variables
-* Directorio de variables completo
-* Desarrollo y validación de cuadruplos para operaciones lineales
+* 1 Validaciones semánticas y de dimensiones de variables
+* 2 Directorio de variables completo
+* 3 Desarrollo y validación de cuadruplos para operaciones lineales
