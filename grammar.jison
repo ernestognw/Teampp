@@ -343,12 +343,6 @@ return:
 	RETURN OPEN_PARENTHESIS expression CLOSE_PARENTHESIS
 	;
 
-output_aux:
-	expression COMMA
-	| expression
-	| {}
-	;
-
 read_op:
 	READ {
 		yy.semantics.quadruples.operatorsStack.push($1);
@@ -361,13 +355,32 @@ read:
 	}
 	;
 
+output_aux:
+	expression COMMA
+	| expression
+	| {}
+	;
+
 writable:
-	STRING 
-	| output_aux 
+	STRING {
+		yy.semantics.quadruples.pushToOperationsStack({
+			value: $1,
+			type: 'string'
+		})
+	}
+	| expression
+	;
+
+write_op:
+	WRITE {
+		yy.semantics.quadruples.operatorsStack.push($1);
+	}
 	;
 
 write:
-	WRITE OPEN_PARENTHESIS writable CLOSE_PARENTHESIS
+	write_op OPEN_PARENTHESIS writable CLOSE_PARENTHESIS {
+		yy.semantics.quadruples.checkOperation({ priority: -3 });
+	}
 	;
 
 condition:

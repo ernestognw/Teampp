@@ -3,6 +3,7 @@ const types = {
   FLOAT: "float",
   CHAR: "char",
   BOOLEAN: "boolean",
+  STRING: "string",
 };
 
 const genericTypes = {

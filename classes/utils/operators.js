@@ -16,7 +16,8 @@ const binaryOperators = {
 
 const unaryOperators = {
   NOT: "!",
-  READ: 'read'
+  READ: 'read',
+  WRITE: 'write',
 };
 
 const operators = {
@@ -40,6 +41,7 @@ const operatorsPriority = {
   [operators.NOT]: -1,
   [operators.EQUAL]: -2,
   [operators.READ]: -3,
+  [operators.WRITE]: -3,
 };
 
 // Only assertion to ensure every operator has code

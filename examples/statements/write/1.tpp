@@ -1,9 +1,10 @@
-program read_test; 
+program write_test; 
 
 vars a, b : int;
 
 main(){
 	a = 1;
-  read(b);
+	b = a;
   a = b - 2;
+  write(a);
 }

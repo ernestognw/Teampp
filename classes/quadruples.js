@@ -70,7 +70,7 @@ class Quadruples {
     if (!this.validateType({ type }))
       throw new Error(
         `${this.semantics.lineError()} Type ${chalk.red(
-          operator
+          type
         )} is not a valid type`
       );
 
@@ -105,7 +105,7 @@ class Quadruples {
 
     let tmp = "";
 
-    if (opcode != OPCODES.READ) {
+    if (opcode != OPCODES.READ && opcode != OPCODES.WRITE) {
       // Equal is a special case
       tmp = `t${this.tmpPointer}`;
       this.pushToOperationsStack({
