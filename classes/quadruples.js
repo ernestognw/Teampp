@@ -4,8 +4,10 @@ const {
   inverseTypes,
   types,
   operatorToOpcode,
-  cube,
+  unaryCube,
+  binaryCube,
   operatorsPriority,
+  inverseBinaryOperators,
 } = require("./utils");
 
 class Quadruples {
@@ -27,6 +29,13 @@ class Quadruples {
    * @returns boolean if the operator is a valid operator
    */
   validateOperator = ({ operator }) => !!inverseOperators[operator];
+
+  /**
+   *
+   * @param {operator} string an operator
+   * @returns boolean if the operator is a binary operator
+   */
+  isBinaryOperator = ({ operator }) => !!inverseBinaryOperators[operator];
 
   /**
    *
@@ -74,16 +83,49 @@ class Quadruples {
   getLastOperator = () => this.operatorsStack[this.operatorsStack.length - 1];
 
   /**
-   * Operates last operator with last two operations
+   * Operates last unary operator with last two operations
    */
-  operate = () => {
+  operateUnary = () => {
+    const left = this.operationsStack.pop();
+    const operator = this.operatorsStack.pop();
+
+    const resultType = unaryCube[left.type][operator];
+
+    if (!resultType)
+      throw new Error(
+        `${this.semantics.lineError()} 
+        Type Mismatch: Value ${chalk.red(left.value)} of type ${chalk.blue(
+          left.type
+        )} cannot be operated using ${chalk.red(operator)} operator
+        `
+      );
+
+    const opcode = operatorToOpcode[operator];
+    this.intermediateCode.push([
+      opcode,
+      left.value,
+      '', // Not right operator
+      `t${this.tmpPointer}`,
+    ]);
+    this.pushToOperationsStack({
+      value: `t${this.tmpPointer}`,
+      type: resultType,
+    });
+    this.tmpPointer++;
+  };
+
+  /**
+   * Operates last binary operator with last two operations
+   */
+  operateBinary = () => {
     const right = this.operationsStack.pop();
     const left = this.operationsStack.pop();
     const operator = this.operatorsStack.pop();
 
-    const resultType = cube[right.type][left.type][operator];
+    const resultType = binaryCube[right.type][left.type][operator];
 
-    if (!resultType)
+    if (!resultType) {
+      console.log(this.intermediateCode)
       throw new Error(
         `${this.semantics.lineError()} 
         Type Mismatch: Value ${chalk.red(right.value)} of type ${chalk.blue(
@@ -95,6 +137,7 @@ class Quadruples {
         )} operator
         `
       );
+    }
 
     const opcode = operatorToOpcode[operator];
     this.intermediateCode.push([
@@ -119,12 +162,16 @@ class Quadruples {
   checkOperation = ({ priority }) => {
     const lastOperator = this.getLastOperator();
 
-    // Validation because it could be fake bottom
     if (
+      // Validation because it could be fake bottom
       this.validateOperator({ operator: lastOperator }) &&
+      // Check priority
       operatorsPriority[lastOperator] == priority
-    )
-      this.operate();
+    ) {
+      if (this.isBinaryOperator({ operator: lastOperator }))
+        this.operateBinary();
+      else this.operateUnary();
+    }
   };
 }
 

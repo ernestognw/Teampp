@@ -61,3 +61,8 @@
 * 1 Validaciones semánticas y de dimensiones de variables
 * 2 Directorio de variables completo
 * 3 Desarrollo y validación de cuadruplos para operaciones lineales
+
+### Semana # 6 "3-7" Mayo:
+
+* 1 Correcciones en operaciones lineales unarias
+* 2 

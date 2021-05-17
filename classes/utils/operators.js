@@ -1,17 +1,25 @@
-const operators = {
+const binaryOperators = {
   PLUS: "+",
   DIV: "/",
   MULT: "*",
   MINUS: "-",
-  NOT_EQUAL: "!",
-  EQUAL_EQUAL: 3,
+  NOT_EQUAL: "!=",
+  EQUAL_EQUAL: "==",
   GTE: ">=",
   LTE: "<=",
   GT: ">",
   LT: "<",
   AND: "&&",
   OR: "||",
-  // NOT: "!",
+};
+
+const unaryOperators = {
+  NOT: "!",
+};
+
+const operators = {
+  ...binaryOperators,
+  ...unaryOperators,
 };
 
 const operatorsPriority = {
@@ -27,14 +35,26 @@ const operatorsPriority = {
   [operators.LT]: 3,
   [operators.AND]: 4,
   [operators.OR]: 4,
+  [operators.NOT]: 0,
 };
 
-const inverseOperators = Object.entries(operators).reduce(
-  (acc, [key, value]) => {
+const invert = (object) =>
+  Object.entries(object).reduce((acc, [key, value]) => {
     acc[value] = key;
     return acc;
-  },
-  {}
-);
+  }, {});
 
-module.exports = { operators, inverseOperators, operatorsPriority };
+const inverseBinaryOperators = invert(binaryOperators);
+const inverseUnaryOperators = invert(unaryOperators);
+
+const inverseOperators = { ...inverseBinaryOperators, ...inverseUnaryOperators };
+
+module.exports = {
+  binaryOperators,
+  unaryOperators,
+  operators,
+  inverseBinaryOperators,
+  inverseUnaryOperators,
+  inverseOperators,
+  operatorsPriority,
+};

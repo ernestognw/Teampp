@@ -316,6 +316,12 @@ statements:
 	| for statements_aux
 	;
 
+equal:
+	EQUAL {
+		
+	}
+	;
+
 assign:
 	var EQUAL expression
 	;
@@ -394,40 +400,62 @@ factor_close_parenthesis:
 
 not: 
 	NOT {
-
+		yy.semantics.quadruples.pushToOperatorsStack({ operator: $1 });
 	}
 	;
 
-factor:
-	var
-	| not var
-	| call
-	| INT {
+int: 
+	INT {
 		yy.semantics.quadruples.pushToOperationsStack({ 
 			value: $1, 
 			type: yy.semantics.quadruples.types.INT 
 		})
 	}
-	| FLOAT {
+	;
+
+float:
+	FLOAT {
 		yy.semantics.quadruples.pushToOperationsStack({ 
 			value: $1, 
 			type: yy.semantics.quadruples.types.FLOAT 
 		})
 	}
-	| CHAR {
+	;
+
+char: 
+	CHAR {
 		yy.semantics.quadruples.pushToOperationsStack({ 
 			value: $1, 
 			type: yy.semantics.quadruples.types.CHAR 
 		})
 	}
-	| not BOOLEAN
-	| BOOLEAN {
+	;
+
+boolean: 
+	BOOLEAN {
 		yy.semantics.quadruples.pushToOperationsStack({ 
 			value: $1, 
 			type: yy.semantics.quadruples.types.BOOLEAN 
 		})
 	}
-	| not factor_open_parenthesis expression factor_close_parenthesis
+	;
+
+factor:
+	var
+	| not var {
+		yy.semantics.quadruples.checkOperation({ priority: 0 });
+	}
+	| call
+	| int
+	| float
+	| char
+	| not boolean {
+		yy.semantics.quadruples.checkOperation({ priority: 0 });
+	}
+	| boolean
+	| not factor_open_parenthesis expression factor_close_parenthesis {
+		yy.semantics.quadruples.checkOperation({ priority: 0 });
+	}
 	| factor_open_parenthesis expression factor_close_parenthesis
 	;
 

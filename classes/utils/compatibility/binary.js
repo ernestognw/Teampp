@@ -1,5 +1,5 @@
-const { types } = require("./types");
-const { operators } = require("./operators");
+const { types } = require("../types");
+const { binaryOperators } = require("../operators");
 
 const { INT, FLOAT, CHAR, BOOLEAN } = types;
 
@@ -16,9 +16,9 @@ const {
   LT,
   AND,
   OR,
-} = operators;
+} = binaryOperators;
 
-const precube = {
+const binaryPrecube = {
   [INT]: {
     [INT]: {
       [PLUS]: INT,
@@ -169,9 +169,9 @@ const precube = {
   },
 };
 
-// To not repeat operators, just declare once in any order at precube
-// and fill every combination using precube
-cube = Object.entries(precube).reduce((acc, [key, value]) => {
+// To not repeat operators, just declare once in any order at binaryPrecube
+// and fill every combination using binaryPrecube
+const binaryCube = Object.entries(binaryPrecube).reduce((acc, [key, value]) => {
   acc[key] = { ...(acc[key] ?? {}), ...value };
 
   Object.entries(value).forEach(([subkey, subvalue]) => {
@@ -185,4 +185,4 @@ cube = Object.entries(precube).reduce((acc, [key, value]) => {
   return acc;
 }, {});
 
-module.exports = { cube };
+module.exports = { binaryCube }

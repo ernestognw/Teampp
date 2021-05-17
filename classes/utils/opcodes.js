@@ -13,6 +13,7 @@ const {
   LT,
   AND,
   OR,
+  NOT,
 } = operators;
 
 const OPCODES = {
@@ -28,6 +29,7 @@ const OPCODES = {
   LT: "LT",
   AND: "AND",
   OR: "OR",
+  NOT: 'NOT'
 };
 
 const operatorToOpcode = {
@@ -43,6 +45,7 @@ const operatorToOpcode = {
   [LT]: OPCODES.LT,
   [AND]: OPCODES.AND,
   [OR]: OPCODES.OR,
+  [NOT]: OPCODES.NOT,
 };
 
 module.exports = { operatorToOpcode };
