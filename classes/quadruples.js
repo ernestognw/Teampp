@@ -141,27 +141,19 @@ class Quadruples {
 
     const opcode = operatorToOpcode[operator];
 
-    if (opcode == OPCODES.EQUAL) {
-      // EQUAL opcode is a binary special case WTF
-      this.intermediateCode.push([
-        opcode,
-        right.value,
-        "", // Not right value
-        left.value,
-      ]);
-    } else {
-      this.intermediateCode.push([
-        opcode,
-        left.value,
-        right.value,
-        `t${this.tmpPointer}`,
-      ]);
+    let tmp = '';
+
+    if (opcode != OPCODES.EQUAL) {
+      // Equal is a special case
+      tmp = `t${this.tmpPointer}`;
+      this.tmpPointer++;
       this.pushToOperationsStack({
-        value: `t${this.tmpPointer}`,
+        value: tmp,
         type: resultType,
       });
-      this.tmpPointer++;
     }
+
+    this.intermediateCode.push([opcode, left.value, right.value, tmp]);
   };
 
   /**

@@ -1,6 +1,7 @@
 program expression_test; 
 
-vars a, b, c, d, e, f, g, h, i, j, k, l, result : int;
+vars a, b, c, d, e, f, g, h, i, j, k, l : int;
+vars result : boolean;
 
 main(){
 	a = 1;
