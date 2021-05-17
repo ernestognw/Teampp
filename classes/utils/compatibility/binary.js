@@ -16,7 +16,13 @@ const {
   LT,
   AND,
   OR,
+  EQUAL,
+  ...missing
 } = binaryOperators;
+
+// Only assertion to ensure every operator is being used
+if (Object.keys(missing).length > 0)
+  throw new Error("Development: There are some binary operators not used");
 
 const binaryPrecube = {
   [INT]: {
@@ -33,6 +39,7 @@ const binaryPrecube = {
       [LT]: BOOLEAN,
       [AND]: null,
       [OR]: null,
+      [EQUAL]: INT,
     },
     [FLOAT]: {
       [PLUS]: FLOAT,
@@ -47,6 +54,7 @@ const binaryPrecube = {
       [LT]: BOOLEAN,
       [AND]: null,
       [OR]: null,
+      [EQUAL]: FLOAT,
     },
     [CHAR]: {
       [PLUS]: INT,
@@ -61,6 +69,7 @@ const binaryPrecube = {
       [LT]: BOOLEAN,
       [AND]: null,
       [OR]: null,
+      [EQUAL]: INT,
     },
     [BOOLEAN]: {
       [PLUS]: null,
@@ -75,6 +84,7 @@ const binaryPrecube = {
       [LT]: null,
       [AND]: null,
       [OR]: null,
+      [EQUAL]: null,
     },
   },
   [FLOAT]: {
@@ -91,6 +101,7 @@ const binaryPrecube = {
       [LT]: BOOLEAN,
       [AND]: null,
       [OR]: null,
+      [EQUAL]: FLOAT,
     },
     [CHAR]: {
       [PLUS]: FLOAT,
@@ -105,6 +116,7 @@ const binaryPrecube = {
       [LT]: BOOLEAN,
       [AND]: null,
       [OR]: null,
+      [EQUAL]: FLOAT,
     },
     [BOOLEAN]: {
       [PLUS]: null,
@@ -119,6 +131,7 @@ const binaryPrecube = {
       [LT]: null,
       [AND]: null,
       [OR]: null,
+      [EQUAL]: null,
     },
   },
   [CHAR]: {
@@ -135,20 +148,22 @@ const binaryPrecube = {
       [LT]: BOOLEAN,
       [AND]: null,
       [OR]: null,
+      [EQUAL]: CHAR,
     },
     [BOOLEAN]: {
-      [PLUS]: "",
-      [DIV]: "",
-      [MULT]: "",
-      [MINUS]: "",
-      [NOT_EQUAL]: "",
-      [EQUAL_EQUAL]: "",
-      [GTE]: "",
-      [LTE]: "",
-      [GT]: "",
-      [LT]: "",
-      [AND]: "",
-      [OR]: "",
+      [PLUS]: null,
+      [DIV]: null,
+      [MULT]: null,
+      [MINUS]: null,
+      [NOT_EQUAL]: null,
+      [EQUAL_EQUAL]: null,
+      [GTE]: null,
+      [LTE]: null,
+      [GT]: null,
+      [LT]: null,
+      [AND]: null,
+      [OR]: null,
+      [EQUAL]: null,
     },
   },
   [BOOLEAN]: {
@@ -165,6 +180,7 @@ const binaryPrecube = {
       [LT]: null,
       [AND]: BOOLEAN,
       [OR]: BOOLEAN,
+      [EQUAL]: BOOLEAN,
     },
   },
 };
@@ -185,4 +201,4 @@ const binaryCube = Object.entries(binaryPrecube).reduce((acc, [key, value]) => {
   return acc;
 }, {});
 
-module.exports = { binaryCube }
+module.exports = { binaryCube };

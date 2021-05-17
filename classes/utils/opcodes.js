@@ -14,6 +14,7 @@ const {
   AND,
   OR,
   NOT,
+  EQUAL,
 } = operators;
 
 const OPCODES = {
@@ -29,7 +30,8 @@ const OPCODES = {
   LT: "LT",
   AND: "AND",
   OR: "OR",
-  NOT: 'NOT'
+  NOT: "NOT",
+  EQUAL: "EQUAL",
 };
 
 const operatorToOpcode = {
@@ -46,6 +48,11 @@ const operatorToOpcode = {
   [AND]: OPCODES.AND,
   [OR]: OPCODES.OR,
   [NOT]: OPCODES.NOT,
+  [EQUAL]: OPCODES.EQUAL,
 };
 
-module.exports = { operatorToOpcode };
+// Only assertion to ensure every operator is being used
+if (Object.values(operators).some(operator => !operatorToOpcode[operator]))
+  throw new Error("Development: There are some operators not translated to opcodes");
+
+module.exports = { OPCODES, operatorToOpcode };

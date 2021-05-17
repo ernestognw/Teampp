@@ -8,6 +8,7 @@ const {
   binaryCube,
   operatorsPriority,
   inverseBinaryOperators,
+  OPCODES,
 } = require("./utils");
 
 class Quadruples {
@@ -101,10 +102,11 @@ class Quadruples {
       );
 
     const opcode = operatorToOpcode[operator];
+
     this.intermediateCode.push([
       opcode,
       left.value,
-      '', // Not right operator
+      "", // Not right operator
       `t${this.tmpPointer}`,
     ]);
     this.pushToOperationsStack({
@@ -124,8 +126,7 @@ class Quadruples {
 
     const resultType = binaryCube[right.type][left.type][operator];
 
-    if (!resultType) {
-      console.log(this.intermediateCode)
+    if (!resultType)
       throw new Error(
         `${this.semantics.lineError()} 
         Type Mismatch: Value ${chalk.red(right.value)} of type ${chalk.blue(
@@ -137,20 +138,30 @@ class Quadruples {
         )} operator
         `
       );
-    }
 
     const opcode = operatorToOpcode[operator];
-    this.intermediateCode.push([
-      opcode,
-      left.value,
-      right.value,
-      `t${this.tmpPointer}`,
-    ]);
-    this.pushToOperationsStack({
-      value: `t${this.tmpPointer}`,
-      type: resultType,
-    });
-    this.tmpPointer++;
+
+    if (opcode == OPCODES.EQUAL) {
+      // EQUAL opcode is a binary special case WTF
+      this.intermediateCode.push([
+        opcode,
+        right.value,
+        "", // Not right value
+        left.value,
+      ]);
+    } else {
+      this.intermediateCode.push([
+        opcode,
+        left.value,
+        right.value,
+        `t${this.tmpPointer}`,
+      ]);
+      this.pushToOperationsStack({
+        value: `t${this.tmpPointer}`,
+        type: resultType,
+      });
+      this.tmpPointer++;
+    }
   };
 
   /**

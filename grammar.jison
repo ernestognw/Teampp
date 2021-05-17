@@ -82,6 +82,7 @@ init:
 		// const directory = yy.semantics.removePreviousDirectories(yy.semantics.main)
 		// console.log(JSON.stringify(directory));
 		console.log(yy.semantics.quadruples.intermediateCode)
+		console.log(yy.semantics.quadruples.operationsStack)
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
 	;
@@ -318,12 +319,14 @@ statements:
 
 equal:
 	EQUAL {
-		
+		yy.semantics.quadruples.operatorsStack.push($1)
 	}
 	;
 
 assign:
-	var EQUAL expression
+	var equal expression {
+		yy.semantics.quadruples.checkOperation({ priority: -2 });
+	}
 	;
 	
 call_aux:
@@ -443,18 +446,18 @@ boolean:
 factor:
 	var
 	| not var {
-		yy.semantics.quadruples.checkOperation({ priority: 0 });
+		yy.semantics.quadruples.checkOperation({ priority: -1 });
 	}
 	| call
 	| int
 	| float
 	| char
 	| not boolean {
-		yy.semantics.quadruples.checkOperation({ priority: 0 });
+		yy.semantics.quadruples.checkOperation({ priority: -1 });
 	}
 	| boolean
 	| not factor_open_parenthesis expression factor_close_parenthesis {
-		yy.semantics.quadruples.checkOperation({ priority: 0 });
+		yy.semantics.quadruples.checkOperation({ priority: -1 });
 	}
 	| factor_open_parenthesis expression factor_close_parenthesis
 	;

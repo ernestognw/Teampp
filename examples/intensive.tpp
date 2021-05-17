@@ -53,7 +53,7 @@ int function something();
 main(){
   one = 2;
   eight = specialPerson.truable();
-  seven = 'f';
+  seven = true;
 	person.example();
   specialPerson.name[0][2][3] = 21;
   specialPerson.name[three + 1][2][3] = 21;

@@ -1,8 +1,8 @@
 const binaryOperators = {
   PLUS: "+",
+  MINUS: "-",
   DIV: "/",
   MULT: "*",
-  MINUS: "-",
   NOT_EQUAL: "!=",
   EQUAL_EQUAL: "==",
   GTE: ">=",
@@ -11,6 +11,7 @@ const binaryOperators = {
   LT: "<",
   AND: "&&",
   OR: "||",
+  EQUAL: "=",
 };
 
 const unaryOperators = {
@@ -35,8 +36,15 @@ const operatorsPriority = {
   [operators.LT]: 3,
   [operators.AND]: 4,
   [operators.OR]: 4,
-  [operators.NOT]: 0,
+  [operators.NOT]: -1,
+  [operators.EQUAL]: -2,
 };
+
+// Only assertion to ensure every operator has code
+if (Object.values(operators).some((operator) => !operatorsPriority[operator]))
+  throw new Error(
+    "Development: You have an operator with no priority specified"
+  );
 
 const invert = (object) =>
   Object.entries(object).reduce((acc, [key, value]) => {
@@ -47,7 +55,10 @@ const invert = (object) =>
 const inverseBinaryOperators = invert(binaryOperators);
 const inverseUnaryOperators = invert(unaryOperators);
 
-const inverseOperators = { ...inverseBinaryOperators, ...inverseUnaryOperators };
+const inverseOperators = {
+  ...inverseBinaryOperators,
+  ...inverseUnaryOperators,
+};
 
 module.exports = {
   binaryOperators,
