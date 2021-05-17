@@ -103,17 +103,26 @@ class Quadruples {
 
     const opcode = operatorToOpcode[operator];
 
-    this.intermediateCode.push([
+    let tmp = "";
+
+    if (opcode != OPCODES.READ) {
+      // Equal is a special case
+      tmp = `t${this.tmpPointer}`;
+      this.pushToOperationsStack({
+        value: `t${this.tmpPointer}`,
+        type: resultType,
+      });
+      this.tmpPointer++;
+    }
+
+    const quadruple = [
       opcode,
       left.value,
       "", // Not right operator
-      `t${this.tmpPointer}`,
-    ]);
-    this.pushToOperationsStack({
-      value: `t${this.tmpPointer}`,
-      type: resultType,
-    });
-    this.tmpPointer++;
+      tmp,
+    ];
+
+    this.intermediateCode.push(quadruple);
   };
 
   /**
@@ -141,7 +150,7 @@ class Quadruples {
 
     const opcode = operatorToOpcode[operator];
 
-    let tmp = '';
+    let tmp = "";
 
     if (opcode != OPCODES.EQUAL) {
       // Equal is a special case
@@ -153,7 +162,9 @@ class Quadruples {
       });
     }
 
-    this.intermediateCode.push([opcode, left.value, right.value, tmp]);
+    const quadruple = [opcode, left.value, right.value, tmp];
+
+    this.intermediateCode.push(quadruple);
   };
 
   /**

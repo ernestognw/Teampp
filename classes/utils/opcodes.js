@@ -15,6 +15,7 @@ const {
   OR,
   NOT,
   EQUAL,
+  READ
 } = operators;
 
 const OPCODES = {
@@ -32,6 +33,7 @@ const OPCODES = {
   OR: "OR",
   NOT: "NOT",
   EQUAL: "EQUAL",
+  READ: "READ",
 };
 
 const operatorToOpcode = {
@@ -49,6 +51,7 @@ const operatorToOpcode = {
   [OR]: OPCODES.OR,
   [NOT]: OPCODES.NOT,
   [EQUAL]: OPCODES.EQUAL,
+  [READ]: OPCODES.READ,
 };
 
 // Only assertion to ensure every operator is being used

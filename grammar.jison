@@ -349,8 +349,16 @@ output_aux:
 	| {}
 	;
 
+read_op:
+	READ {
+		yy.semantics.quadruples.operatorsStack.push($1);
+	}
+	;
+
 read:
-	READ OPEN_PARENTHESIS var CLOSE_PARENTHESIS
+	read_op OPEN_PARENTHESIS var CLOSE_PARENTHESIS {
+		yy.semantics.quadruples.checkOperation({ priority: -3 });
+	}
 	;
 
 writable:
