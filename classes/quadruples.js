@@ -232,11 +232,17 @@ class Quadruples {
 
   /**
    * Fills a previously generated jump with the current quadruple
+   * @param {boolean} usePop if going to use stack top as destination 
    */
-  fillPendingJump = () => {
+  fillPendingJump = (params = {}) => {
+    const { usePop } = params;
+
     const target = this.jumpStack.pop();
     const index = this.intermediateCode[target].indexOf("");
-    this.intermediateCode[target][index] = this.intermediateCode.length + 1;
+  
+    const to = usePop ? this.jumpStack.pop() : this.intermediateCode.length + 1;
+  
+    this.intermediateCode[target][index] = to;
   };
 }
 

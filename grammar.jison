@@ -82,6 +82,7 @@ init:
 		// const directory = yy.semantics.removePreviousDirectories(yy.semantics.main)
 		// console.log(JSON.stringify(directory));
 		console.log(yy.semantics.quadruples.intermediateCode)
+		console.log(yy.semantics.quadruples.jumpStack)
 		// console.log(yy.semantics.quadruples.operationsStack)
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
@@ -411,13 +412,34 @@ condition:
 	}
 	;
 
+while_start:
+	WHILE {
+		yy.semantics.quadruples.jumpStack.push(yy.semantics.quadruples.intermediateCode.length + 1);
+	}
+	;
+
+while_condition:
+	OPEN_PARENTHESIS expression CLOSE_PARENTHESIS {
+		yy.semantics.quadruples.operatorsStack.push('gotof');
+		yy.semantics.quadruples.checkOperation({ priority: -3 });
+	}
+	;
+
 while_header: 
-	WHILE OPEN_PARENTHESIS expression CLOSE_PARENTHESIS DO OPEN_BRACKET
+	while_start while_condition DO OPEN_BRACKET
+	;
+
+while_close:
+	CLOSE_BRACKET {
+		yy.semantics.quadruples.operatorsStack.push('goto');
+		yy.semantics.quadruples.checkOperation({ priority: -3 });
+		yy.semantics.quadruples.fillPendingJump({ usePop: true });
+	}
 	;
 
 while:
-	while_header statements CLOSE_BRACKET
-	| while_header CLOSE_BRACKET
+	while_header statements while_close
+	| while_header while_close
 	;
 
 for_aux:
