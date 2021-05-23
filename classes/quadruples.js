@@ -8,6 +8,7 @@ const {
   binaryCube,
   operatorsPriority,
   inverseBinaryOperators,
+  inverseUnaryOperators,
   OPCODES,
 } = require("./utils");
 
@@ -20,6 +21,7 @@ class Quadruples {
 
     this.operatorsStack = [];
     this.operationsStack = [];
+    this.jumpStack = [];
 
     this.types = types;
   }
@@ -37,6 +39,13 @@ class Quadruples {
    * @returns boolean if the operator is a binary operator
    */
   isBinaryOperator = ({ operator }) => !!inverseBinaryOperators[operator];
+
+  /**
+   *
+   * @param {operator} string an operator
+   * @returns boolean if the operator is a unary operator
+   */
+  isUnaryOperator = ({ operator }) => !!inverseUnaryOperators[operator];
 
   /**
    *
@@ -84,7 +93,32 @@ class Quadruples {
   getLastOperator = () => this.operatorsStack[this.operatorsStack.length - 1];
 
   /**
-   * Operates last unary operator with last two operations
+   * Operates last standalone operator
+   */
+  operateStandalone = () => {
+    const operator = this.operatorsStack.pop();
+
+    const opcode = operatorToOpcode[operator];
+
+    const left = "";
+
+    const quadruple = [
+      opcode,
+      left,
+      "", // Not right operator
+      "", // Not result
+    ];
+
+    this.intermediateCode.push(quadruple);
+
+    if (opcode === OPCODES.GOTO) {
+      this.fillPendingJump();
+      this.jumpStack.push(this.intermediateCode.length - 1);
+    }
+  };
+
+  /**
+   * Operates last unary operator with last one operations
    */
   operateUnary = () => {
     const left = this.operationsStack.pop();
@@ -105,8 +139,11 @@ class Quadruples {
 
     let tmp = "";
 
-    if (opcode != OPCODES.READ && opcode != OPCODES.WRITE) {
-      // Equal is a special case
+    if (
+      opcode != OPCODES.READ &&
+      opcode != OPCODES.WRITE &&
+      opcode != OPCODES.GOTOF
+    ) {
       tmp = `t${this.tmpPointer}`;
       this.pushToOperationsStack({
         value: `t${this.tmpPointer}`,
@@ -114,6 +151,9 @@ class Quadruples {
       });
       this.tmpPointer++;
     }
+
+    if (opcode === OPCODES.GOTOF)
+      this.jumpStack.push(this.intermediateCode.length);
 
     const quadruple = [
       opcode,
@@ -184,8 +224,19 @@ class Quadruples {
     ) {
       if (this.isBinaryOperator({ operator: lastOperator }))
         this.operateBinary();
-      else this.operateUnary();
+      else if (this.isUnaryOperator({ operator: lastOperator }))
+        this.operateUnary();
+      else this.operateStandalone();
     }
+  };
+
+  /**
+   * Fills a previously generated jump with the current quadruple
+   */
+  fillPendingJump = () => {
+    const target = this.jumpStack.pop();
+    const index = this.intermediateCode[target].indexOf("");
+    this.intermediateCode[target][index] = this.intermediateCode.length + 1;
   };
 }
 

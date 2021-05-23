@@ -82,7 +82,7 @@ init:
 		// const directory = yy.semantics.removePreviousDirectories(yy.semantics.main)
 		// console.log(JSON.stringify(directory));
 		console.log(yy.semantics.quadruples.intermediateCode)
-		console.log(yy.semantics.quadruples.operationsStack)
+		// console.log(yy.semantics.quadruples.operationsStack)
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
   }
 	;
@@ -90,7 +90,7 @@ init:
 programid: 
 	PROGRAM ID {
 		yy.semantics.addVar({
-			id: $2.toString(), 
+			id: $2, 
 			type: yy.semantics.genericTypes.PROGRAM,
 			addNextLevel: true
 		})
@@ -104,7 +104,7 @@ program:
 inheritance:
 	INHERITS ID {
 		yy.semantics.validateId({
-			id: $2.toString(), 
+			id: $2, 
 			expectedType: yy.semantics.genericTypes.CLASS,
 		})
 	}
@@ -114,7 +114,7 @@ inheritance:
 classid: 
 	CLASS ID {
 		yy.semantics.addVar({
-			id: $2.toString(), 
+			id: $2, 
 			type: yy.semantics.genericTypes.CLASS,
 			addNextLevel: true
 		})
@@ -383,13 +383,32 @@ write:
 	}
 	;
 
+condition_header:
+	IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS {
+		yy.semantics.quadruples.operatorsStack.push('gotof');
+		yy.semantics.quadruples.checkOperation({ priority: -3 });
+	}
+	;
+
+condition_body:
+	OPEN_BRACKET statements CLOSE_BRACKET
+	| OPEN_BRACKET CLOSE_BRACKET
+	;
+
+else: 
+	ELSE {
+		yy.semantics.quadruples.operatorsStack.push('goto');
+		yy.semantics.quadruples.checkOperation({ priority: -3 });
+	}
+	;
+
 condition:
-	IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET statements CLOSE_BRACKET ELSE OPEN_BRACKET statements CLOSE_BRACKET
-	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET statements CLOSE_BRACKET ELSE OPEN_BRACKET CLOSE_BRACKET
-	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET statements CLOSE_BRACKET
-	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET CLOSE_BRACKET ELSE OPEN_BRACKET statements CLOSE_BRACKET
-	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET CLOSE_BRACKET ELSE OPEN_BRACKET CLOSE_BRACKET
-	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACKET CLOSE_BRACKET
+	condition_header condition_body else condition_body {
+		yy.semantics.quadruples.fillPendingJump();
+	}
+	| condition_header condition_body {
+		yy.semantics.quadruples.fillPendingJump();
+	}
 	;
 
 while_header: 

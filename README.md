@@ -62,7 +62,7 @@
 * 2 Directorio de variables completo
 * 3 Desarrollo y validación de cuadruplos para operaciones lineales
 
-### Semana # 6 "3-7" Mayo:
+### Semana # 6 "10-15" Mayo:
 
 * 1 Correcciones en operaciones lineales unarias
-* 2 
+* 2 Completados todos los estatuso lineales

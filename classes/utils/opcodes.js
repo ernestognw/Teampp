@@ -16,7 +16,9 @@ const {
   NOT,
   EQUAL,
   READ,
-  WRITE
+  WRITE,
+  GOTOF,
+  GOTO
 } = operators;
 
 const OPCODES = {
@@ -36,6 +38,8 @@ const OPCODES = {
   EQUAL: "EQUAL",
   READ: "READ",
   WRITE: "WRITE",
+  GOTO: "GOTO",
+  GOTOF: "GOTOF",
 };
 
 const operatorToOpcode = {
@@ -55,6 +59,8 @@ const operatorToOpcode = {
   [EQUAL]: OPCODES.EQUAL,
   [READ]: OPCODES.READ,
   [WRITE]: OPCODES.WRITE,
+  [GOTO]: OPCODES.GOTO,
+  [GOTOF]: OPCODES.GOTOF,
 };
 
 // Only assertion to ensure every operator is being used

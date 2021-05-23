@@ -16,13 +16,19 @@ const binaryOperators = {
 
 const unaryOperators = {
   NOT: "!",
-  READ: 'read',
-  WRITE: 'write',
+  READ: "read",
+  WRITE: "write",
+  GOTOF: "gotof",
+};
+
+const standaloneOperators = {
+  GOTO: "goto",
 };
 
 const operators = {
   ...binaryOperators,
   ...unaryOperators,
+  ...standaloneOperators,
 };
 
 const operatorsPriority = {
@@ -42,6 +48,8 @@ const operatorsPriority = {
   [operators.EQUAL]: -2,
   [operators.READ]: -3,
   [operators.WRITE]: -3,
+  [operators.GOTOF]: -3,
+  [operators.GOTO]: -3,
 };
 
 // Only assertion to ensure every operator has code
@@ -58,18 +66,22 @@ const invert = (object) =>
 
 const inverseBinaryOperators = invert(binaryOperators);
 const inverseUnaryOperators = invert(unaryOperators);
+const inverseStandaloneOperators = invert(standaloneOperators);
 
 const inverseOperators = {
   ...inverseBinaryOperators,
   ...inverseUnaryOperators,
+  ...inverseStandaloneOperators,
 };
 
 module.exports = {
   binaryOperators,
   unaryOperators,
+  standaloneOperators,
   operators,
   inverseBinaryOperators,
   inverseUnaryOperators,
+  inverseStandaloneOperators,
   inverseOperators,
   operatorsPriority,
 };
