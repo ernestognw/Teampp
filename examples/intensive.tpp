@@ -71,8 +71,8 @@ main(){
   } else {
     seven = false;
     if(eight) {
-      for one = 10 + 2 to 20 do {}
-      for one = 10 + 2 to 20 do {
+      for (one = 10 + 2; one < 20; one = one + 1) {}
+      for (one = 10 + 2; one < 20; one = one + 1) {
         three = three + 1;
       }
       while(!ten) do {
@@ -85,7 +85,7 @@ main(){
     }
   }
   
-  for specialPerson.name[0][0][2] = 0 to 100 do {
+  for (specialPerson.name[0][0][2] = 0; specialPerson.name[0][0][2] < 100; specialPerson.name[0][0][2] = specialPerson.name[0][0][2] + 1) {
     person.name[specialPerson.name[0][0][2]] = 0;
   }
 

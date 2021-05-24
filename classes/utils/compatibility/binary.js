@@ -188,11 +188,11 @@ const binaryPrecube = {
 // To not repeat operators, just declare once in any order at binaryPrecube
 // and fill every combination using binaryPrecube
 const binaryCube = Object.entries(binaryPrecube).reduce((acc, [key, value]) => {
-  acc[key] = { ...(acc[key] ?? {}), ...value };
+  acc[key] = { ...(acc[key] || {}), ...value };
 
   Object.entries(value).forEach(([subkey, subvalue]) => {
     acc[subkey] = {
-      ...(acc[subkey] ?? {}),
+      ...(acc[subkey] || {}),
       [subkey]: subvalue,
       [key]: { ...value[subkey] },
     };

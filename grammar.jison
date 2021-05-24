@@ -384,11 +384,15 @@ write:
 	}
 	;
 
-condition_header:
-	IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS {
+close_parenthesis_gotof:
+	CLOSE_PARENTHESIS {
 		yy.semantics.quadruples.operatorsStack.push('gotof');
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
 	}
+	;
+
+condition_header:
+	IF OPEN_PARENTHESIS expression close_parenthesis_gotof
 	;
 
 condition_body:
@@ -419,10 +423,7 @@ while_start:
 	;
 
 while_condition:
-	OPEN_PARENTHESIS expression CLOSE_PARENTHESIS {
-		yy.semantics.quadruples.operatorsStack.push('gotof');
-		yy.semantics.quadruples.checkOperation({ priority: -3 });
-	}
+	OPEN_PARENTHESIS expression close_parenthesis_gotof
 	;
 
 while_header: 
@@ -442,13 +443,34 @@ while:
 	| while_header while_close
 	;
 
+close_bracket_goto:
+	CLOSE_BRACKET {
+		yy.semantics.quadruples.operatorsStack.push('goto');
+		yy.semantics.quadruples.checkOperation({ priority: -3 });
+		yy.semantics.quadruples.fillPendingJump({ usePop: true });
+	}
+	;
+
 for_aux:
-	statements CLOSE_BRACKET
-	| CLOSE_BRACKET
+	statements close_bracket_goto
+	| close_bracket_goto
+	;
+
+for_expression:
+	expression {
+		yy.semantics.quadruples.operatorsStack.push('gotof');
+		yy.semantics.quadruples.checkOperation({ priority: -3 });
+	}
+	;
+
+for_first_semicolon:
+	SEMICOLON {
+		yy.semantics.quadruples.jumpStack.push(yy.semantics.quadruples.intermediateCode.length + 1);
+	}
 	;
 
 for:
-	FOR var EQUAL expression TO expression DO OPEN_BRACKET for_aux
+	FOR OPEN_PARENTHESIS assign for_first_semicolon for_expression SEMICOLON assign CLOSE_PARENTHESIS OPEN_BRACKET for_aux
 	;
 
 factor_open_parenthesis:
