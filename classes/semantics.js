@@ -12,10 +12,13 @@ class Semantics {
     this.currentDirectory = this.main;
     this.currentType = null;
     this.pendingVars = [];
+    this.currentFunctionCall = {};
+    this.paramPointer = 0;
     this.previousDirectoriesStack = [];
     this.currentVariableStack = [];
     this.isPointPending = false;
     this.pointsAdvanced = 0;
+    this.paramsStack = [];
 
     this.genericTypes = genericTypes;
 
@@ -30,6 +33,7 @@ class Semantics {
    * @param {addNextLevel} boolean whether is going to start a new sub variable directory
    * @param {isFunction} boolean whether the variable is for a function or not
    * @param {dimensions} number number of dimensions for the variable
+   * @param {addToParams} boolean whether to add the variable to param array
    */
   addVar = ({
     id,
@@ -37,10 +41,13 @@ class Semantics {
     isFunction = false,
     addNextLevel = false,
     dimensions = 0,
+    addToParams = false,
   }) => {
     const typeExists = this.validateGenericType({ type });
 
     let varsDirectory = {};
+
+    if (addToParams) this.currentDirectory.params.push(type);
 
     if (!typeExists) {
       const { varsDirectory: classVarsDirectory } = this.validateId({
@@ -68,13 +75,14 @@ class Semantics {
       isFunction,
       dimensions,
       varsDirectory,
+      params: [],
       previousDirectory: this.currentDirectory,
     };
 
-    if (addNextLevel) {
-      this.previousDirectoriesStack.push(this.currentDirectory);
-      this.currentDirectory = this.currentDirectory.varsDirectory[id];
-    }
+    if (addNextLevel)
+      this.advanceToDirectory({
+        name: id,
+      });
   };
 
   /**
@@ -158,9 +166,9 @@ class Semantics {
 
     if (currentVariable.isFunction !== isFunction)
       throw new Error(
-        `${this.lineError()} Identifier ${chalk.blue(
-          id
-        )} is ${isFunction ? 'not' : ''} a function`
+        `${this.lineError()} Identifier ${chalk.blue(id)} is ${
+          isFunction ? "not" : ""
+        } a function`
       );
   };
 
@@ -349,6 +357,33 @@ class Semantics {
    */
   lineError = () =>
     `Semantic error at line ${chalk.yellow(this.grammar.yylineno)}.`;
+
+  /**
+   * Enters into a directory
+   * @param {name} string name of the directory to enter
+   */
+  advanceToDirectory = ({ name }) => {
+    this.previousDirectoriesStack.push(this.currentDirectory);
+    this.currentDirectory = this.currentDirectory.varsDirectory[name];
+  };
+
+  /**
+   *
+   */
+  validateParam = () => {
+    const name = this.currentDirectory.name;
+    const expectedParams = this.currentDirectory.params;
+    const expectedType = expectedParams[this.paramPointer];
+
+    if (!expectedType)
+      throw new Error(`
+      ${this.lineError()} Function ${chalk.blue(name)} expected ${chalk.red(
+        expectedParams.length
+      )} params.
+      `);
+    
+      this.paramPointer++;
+  };
 }
 
 module.exports = Semantics;

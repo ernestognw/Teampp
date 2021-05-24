@@ -79,8 +79,8 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		// const directory = yy.semantics.removePreviousDirectories(yy.semantics.main)
-		// console.log(JSON.stringify(directory));
+		const directory = yy.semantics.removePreviousDirectories(yy.semantics.main)
+		console.log(JSON.stringify(directory));
 		console.log(yy.semantics.quadruples.intermediateCode)
 		console.log(yy.semantics.quadruples.jumpStack)
 		// console.log(yy.semantics.quadruples.operationsStack)
@@ -229,7 +229,8 @@ param_dec:
 	ID COLON type {
 		yy.semantics.addVar({
 			id: $1,
-			type: $3
+			type: $3,
+			addToParams: true
 		})
 	}
 	;
@@ -329,15 +330,30 @@ assign:
 		yy.semantics.quadruples.checkOperation({ priority: -2 });
 	}
 	;
+
+call_expression: 
+	expression {
+		yy.semantics.validateParam();
+	}
+	;
 	
 call_aux:
-	expression COMMA call_aux
-	| expression
+	call_expression COMMA call_aux
+	| call_expression
 	| {}
 	;
 
+var_call:
+	var OPEN_PARENTHESIS {	
+		yy.semantics.advanceToDirectory({ name: $1 })
+	}
+	;
+
 call:
-	var OPEN_PARENTHESIS call_aux CLOSE_PARENTHESIS
+	var_call call_aux CLOSE_PARENTHESIS {
+		yy.semantics.backDirectory();
+		yy.semantics.paramPointer = 0;
+	}
 	;
 
 return:
