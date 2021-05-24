@@ -392,7 +392,7 @@ close_parenthesis_gotof:
 	;
 
 condition_header:
-	IF OPEN_PARENTHESIS expression close_parenthesis_gotof
+	IF OPEN_PARENTHESIS bool_expression close_parenthesis_gotof
 	;
 
 condition_body:
@@ -422,8 +422,16 @@ while_start:
 	}
 	;
 
+bool_expression:
+	expression {
+		yy.semantics.quadruples.validateLastOperation({ 
+			expectedType: yy.semantics.quadruples.types.BOOLEAN  
+		});
+	}
+	;
+
 while_condition:
-	OPEN_PARENTHESIS expression close_parenthesis_gotof
+	OPEN_PARENTHESIS bool_expression close_parenthesis_gotof
 	;
 
 while_header: 
@@ -458,6 +466,9 @@ for_aux:
 
 for_expression:
 	expression {
+		yy.semantics.quadruples.validateLastOperation({ 
+			expectedType: yy.semantics.quadruples.types.BOOLEAN  
+		});
 		yy.semantics.quadruples.operatorsStack.push('gotof');
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
 	}

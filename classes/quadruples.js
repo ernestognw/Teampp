@@ -93,6 +93,12 @@ class Quadruples {
   getLastOperator = () => this.operatorsStack[this.operatorsStack.length - 1];
 
   /**
+   * Retrieves last operator on operation stack
+   * @returns Last operator
+   */
+  getLastOperation = () => this.operationsStack[this.operationsStack.length - 1];
+
+  /**
    * Operates last standalone operator
    */
   operateStandalone = () => {
@@ -232,17 +238,34 @@ class Quadruples {
 
   /**
    * Fills a previously generated jump with the current quadruple
-   * @param {boolean} usePop if going to use stack top as destination 
+   * @param {boolean} usePop if going to use stack top as destination
    */
   fillPendingJump = (params = {}) => {
     const { usePop } = params;
 
     const target = this.jumpStack.pop();
     const index = this.intermediateCode[target].indexOf("");
-  
+
     const to = usePop ? this.jumpStack.pop() : this.intermediateCode.length + 1;
-  
+
     this.intermediateCode[target][index] = to;
+  };
+
+  /**
+   * Validates that the last operation is for a specified type
+   * @param {expectedType} type expected type
+   */
+  validateLastOperation = ({ expectedType }) => {
+    const lastOperation = this.getLastOperation();
+
+    if (expectedType != lastOperation.type)
+      throw new Error(
+        `${this.semantics.lineError()} 
+      Type Mismatch: Value ${chalk.red(lastOperation.value)} is of type ${chalk.blue(
+          lastOperation.type
+        )}, but ${chalk.red(expectedType)} was expected
+      `
+      );
   };
 }
 
