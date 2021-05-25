@@ -5,11 +5,13 @@
 	if(!yy.started) {
 		yy.started = true
 
-		const VirtualMachine = require('../../classes/virtual-machine.js');
+		const Memory = require('../../classes/memory.js');
 		const Semantics = require('../../classes/semantics.js');
+		const VirtualMachine = require('../../classes/virtual-machine.js');
 
-		yy.virtualMachine = new VirtualMachine(this);
-		yy.semantics = new Semantics(this, yy.virtualMachine.memoryMap);
+    yy.memory = new Memory();
+		yy.virtualMachine = new VirtualMachine(yy.memory);
+		yy.semantics = new Semantics(this, yy.memory);
 	} else {
 		yy.semantics.parentCtx = this;
 	}
@@ -81,11 +83,13 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		const directory = yy.semantics.removePreviousDirectories(yy.semantics.main);
-		console.log(JSON.stringify(directory));
-		console.log(yy.semantics.quadruples.intermediateCode);
+		// const directory = yy.semantics.removePreviousDirectories(yy.semantics.main);
+		// console.log(JSON.stringify(directory));
+		// console.log(yy.semantics.quadruples.intermediateCode);
 		// console.log(yy.semantics.quadruples.operationsStack);
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`);
+		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
+		yy.virtualMachine.exec();
   }
 	;
 
@@ -522,7 +526,7 @@ not:
 int: 
 	INT {
 		yy.semantics.setConstant({ 
-			value: $1, 
+			value: Number($1), 
 			type: yy.semantics.quadruples.types.INT 
 		})
 	}
@@ -531,7 +535,7 @@ int:
 float:
 	FLOAT {
 		yy.semantics.setConstant({ 
-			value: $1, 
+			value: Number($1), 
 			type: yy.semantics.quadruples.types.FLOAT 
 		})
 	}

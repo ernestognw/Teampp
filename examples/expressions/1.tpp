@@ -10,4 +10,6 @@ main(){
 	e = 4;
 
 	result = a + b * c - d * e;
+
+	write(result);
 }

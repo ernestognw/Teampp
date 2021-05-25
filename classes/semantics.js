@@ -4,7 +4,7 @@ const Memory = require("./memory.js");
 const { genericTypes, inverseGenericTypes, inverseTypes } = require("./utils");
 
 class Semantics {
-  constructor(grammar) {
+  constructor(grammar, memory) {
     this.grammar = grammar;
 
     this.main = {
@@ -25,7 +25,7 @@ class Semantics {
     this.genericTypes = genericTypes;
 
     this.quadruples = new Quadruples(this);
-    this.memory = new Memory(this);
+    this.memory = memory;
   }
 
   /**
@@ -417,6 +417,7 @@ class Semantics {
       });
 
     this.constantsDirectory[value] = address;
+    this.memory.addresses[address] = value;
     this.quadruples.pushToOperationsStack({
       value: address,
       type,
