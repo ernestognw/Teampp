@@ -66,3 +66,14 @@
 
 * 1 Correcciones en operaciones lineales unarias
 * 2 Completados todos los estatuso lineales
+
+### Semana # 7 y 8 "16-24" Mayo:
+* 1 Completar validaciones semanticas de funciones
+* 2 Semántica y cuádruplos de condiciones
+* 3 Semántica y cuádruplos de while
+* 4 Semántica y cuádruplos de for
+* 5 Semántica y cuádruplos de read
+* 6 Validaciones semánticas de parámetros de llamada a funciones
+* 7 Asignación de direcciones de memoria a variables
+* 8 Máquina virtual
+* 8 Primeras operaciones de la máquina virtual
