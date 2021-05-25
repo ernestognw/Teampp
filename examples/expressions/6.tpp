@@ -23,4 +23,6 @@ main(){
   n = false;
 
 	result = !((a + b) * c / (d + e) - f * g > h * (i + j) - k) && !(7 == 4 + 1 && !l || m && !n);
+
+	write(result);
 }

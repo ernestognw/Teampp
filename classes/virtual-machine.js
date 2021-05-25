@@ -68,23 +68,67 @@ class VirtualMachine {
       this.memory.addresses[left] / this.memory.addresses[right];
   };
 
-  [EQ] = (quadruple) => {};
+  [EQ] = (quadruple) => {
+    const [_, left, right, result] = quadruple;
 
-  [NEQ] = (quadruple) => {};
+    this.memory.addresses[result] =
+      this.memory.addresses[left] === this.memory.addresses[right];
+  };
 
-  [GTE] = (quadruple) => {};
+  [NEQ] = (quadruple) => {
+    const [_, left, right, result] = quadruple;
 
-  [LTE] = (quadruple) => {};
+    this.memory.addresses[result] =
+      this.memory.addresses[left] != this.memory.addresses[right];
+  };
 
-  [GT] = (quadruple) => {};
+  [GTE] = (quadruple) => {
+    const [_, left, right, result] = quadruple;
 
-  [LT] = (quadruple) => {};
+    this.memory.addresses[result] =
+      this.memory.addresses[left] >= this.memory.addresses[right];
+  };
 
-  [AND] = (quadruple) => {};
+  [LTE] = (quadruple) => {
+    const [_, left, right, result] = quadruple;
 
-  [OR] = (quadruple) => {};
+    this.memory.addresses[result] =
+      this.memory.addresses[left] <= this.memory.addresses[right];
+  };
 
-  [NOT] = (quadruple) => {};
+  [GT] = (quadruple) => {
+    const [_, left, right, result] = quadruple;
+
+    this.memory.addresses[result] =
+      this.memory.addresses[left] > this.memory.addresses[right];
+  };
+
+  [LT] = (quadruple) => {
+    const [_, left, right, result] = quadruple;
+
+    this.memory.addresses[result] =
+      this.memory.addresses[left] < this.memory.addresses[right];
+  };
+
+  [AND] = (quadruple) => {
+    const [_, left, right, result] = quadruple;
+
+    this.memory.addresses[result] =
+      this.memory.addresses[left] && this.memory.addresses[right];
+  };
+
+  [OR] = (quadruple) => {
+    const [_, left, right, result] = quadruple;
+
+    this.memory.addresses[result] =
+      this.memory.addresses[left] || this.memory.addresses[right];
+  };
+
+  [NOT] = (quadruple) => {
+    const [_, toNegate] = quadruple;
+
+    this.memory.addresses[toNegate] = !this.memory.addresses[toNegate];
+  };
 
   [EQUAL] = (quadruple) => {
     const [_, result, toSet] = quadruple;

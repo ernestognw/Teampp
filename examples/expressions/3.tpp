@@ -18,4 +18,6 @@ main(){
 	l = 13;
 
 	result = ((a + b) * c + d * e * f + k / h * j) + g * l + h + j > (a - c * d) / f;
+
+	write(result);
 }

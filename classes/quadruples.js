@@ -144,36 +144,29 @@ class Quadruples {
 
     const opcode = operatorToOpcode[operator];
 
-    let tmp = "";
+    const leftAddress =
+      this.semantics.currentDirectory.varsDirectory[left.value]?.address ||
+      left.value;
 
     if (
       opcode != OPCODES.READ &&
       opcode != OPCODES.WRITE &&
       opcode != OPCODES.GOTOF
     ) {
-      tmp = this.semantics.memory.getAddress({
-        type: resultType,
-        segment: this.semantics.memory.segments.TEMP,
-      });
       this.pushToOperationsStack({
-        value: tmp,
+        value: leftAddress,
         type: resultType,
       });
-      this.tmpPointer++;
     }
 
     if (opcode === OPCODES.GOTOF)
       this.jumpStack.push(this.intermediateCode.length);
 
-    const leftAddress =
-      this.semantics.currentDirectory.varsDirectory[left.value]?.address ||
-      left.value;
-
     const quadruple = [
       opcode,
       leftAddress,
-      "", // Not right operator
-      tmp,
+      "", // Not right operator,
+      "",
     ];
 
     this.intermediateCode.push(quadruple);
@@ -264,7 +257,9 @@ class Quadruples {
     const target = this.jumpStack.pop().toString();
     const index = this.intermediateCode[target].indexOf("");
 
-    const to = usePop ? this.jumpStack.pop().toString() : this.intermediateCode.length + 1;
+    const to = usePop
+      ? this.jumpStack.pop().toString()
+      : this.intermediateCode.length + 1;
 
     this.intermediateCode[target][index] = to;
   };

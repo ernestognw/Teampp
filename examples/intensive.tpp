@@ -66,6 +66,9 @@ main(){
     ][1][2]
   ][person.age + 2][3 + one] = 79;
 
+  seven = eight == nine;
+  seven = eight != nine;
+
   if(seven) {
     person.example();
   } else {

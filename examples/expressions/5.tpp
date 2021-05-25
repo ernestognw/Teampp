@@ -19,4 +19,6 @@ main(){
 	k = 11;
 
 	result = (a + b) * c / (d + e) - f * g > h * (i + j) - k;
+
+	write(result);
 }

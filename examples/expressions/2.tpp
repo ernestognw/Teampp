@@ -11,4 +11,6 @@ main(){
 	g = 6;
 
 	result = a + (b * c - d) * f + g;
+
+	write(result);
 }
