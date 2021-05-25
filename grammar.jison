@@ -5,9 +5,11 @@
 	if(!yy.started) {
 		yy.started = true
 
+		const VirtualMachine = require('../../classes/virtual-machine.js');
 		const Semantics = require('../../classes/semantics.js');
 
-		yy.semantics = new Semantics(this);
+		yy.virtualMachine = new VirtualMachine(this);
+		yy.semantics = new Semantics(this, yy.virtualMachine.memoryMap);
 	} else {
 		yy.semantics.parentCtx = this;
 	}
@@ -79,12 +81,11 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		const directory = yy.semantics.removePreviousDirectories(yy.semantics.main)
+		const directory = yy.semantics.removePreviousDirectories(yy.semantics.main);
 		console.log(JSON.stringify(directory));
-		console.log(yy.semantics.quadruples.intermediateCode)
-		console.log(yy.semantics.quadruples.jumpStack)
-		// console.log(yy.semantics.quadruples.operationsStack)
-    console.log(`Succesfully compiled with ${this._$.last_line} lines of code`)
+		console.log(yy.semantics.quadruples.intermediateCode);
+		// console.log(yy.semantics.quadruples.operationsStack);
+    console.log(`Succesfully compiled with ${this._$.last_line} lines of code`);
   }
 	;
 
@@ -520,7 +521,7 @@ not:
 
 int: 
 	INT {
-		yy.semantics.quadruples.pushToOperationsStack({ 
+		yy.semantics.setConstant({ 
 			value: $1, 
 			type: yy.semantics.quadruples.types.INT 
 		})
@@ -529,7 +530,7 @@ int:
 
 float:
 	FLOAT {
-		yy.semantics.quadruples.pushToOperationsStack({ 
+		yy.semantics.setConstant({ 
 			value: $1, 
 			type: yy.semantics.quadruples.types.FLOAT 
 		})
@@ -538,7 +539,7 @@ float:
 
 char: 
 	CHAR {
-		yy.semantics.quadruples.pushToOperationsStack({ 
+		yy.semantics.setConstant({ 
 			value: $1, 
 			type: yy.semantics.quadruples.types.CHAR 
 		})
@@ -547,7 +548,7 @@ char:
 
 boolean: 
 	BOOLEAN {
-		yy.semantics.quadruples.pushToOperationsStack({ 
+		yy.semantics.setConstant({ 
 			value: $1, 
 			type: yy.semantics.quadruples.types.BOOLEAN 
 		})

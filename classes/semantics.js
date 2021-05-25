@@ -1,6 +1,7 @@
 const chalk = require("chalk");
 const Quadruples = require("./quadruples.js");
-const { genericTypes, inverseGenericTypes } = require("./utils");
+const Memory = require("./memory.js");
+const { genericTypes, inverseGenericTypes, inverseTypes } = require("./utils");
 
 class Semantics {
   constructor(grammar) {
@@ -10,6 +11,7 @@ class Semantics {
       varsDirectory: {},
     };
     this.currentDirectory = this.main;
+    this.constantsDirectory = {};
     this.currentType = null;
     this.pendingVars = [];
     this.currentFunctionCall = {};
@@ -23,6 +25,7 @@ class Semantics {
     this.genericTypes = genericTypes;
 
     this.quadruples = new Quadruples(this);
+    this.memory = new Memory(this);
   }
 
   /**
@@ -69,12 +72,20 @@ class Semantics {
       );
     }
 
+    let address;
+    if (this.validateType({ type }))
+      address = this.memory.getAddress({
+        type,
+        segment: this.memory.segments.LOCAL,
+      });
+
     this.currentDirectory.varsDirectory[id] = {
       name: id,
       type,
       isFunction,
       dimensions,
       varsDirectory,
+      address,
       params: [],
       previousDirectory: this.currentDirectory,
     };
@@ -98,6 +109,13 @@ class Semantics {
    * @returns boolean if the type is a generic type
    */
   validateGenericType = ({ type }) => !!inverseGenericTypes[type];
+
+  /**
+   *
+   * @param {type} string a type
+   * @returns boolean if the type is a type
+   */
+  validateType = ({ type }) => !!inverseTypes[type];
 
   /**
    * Add function by using the current type saved previously
@@ -381,8 +399,28 @@ class Semantics {
         expectedParams.length
       )} params.
       `);
-    
-      this.paramPointer++;
+
+    this.paramPointer++;
+  };
+
+  /**
+   *
+   * @param {number} value to set
+   * @param {type} type of constant
+   */
+  setConstant = ({ value, type }) => {
+    const address =
+      this.constantsDirectory[value] ||
+      this.memory.getAddress({
+        type,
+        segment: this.memory.segments.GLOBAL,
+      });
+
+    this.constantsDirectory[value] = address;
+    this.quadruples.pushToOperationsStack({
+      value: address,
+      type,
+    });
   };
 }
 

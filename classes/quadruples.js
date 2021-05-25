@@ -96,7 +96,8 @@ class Quadruples {
    * Retrieves last operator on operation stack
    * @returns Last operator
    */
-  getLastOperation = () => this.operationsStack[this.operationsStack.length - 1];
+  getLastOperation = () =>
+    this.operationsStack[this.operationsStack.length - 1];
 
   /**
    * Operates last standalone operator
@@ -150,9 +151,12 @@ class Quadruples {
       opcode != OPCODES.WRITE &&
       opcode != OPCODES.GOTOF
     ) {
-      tmp = `t${this.tmpPointer}`;
+      tmp = this.semantics.memory.getAddress({
+        type: resultType,
+        segment: this.semantics.memory.segments.TEMP,
+      });
       this.pushToOperationsStack({
-        value: `t${this.tmpPointer}`,
+        value: tmp,
         type: resultType,
       });
       this.tmpPointer++;
@@ -161,9 +165,13 @@ class Quadruples {
     if (opcode === OPCODES.GOTOF)
       this.jumpStack.push(this.intermediateCode.length);
 
+    const leftAddress =
+      this.semantics.currentDirectory.varsDirectory[left.value]?.address ||
+      left.value;
+
     const quadruple = [
       opcode,
-      left.value,
+      leftAddress,
       "", // Not right operator
       tmp,
     ];
@@ -200,7 +208,10 @@ class Quadruples {
 
     if (opcode != OPCODES.EQUAL) {
       // Equal is a special case
-      tmp = `t${this.tmpPointer}`;
+      tmp = this.semantics.memory.getAddress({
+        type: resultType,
+        segment: this.semantics.memory.segments.TEMP,
+      });
       this.tmpPointer++;
       this.pushToOperationsStack({
         value: tmp,
@@ -208,7 +219,14 @@ class Quadruples {
       });
     }
 
-    const quadruple = [opcode, left.value, right.value, tmp];
+    const leftAddress =
+      this.semantics.currentDirectory.varsDirectory[left.value]?.address ||
+      left.value;
+    const rightAddress =
+      this.semantics.currentDirectory.varsDirectory[right.value]?.address ||
+      right.value;
+
+    const quadruple = [opcode, leftAddress, rightAddress, tmp];
 
     this.intermediateCode.push(quadruple);
   };
@@ -243,10 +261,10 @@ class Quadruples {
   fillPendingJump = (params = {}) => {
     const { usePop } = params;
 
-    const target = this.jumpStack.pop();
+    const target = this.jumpStack.pop().toString();
     const index = this.intermediateCode[target].indexOf("");
 
-    const to = usePop ? this.jumpStack.pop() : this.intermediateCode.length + 1;
+    const to = usePop ? this.jumpStack.pop().toString() : this.intermediateCode.length + 1;
 
     this.intermediateCode[target][index] = to;
   };
@@ -261,9 +279,11 @@ class Quadruples {
     if (expectedType != lastOperation.type)
       throw new Error(
         `${this.semantics.lineError()} 
-      Type Mismatch: Value ${chalk.red(lastOperation.value)} is of type ${chalk.blue(
-          lastOperation.type
-        )}, but ${chalk.red(expectedType)} was expected
+      Type Mismatch: Value ${chalk.red(
+        lastOperation.value
+      )} is of type ${chalk.blue(lastOperation.type)}, but ${chalk.red(
+          expectedType
+        )} was expected
       `
       );
   };
