@@ -1,13 +1,15 @@
 program condition_test; 
 
-vars a, b, c, d : int;
+vars a : boolean;
 
 main(){
-	if(a + b > c * d) {
-    a = b * c;
+  read(a);
+
+	if(a) {
+    write("If passed");
   } else {
-    b = a - c;
+    write("Else passed");
   }
 
-  b = c * a;
+  write("Write anyway");
 }

@@ -1,14 +1,14 @@
 program condition_test; 
 
-vars a, b, c, e : int;
+vars a : int;
 
 main(){
-  a = b + c;
+  a = 0;
 
-	while(a > b * c) do {
-    a = b - c;
-    b = b + e;
+	while(a < 10) do {
+
+    a = a + 1;
   } 
 
-  c = a + b;
+  write("Finished");
 }

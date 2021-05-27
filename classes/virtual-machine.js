@@ -176,9 +176,17 @@ class VirtualMachine {
     console.log(this.memory.addresses[toWrite]);
   };
 
-  [GOTO] = (quadruple) => {};
+  [GOTO] = (quadruple) => {
+    const [_, target] = quadruple;
 
-  [GOTOF] = (quadruple) => {};
+    this.instructionPointer = target - 1;
+  };
+
+  [GOTOF] = (quadruple) => {
+    const [_, toCheck, target] = quadruple;
+
+    if (!this.memory.addresses[toCheck]) this.instructionPointer = target - 1;
+  };
 }
 
 module.exports = VirtualMachine;

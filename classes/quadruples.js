@@ -259,7 +259,7 @@ class Quadruples {
 
     const to = usePop
       ? this.jumpStack.pop().toString()
-      : this.intermediateCode.length + 1;
+      : this.intermediateCode.length ;
 
     this.intermediateCode[target][index] = to;
   };

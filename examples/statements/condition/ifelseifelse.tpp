@@ -1,18 +1,21 @@
 program condition_test; 
 
-vars a, b, c, d : int;
+vars a, b : boolean;
 
 main(){
-	if(a + b > c * d) {
-    a = b * c;
+  read(a);
+
+	if(a) {
+    write("If passed");
   } else {
-    if(a + b > c * d)  {
-      a = b * c;
+    write("Else passed");
+    read(b);
+    if(b) {
+      write("Else if passed");
     } else {
-      b = a - c;
+      write("Else else passed");
     }
-    b = a - c;
   }
 
-  b = c * a;
+  write("Write anyway");
 }

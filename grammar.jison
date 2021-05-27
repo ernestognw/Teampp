@@ -385,10 +385,17 @@ output_aux:
 
 writable:
 	STRING {
+		const string = $1.substring(1, $1.length - 1);
+
 		yy.semantics.quadruples.pushToOperationsStack({
-			value: $1,
-			type: 'string'
-		})
+			value: string,
+			type: yy.semantics.quadruples.types.STRING 
+		});
+
+		yy.semantics.setConstant({ 
+			value: string, 
+			type: yy.semantics.quadruples.types.STRING 
+		});
 	}
 	| expression
 	;
