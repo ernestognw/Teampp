@@ -1,4 +1,15 @@
-const { OPCODES } = require("./utils");
+const { OPCODES, types } = require("./utils");
+const readline = require("readline");
+
+const question = (int) =>
+  new Promise((resolve) => {
+    int.question("", (variable) => {
+      int.close();
+      resolve(variable);
+    });
+  });
+
+const { INT, FLOAT, CHAR, BOOLEAN, STRING } = types;
 
 const {
   SUM,
@@ -27,13 +38,13 @@ class VirtualMachine {
     this.memory = memory;
   }
 
-  exec = () => {
+  exec = async () => {
     while (this.instructionPointer < this.code.length) {
       const quadruple = this.code[this.instructionPointer];
       const opcode = quadruple[0];
       const operation = this[opcode];
       if (!operation) throw new Error("Unknown opcode");
-      operation(quadruple);
+      await operation(quadruple);
       this.instructionPointer++;
     }
   };
@@ -136,7 +147,28 @@ class VirtualMachine {
     this.memory.addresses[result] = this.memory.addresses[toSet];
   };
 
-  [READ] = (quadruple) => {};
+  [READ] = async (quadruple) => {
+    const [_, toSet] = quadruple;
+
+    const int = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    let result = await question(int);
+
+    const [type] = Object.entries(
+      this.memory.map[this.memory.segments.LOCAL]
+    ).find(([_, { low, high }]) => toSet >= low && toSet <= high);
+
+    if (type == INT) result = parseInt(result);
+    if (type == FLOAT) result = parseFloat(result);
+    if (type == CHAR) result = result[0];
+    if (type == BOOLEAN) result = result !== "false";
+    if (type == STRING) result = result.toString();
+
+    this.memory.addresses[toSet] = result;
+  };
 
   [WRITE] = (quadruple) => {
     const [_, toWrite] = quadruple;

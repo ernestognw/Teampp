@@ -1,9 +1,17 @@
 program read_test; 
 
-vars a, b : int;
+vars a : int;
+vars c : float;
+vars d : boolean;
+vars e : char;
 
 main(){
-	a = 1;
-  read(b);
-  a = b - 2;
+  read(a);
+  write(a);
+  read(c);
+  write(c);
+  read(d);
+  write(d);
+  read(e);
+  write(e);
 }
