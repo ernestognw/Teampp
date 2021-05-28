@@ -56,11 +56,11 @@ class VirtualMachine {
 
     do {
       value =
-      this.previousMemories[this.previousMemories.length - back - 1]?.[
-        address
-      ];
+        this.previousMemories[this.previousMemories.length - back]?.[
+          address
+        ];
       back++;
-      if(back > this.previousMemories.length) break;
+      if (back > this.previousMemories.length) break;
     } while (!value);
 
     this.previousMemories.pop();
@@ -77,6 +77,7 @@ class VirtualMachine {
       await operation(quadruple);
       this.instructionPointer++;
     }
+    // console.log(this.memory.addresses);
   };
 
   setCode = (code) => (this.code = code);

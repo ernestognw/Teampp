@@ -88,7 +88,6 @@ init:
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
 		yy.virtualMachine.exec();
-		console.log(yy.memory.addresses);
   }
 	;
 
