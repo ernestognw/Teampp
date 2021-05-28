@@ -5,8 +5,10 @@ vars b, c, d : int;
 
 int function example(a : int, c : float, x : int);
   vars any : char;
+  vars y : char;
 {
     write(any);
+    write(y);
     write(x);
     a = b * a + c / d;
     return(a);

@@ -75,7 +75,14 @@ class Semantics {
       varsDirectory = { ...classVarsDirectory };
     }
 
-    if (!!this.currentDirectory.varsDirectory[id]) {
+    if (
+      !addToParams &&
+      !!this.checkOnPreviousScope({
+        directory: this.currentDirectory,
+        id,
+        considerParams: true,
+      })
+    ) {
       throw new Error(
         `${this.lineError()} Variable ${chalk.red(
           id
@@ -525,7 +532,7 @@ class Semantics {
 
     this.quadruples.jumpStack.push(validated.target);
     this.quadruples.operatorsStack.push(this.quadruples.operators.GOSUB);
-		this.quadruples.checkOperation({ priority: -3 });
+    this.quadruples.checkOperation({ priority: -3 });
   };
 }
 
