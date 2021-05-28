@@ -178,7 +178,7 @@ class VirtualMachine {
     if (type == BOOLEAN) result = result !== "false";
     if (type == STRING) result = result.toString();
 
-    this.accessMemory(toSet) = result;
+    this.currentMemory[toSet] = result;
   };
 
   [WRITE] = (quadruple) => {
