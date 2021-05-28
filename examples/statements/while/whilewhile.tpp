@@ -1,18 +1,20 @@
 program condition_test; 
 
-vars a, b, c, e : int;
+vars a, b : int;
 
 main(){
-  a = b + c;
+  a = 0;
+  b = 0;
 
-	while(a > b * c) do {
-    a = b - c;
-    b = b + e;
-    while (a > b * c) do {
-      a = b - c;
-      b = b + e;
-    } 
+	while(a < 10) do {
+    write(a);
+    a = a + 1;
+    while(b < 10) do {
+      write(b);
+      b = b + 1;
+    }
+    b = 0;
   } 
 
-  c = a + b;
+  write("Finished");
 }

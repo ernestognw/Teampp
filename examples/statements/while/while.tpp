@@ -6,7 +6,7 @@ main(){
   a = 0;
 
 	while(a < 10) do {
-
+    write(a);
     a = a + 1;
   } 
 

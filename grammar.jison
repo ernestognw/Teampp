@@ -89,7 +89,7 @@ init:
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
 		yy.virtualMachine.exec();
-		// console.log(yy.memory.addresses)
+		console.log(yy.memory.addresses)
   }
 	;
 
@@ -446,7 +446,7 @@ condition:
 
 while_start:
 	WHILE {
-		yy.semantics.quadruples.jumpStack.push(yy.semantics.quadruples.intermediateCode.length + 1);
+		yy.semantics.quadruples.jumpStack.push(yy.semantics.quadruples.intermediateCode.length);
 	}
 	;
 
