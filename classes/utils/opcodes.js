@@ -18,7 +18,10 @@ const {
   READ,
   WRITE,
   GOTOF,
-  GOTO
+  GOTO,
+  ERA,
+  PARAM,
+  GOSUB,
 } = operators;
 
 const OPCODES = {
@@ -40,6 +43,9 @@ const OPCODES = {
   WRITE: "WRITE",
   GOTO: "GOTO",
   GOTOF: "GOTOF",
+  ERA: "ERA",
+  PARAM: "PARAM",
+  GOSUB: "GOSUB",
 };
 
 const operatorToOpcode = {
@@ -61,6 +67,9 @@ const operatorToOpcode = {
   [WRITE]: OPCODES.WRITE,
   [GOTO]: OPCODES.GOTO,
   [GOTOF]: OPCODES.GOTOF,
+  [ERA]: OPCODES.ERA,
+  [PARAM]: OPCODES.PARAM,
+  [GOSUB]: OPCODES.GOSUB,
 };
 
 // Only assertion to ensure every operator is being used

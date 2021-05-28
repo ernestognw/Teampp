@@ -9,6 +9,7 @@ const {
   operatorsPriority,
   inverseBinaryOperators,
   inverseUnaryOperators,
+  operators,
   OPCODES,
 } = require("./utils");
 
@@ -16,7 +17,7 @@ class Quadruples {
   constructor(semantics) {
     this.semantics = semantics;
 
-    this.intermediateCode = [];
+    this.intermediateCode = [["GOTO", "", "", ""]];
     this.tmpPointer = 1;
 
     this.operatorsStack = [];
@@ -24,6 +25,10 @@ class Quadruples {
     this.jumpStack = [];
 
     this.types = types;
+
+    this.checkingParams = false;
+
+    this.operators = operators;
   }
 
   /**
@@ -122,6 +127,10 @@ class Quadruples {
       this.fillPendingJump();
       this.jumpStack.push(this.intermediateCode.length - 1);
     }
+    if (opcode === OPCODES.GOSUB) {
+      this.jumpStack.push(this.intermediateCode.length - 1);
+      this.fillPendingJump({ usePop: true });
+    }
   };
 
   /**
@@ -199,25 +208,39 @@ class Quadruples {
 
     let tmp = "";
 
-    if (opcode != OPCODES.EQUAL) {
+    if (opcode != OPCODES.EQUAL && opcode != OPCODES.PARAM) {
       // Equal is a special case
-      tmp = this.semantics.memory.getAddress({
-        type: resultType,
-        segment: this.semantics.memory.segments.TEMP,
-      });
-      this.tmpPointer++;
+      if (!this.checkingParams && this.semantics.currentDirectory.isFunction) {
+        tmp = `tmp${this.tmpPointer}`;
+        this.tmpPointer++;
+      } else {
+        tmp = this.semantics.memory.getAddress({
+          type: resultType,
+          segment: this.semantics.memory.segments.TEMP,
+        });
+      }
+
       this.pushToOperationsStack({
         value: tmp,
         type: resultType,
       });
     }
 
-    const leftAddress =
-      this.semantics.currentDirectory.varsDirectory[left.value]?.address ||
-      left.value;
-    const rightAddress =
-      this.semantics.currentDirectory.varsDirectory[right.value]?.address ||
-      right.value;
+    let leftAddress;
+    let rightAddress;
+
+    leftAddress =
+      this.semantics.checkOnPreviousScope({
+        directory: this.semantics.currentDirectory,
+        id: left.value,
+        considerParams: true,
+      })?.address || left.value;
+    rightAddress =
+      this.semantics.checkOnPreviousScope({
+        directory: this.semantics.currentDirectory,
+        id: right.value,
+        considerParams: true,
+      })?.address || right.value;
 
     const quadruple = [opcode, leftAddress, rightAddress, tmp];
 
@@ -254,12 +277,10 @@ class Quadruples {
   fillPendingJump = (params = {}) => {
     const { usePop } = params;
 
-    const target = this.jumpStack.pop().toString();
+    const target = this.jumpStack.pop();
     const index = this.intermediateCode[target].indexOf("");
 
-    const to = usePop
-      ? this.jumpStack.pop().toString()
-      : this.intermediateCode.length ;
+    const to = usePop ? this.jumpStack.pop() : this.intermediateCode.length;
 
     this.intermediateCode[target][index] = to;
   };

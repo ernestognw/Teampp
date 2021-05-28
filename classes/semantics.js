@@ -1,7 +1,11 @@
 const chalk = require("chalk");
 const Quadruples = require("./quadruples.js");
-const Memory = require("./memory.js");
-const { genericTypes, inverseGenericTypes, inverseTypes } = require("./utils");
+const {
+  genericTypes,
+  inverseGenericTypes,
+  inverseTypes,
+  operators,
+} = require("./utils");
 
 class Semantics {
   constructor(grammar, memory) {
@@ -20,7 +24,6 @@ class Semantics {
     this.currentVariableStack = [];
     this.isPointPending = false;
     this.pointsAdvanced = 0;
-    this.paramsStack = [];
 
     this.genericTypes = genericTypes;
 
@@ -50,7 +53,15 @@ class Semantics {
 
     let varsDirectory = {};
 
-    if (addToParams) this.currentDirectory.params.push(type);
+    if (addToParams)
+      if (this.currentDirectory.paramsDeclared[id])
+        throw new Error(
+          `${this.lineError()} Param ${chalk.red(
+            id
+          )} already exists in ${chalk.blue(
+            this.currentDirectory.name
+          )} function declaration.`
+        );
 
     if (!typeExists) {
       const { varsDirectory: classVarsDirectory } = this.validateId({
@@ -73,13 +84,21 @@ class Semantics {
     }
 
     let address;
-    if (this.validateType({ type }))
+    if (
+      !this.currentDirectory.isFunction &&
+      !addToParams &&
+      !isFunction &&
+      this.validateType({ type })
+    ) {
       address = this.memory.getAddress({
         type,
         segment: this.memory.segments.LOCAL,
       });
+    }
 
-    this.currentDirectory.varsDirectory[id] = {
+    const directoryName = addToParams ? "paramsDeclared" : "varsDirectory";
+
+    this.currentDirectory[directoryName][id] = {
       name: id,
       type,
       isFunction,
@@ -87,8 +106,18 @@ class Semantics {
       varsDirectory,
       address,
       params: [],
+      paramsDeclared: {},
       previousDirectory: this.currentDirectory,
     };
+
+    if (isFunction)
+      this.currentDirectory[directoryName][id].target =
+        this.quadruples.intermediateCode.length;
+
+    if (addToParams)
+      this.currentDirectory.params.push(
+        this.currentDirectory[directoryName][id]
+      );
 
     if (addNextLevel)
       this.advanceToDirectory({
@@ -144,21 +173,18 @@ class Semantics {
   validateId = ({ id, expectedType }) => {
     const scope = this.currentDirectory.name;
 
-    let directory = this.currentDirectory;
-    let toCheck = this.currentDirectory.varsDirectory[id];
-
-    while (!toCheck && directory) {
-      directory = directory.previousDirectory;
-      if (directory) {
-        toCheck = directory.varsDirectory[id];
-      }
-    }
+    const directory = this.currentDirectory;
+    const toCheck = this.checkOnPreviousScope({
+      directory,
+      id,
+      considerParams: !this.quadruples.checkingParams,
+    });
 
     if (!toCheck) {
       throw new Error(
         `${this.lineError()} Identifier ${chalk.blue(
           id
-        )} not declared neither in ${chalk.red(scope)} scope.`
+        )} not declared in ${chalk.red(scope)} scope.`
       );
     }
 
@@ -391,16 +417,61 @@ class Semantics {
   validateParam = () => {
     const name = this.currentDirectory.name;
     const expectedParams = this.currentDirectory.params;
-    const expectedType = expectedParams[this.paramPointer];
+    const param = expectedParams[this.paramPointer];
 
-    if (!expectedType)
+    if (!param)
       throw new Error(`
-      ${this.lineError()} Function ${chalk.blue(name)} expected ${chalk.red(
+    ${this.lineError()} Function ${chalk.blue(name)} expected ${chalk.red(
         expectedParams.length
       )} params.
       `);
 
+    const { type: expectedType, name: paramName } = param;
+    const { type, value } = this.quadruples.getLastOperation();
+
+    if (type !== expectedType)
+      throw new Error(`
+    ${this.lineError()} Function ${chalk.blue(name)} expected ${chalk.red(
+        expectedType
+      )} type in parameter ${chalk.green(
+        this.paramPointer + 1
+      )} but received ${chalk.red(type)}.
+      `);
+
     this.paramPointer++;
+
+    let address;
+    if (isNaN(Number(value))) {
+      const validated = this.validateId({ id: value, expectedType: type });
+      address = validated.address;
+    }
+
+    this.quadruples.pushToOperationsStack({
+      type: expectedType,
+      value: paramName,
+    });
+    this.quadruples.pushToOperationsStack({
+      type,
+      value: address || value,
+    });
+    this.quadruples.pushToOperatorsStack({
+      operator: operators.PARAM,
+    });
+    this.quadruples.checkOperation({ priority: -3 });
+  };
+
+  resetParamPointer = () => {
+    const name = this.currentDirectory.name;
+    const expectedParams = this.currentDirectory.params;
+
+    if (this.paramPointer < expectedParams.length)
+      throw new Error(`
+    ${this.lineError()} Function ${chalk.blue(name)} expected ${chalk.red(
+        expectedParams.length
+      )} params.
+      `);
+
+    this.paramPointer = 0;
   };
 
   /**
@@ -422,6 +493,39 @@ class Semantics {
       value: address,
       type,
     });
+  };
+
+  /**
+   * Founds a variable in
+   *
+   * @param {directory} object directory to start checking backwards
+   * @param {id} string name of the variable to check
+   * @returns
+   */
+  checkOnPreviousScope = ({ directory, id, considerParams = false }) => {
+    if (considerParams && directory.paramsDeclared?.[id])
+      return directory.paramsDeclared?.[id];
+
+    let found = directory.varsDirectory[id];
+
+    while (!found && directory) {
+      directory = directory.previousDirectory;
+      if (directory) {
+        if (considerParams && directory.paramsDeclared?.[id])
+          return directory.paramsDeclared?.[id];
+        found = directory.varsDirectory[id];
+      }
+    }
+
+    return found;
+  };
+
+  addGoSub = ({ functionName }) => {
+    const validated = this.validateId({ id: functionName });
+
+    this.quadruples.jumpStack.push(validated.target);
+    this.quadruples.operatorsStack.push(this.quadruples.operators.GOSUB);
+		this.quadruples.checkOperation({ priority: -3 });
   };
 }
 

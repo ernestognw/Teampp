@@ -89,7 +89,7 @@ init:
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
 		yy.virtualMachine.exec();
-		console.log(yy.memory.addresses)
+		// console.log(yy.memory.addresses)
   }
 	;
 
@@ -264,9 +264,22 @@ modules:
 	| {}
 	;
 
+main:
+	MAIN {
+		yy.semantics.quadruples.jumpStack.push(yy.semantics.quadruples.intermediateCode.length);
+		yy.semantics.quadruples.jumpStack.push(0);
+	}
+	;
+
+main_close:
+	CLOSE_BRACKET {
+		yy.semantics.quadruples.fillPendingJump({ usePop: true });
+	}
+	;
+
 body: 
-	MAIN OPEN_PARENTHESIS CLOSE_PARENTHESIS OPEN_BRACKET statements CLOSE_BRACKET
-	| MAIN OPEN_PARENTHESIS CLOSE_PARENTHESIS OPEN_BRACKET CLOSE_BRACKET
+	main OPEN_PARENTHESIS CLOSE_PARENTHESIS OPEN_BRACKET statements main_close
+	| main OPEN_PARENTHESIS CLOSE_PARENTHESIS OPEN_BRACKET main_close 
 	| {}
 	;
 
@@ -309,7 +322,7 @@ var:
 	;
 
 statements_aux:
-	statements 
+	statements
 	| {}
 	;
 
@@ -349,15 +362,22 @@ call_aux:
 	;
 
 var_call:
-	var OPEN_PARENTHESIS {	
+	var OPEN_PARENTHESIS {
+		yy.semantics.quadruples.checkingParams = true;
+		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.ERA);
+		yy.semantics.quadruples.checkOperation({ priority: -3 });
 		yy.semantics.advanceToDirectory({ name: $1 })
 	}
 	;
 
 call:
 	var_call call_aux CLOSE_PARENTHESIS {
+		yy.semantics.addGoSub({
+			functionName: $1
+		});
+		yy.semantics.resetParamPointer();
 		yy.semantics.backDirectory();
-		yy.semantics.paramPointer = 0;
+		yy.semantics.quadruples.checkingParams = false;
 	}
 	;
 
@@ -387,10 +407,10 @@ writable:
 	STRING {
 		const string = $1.substring(1, $1.length - 1);
 
-		yy.semantics.quadruples.pushToOperationsStack({
-			value: string,
-			type: yy.semantics.quadruples.types.STRING 
-		});
+		// yy.semantics.quadruples.pushToOperationsStack({
+		// 	value: string,
+		// 	type: yy.semantics.quadruples.types.STRING 
+		// });
 
 		yy.semantics.setConstant({ 
 			value: string, 
@@ -414,7 +434,7 @@ write:
 
 close_parenthesis_gotof:
 	CLOSE_PARENTHESIS {
-		yy.semantics.quadruples.operatorsStack.push('gotof');
+		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.GOTOF);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
 	}
 	;
@@ -430,7 +450,7 @@ condition_body:
 
 else: 
 	ELSE {
-		yy.semantics.quadruples.operatorsStack.push('goto');
+		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.GOTO);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
 	}
 	;
@@ -468,7 +488,7 @@ while_header:
 
 while_close:
 	CLOSE_BRACKET {
-		yy.semantics.quadruples.operatorsStack.push('goto');
+		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.GOTO);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
 		yy.semantics.quadruples.fillPendingJump({ usePop: true });
 	}
@@ -481,7 +501,7 @@ while:
 
 close_bracket_goto:
 	CLOSE_BRACKET {
-		yy.semantics.quadruples.operatorsStack.push('goto');
+		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.GOTO);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
 		yy.semantics.quadruples.fillPendingJump({ usePop: true });
 	}
@@ -497,7 +517,7 @@ for_expression:
 		yy.semantics.quadruples.validateLastOperation({ 
 			expectedType: yy.semantics.quadruples.types.BOOLEAN  
 		});
-		yy.semantics.quadruples.operatorsStack.push('gotof');
+		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.GOTOF);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
 	}
 	;

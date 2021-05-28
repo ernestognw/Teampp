@@ -18,7 +18,7 @@ class Memory {
           high: 9999,
         },
         [FLOAT]: {
-          pointer: 5000,
+          pointer: 10000,
           low: 10000,
           high: 14999,
         },

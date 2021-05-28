@@ -12,6 +12,7 @@ const binaryOperators = {
   AND: "&&",
   OR: "||",
   EQUAL: "=",
+  PARAM: "param",
 };
 
 const unaryOperators = {
@@ -23,6 +24,8 @@ const unaryOperators = {
 
 const standaloneOperators = {
   GOTO: "goto",
+  GOSUB: "gosub",
+  ERA: "era",
 };
 
 const operators = {
@@ -46,10 +49,13 @@ const operatorsPriority = {
   [operators.OR]: 4,
   [operators.NOT]: -1,
   [operators.EQUAL]: -2,
+  [operators.PARAM]: -3,
   [operators.READ]: -3,
   [operators.WRITE]: -3,
   [operators.GOTOF]: -3,
   [operators.GOTO]: -3,
+  [operators.ERA]: -3,
+  [operators.GOSUB]: -3,
 };
 
 // Only assertion to ensure every operator has code

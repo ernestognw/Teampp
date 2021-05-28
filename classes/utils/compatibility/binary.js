@@ -17,6 +17,7 @@ const {
   AND,
   OR,
   EQUAL,
+  PARAM,
   ...missing
 } = binaryOperators;
 
@@ -40,6 +41,7 @@ const binaryPrecube = {
       [AND]: null,
       [OR]: null,
       [EQUAL]: INT,
+      [PARAM]: INT,
     },
     [FLOAT]: {
       [PLUS]: FLOAT,
@@ -55,6 +57,7 @@ const binaryPrecube = {
       [AND]: null,
       [OR]: null,
       [EQUAL]: FLOAT,
+      [PARAM]: FLOAT,
     },
     [CHAR]: {
       [PLUS]: INT,
@@ -70,6 +73,7 @@ const binaryPrecube = {
       [AND]: null,
       [OR]: null,
       [EQUAL]: INT,
+      [PARAM]: INT,
     },
     [BOOLEAN]: {
       [PLUS]: null,
@@ -85,6 +89,7 @@ const binaryPrecube = {
       [AND]: null,
       [OR]: null,
       [EQUAL]: null,
+      [PARAM]: null,
     },
   },
   [FLOAT]: {
@@ -102,6 +107,7 @@ const binaryPrecube = {
       [AND]: null,
       [OR]: null,
       [EQUAL]: FLOAT,
+      [PARAM]: FLOAT,
     },
     [CHAR]: {
       [PLUS]: FLOAT,
@@ -117,6 +123,7 @@ const binaryPrecube = {
       [AND]: null,
       [OR]: null,
       [EQUAL]: FLOAT,
+      [PARAM]: FLOAT,
     },
     [BOOLEAN]: {
       [PLUS]: null,
@@ -132,6 +139,7 @@ const binaryPrecube = {
       [AND]: null,
       [OR]: null,
       [EQUAL]: null,
+      [PARAM]: null,
     },
   },
   [CHAR]: {
@@ -149,6 +157,7 @@ const binaryPrecube = {
       [AND]: null,
       [OR]: null,
       [EQUAL]: CHAR,
+      [PARAM]: CHAR,
     },
     [BOOLEAN]: {
       [PLUS]: null,
@@ -164,6 +173,7 @@ const binaryPrecube = {
       [AND]: null,
       [OR]: null,
       [EQUAL]: null,
+      [PARAM]: null,
     },
   },
   [BOOLEAN]: {
@@ -181,6 +191,7 @@ const binaryPrecube = {
       [AND]: BOOLEAN,
       [OR]: BOOLEAN,
       [EQUAL]: BOOLEAN,
+      [PARAM]: BOOLEAN,
     },
   },
 };

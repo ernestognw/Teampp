@@ -30,6 +30,9 @@ const {
   WRITE,
   GOTO,
   GOTOF,
+  ERA,
+  PARAM,
+  GOSUB,
 } = OPCODES;
 
 class VirtualMachine {
@@ -187,6 +190,12 @@ class VirtualMachine {
 
     if (!this.memory.addresses[toCheck]) this.instructionPointer = target - 1;
   };
+
+  [ERA] = () => {};
+
+  [PARAM] = () => {};
+
+  [GOSUB] = () => {};
 }
 
 module.exports = VirtualMachine;
