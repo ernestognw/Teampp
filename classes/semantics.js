@@ -115,7 +115,6 @@ class Semantics {
       address,
       params: [],
       paramsDeclared: {},
-      previousDirectory: this.currentDirectory,
     };
 
     if (isFunction) {
@@ -383,39 +382,6 @@ class Semantics {
   };
 
   /**
-   * Takes a directory, COPIES IT, and remove the references so it can be logged in console
-   * for debugging purposes
-   *
-   * @param {directory} object Directory to copy
-   */
-  removePreviousDirectories = (directory) => {
-    // If directory has no varsDirectory, it is a varsDirectory
-    if (!directory.varsDirectory) {
-      const keys = Object.keys(directory);
-
-      // When is a varsDirectory, it could be empty, in that case, we just return empty
-      if (keys.length === 0) return {};
-
-      // Otherwise we return the variables with the previousDirectories removed
-      return keys.reduce((acc, key) => {
-        acc[key] = { ...this.removePreviousDirectories(directory[key]) };
-        return acc;
-      }, {});
-    }
-
-    // If it has a varsDirectory, it is a variable directory
-    // with a previousDirectory so we remove it
-    delete directory.previousDirectory;
-
-    return {
-      ...directory,
-      varsDirectory: {
-        ...this.removePreviousDirectories(directory.varsDirectory),
-      },
-    };
-  };
-
-  /**
    * Returns a generic error string with the line in which the error was detected
    */
   lineError = () =>
@@ -427,7 +393,10 @@ class Semantics {
    */
   advanceToDirectory = ({ name }) => {
     this.previousDirectoriesStack.push(this.currentDirectory);
-    this.currentDirectory = this.currentDirectory.varsDirectory[name];
+    this.currentDirectory = this.checkOnPreviousScope({
+      directory: this.currentDirectory,
+      id: name,
+    });
   };
 
   /**
@@ -521,22 +490,28 @@ class Semantics {
    * @param {id} string name of the variable to check
    * @returns
    */
-  checkOnPreviousScope = ({ directory, id, considerParams = false }) => {
-    if (considerParams && directory.paramsDeclared?.[id])
-      return directory.paramsDeclared?.[id];
+  checkOnPreviousScope = ({ directory, id }) => {
+    let foundParam;
+    let foundVar;
 
-    let found = directory.varsDirectory[id];
+    let back = -1;
 
-    while (!found && directory) {
-      directory = directory.previousDirectory;
+    do {
+      if (back >= 0)
+        directory =
+          this.previousDirectoriesStack[
+            this.previousDirectoriesStack.length - back - 1
+          ];
+
+      back++;
       if (directory) {
-        if (considerParams && directory.paramsDeclared?.[id])
-          return directory.paramsDeclared?.[id];
-        found = directory.varsDirectory[id];
+        if (directory.varsDirectory[id]) foundVar = directory.varsDirectory[id];
+        if (directory.paramsDeclared?.[id])
+          foundParam = directory.paramsDeclared?.[id];
       }
-    }
+    } while (directory);
 
-    return found;
+    return foundVar || foundParam;
   };
 
   addGoSub = ({ functionName }) => {

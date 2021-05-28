@@ -44,10 +44,29 @@ class VirtualMachine {
     this.currentMemory = this.memory.addresses;
     this.backStack = [];
     this.methodAddresses = [];
+    this.previousMemories = [];
+    this.returns = [];
   }
 
-  accessMemory = (address) =>
-    this.currentMemory[address] || this.memory.addresses[address];
+  accessMemory = (address) => {
+    this.previousMemories.push(this.currentMemory);
+
+    let back = 0;
+    let value;
+
+    do {
+      value =
+      this.previousMemories[this.previousMemories.length - back - 1]?.[
+        address
+      ];
+      back++;
+      if(back > this.previousMemories.length) break;
+    } while (!value);
+
+    this.previousMemories.pop();
+
+    return value;
+  };
 
   exec = async () => {
     while (this.instructionPointer < this.code.length) {
@@ -203,7 +222,8 @@ class VirtualMachine {
     const [_, methodAddress] = quadruple;
 
     this.currentMemory[methodAddress] = {}; // Activation Record
-    this.currentMemory = this.accessMemory(methodAddress); // Move to activation record
+    this.previousMemories.push(this.currentMemory);
+    this.currentMemory = this.currentMemory[methodAddress]; // Move to activation record
     this.methodAddresses.push(methodAddress);
   };
 
@@ -221,18 +241,24 @@ class VirtualMachine {
 
   [ENDFUNC] = () => {
     this.instructionPointer = this.backStack.pop();
-    this.currentMemory = this.memory.addresses;
+    this.currentMemory = this.previousMemories.pop();
+
+    const { value, address } = this.returns.pop();
+
+    this.currentMemory[address] = value;
   };
 
   [RETURN] = (quadruple) => {
     const [_, variable] = quadruple;
     const methodEnded = this.methodAddresses.pop();
 
-    this.memory.addresses[methodEnded] = this.accessMemory(variable);
+    this.returns.push({
+      value: this.accessMemory(variable),
+      address: methodEnded,
+    });
 
-    while(this.code[this.instructionPointer][0] != ENDFUNC)
-      this.instructionPointer++
-    
+    while (this.code[this.instructionPointer][0] != ENDFUNC)
+      this.instructionPointer++;
 
     this.instructionPointer--;
   };

@@ -83,8 +83,7 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		// const directocodery = yy.semantics.removePreviousDirectories(yy.semantics.main);
-		// console.log(JSON.stringify(directory));
+		// console.log(JSON.stringify(yy.semantics.main));
 		console.log(yy.semantics.quadruples.intermediateCode);
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
@@ -401,17 +400,17 @@ call:
 
 return:
 	RETURN OPEN_PARENTHESIS expression CLOSE_PARENTHESIS {
-		yy.semantics.validateReturn({
-			func: yy.semantics.currentDirectory,
-			returnType: yy.semantics.quadruples.getLastOperation().type
-		})
+		// yy.semantics.validateReturn({
+		// 	func: yy.semantics.currentDirectory,
+		// 	returnType: yy.semantics.quadruples.getLastOperation().type
+		// })
 		yy.semantics.quadruples.pushToOperationsStack({
 			value: yy.semantics.quadruples.getLastOperation().value	,
 			type: yy.semantics.quadruples.getLastOperation().type
 		})
 		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.RETURN);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
-		yy.semantics.quadruples.operationsStack.pop();
+		// yy.semantics.quadruples.operationsStack.pop();
 	}
 	;
 
