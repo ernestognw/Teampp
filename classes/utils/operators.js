@@ -20,12 +20,14 @@ const unaryOperators = {
   READ: "read",
   WRITE: "write",
   GOTOF: "gotof",
+  ERA: "era",
+  RETURN: "return",
 };
 
 const standaloneOperators = {
   GOTO: "goto",
   GOSUB: "gosub",
-  ERA: "era",
+  ENDFUNC: "endfunc",
 };
 
 const operators = {
@@ -56,6 +58,8 @@ const operatorsPriority = {
   [operators.GOTO]: -3,
   [operators.ERA]: -3,
   [operators.GOSUB]: -3,
+  [operators.ENDFUNC]: -3,
+  [operators.RETURN]: -3,
 };
 
 // Only assertion to ensure every operator has code

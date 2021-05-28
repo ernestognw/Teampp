@@ -33,13 +33,21 @@ const {
   ERA,
   PARAM,
   GOSUB,
+  ENDFUNC,
+  RETURN,
 } = OPCODES;
 
 class VirtualMachine {
   constructor(memory) {
     this.instructionPointer = 0;
     this.memory = memory;
+    this.currentMemory = this.memory.addresses;
+    this.backStack = [];
+    this.methodAddresses = [];
   }
+
+  accessMemory = (address) =>
+    this.currentMemory[address] || this.memory.addresses[address];
 
   exec = async () => {
     while (this.instructionPointer < this.code.length) {
@@ -57,97 +65,97 @@ class VirtualMachine {
   [SUM] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] + this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) + this.accessMemory(right);
   };
 
   [SUB] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] - this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) - this.accessMemory(right);
   };
 
   [MULT] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] * this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) * this.accessMemory(right);
   };
 
   [DIV] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] / this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) / this.accessMemory(right);
   };
 
   [EQ] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] === this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) === this.accessMemory(right);
   };
 
   [NEQ] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] != this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) != this.accessMemory(right);
   };
 
   [GTE] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] >= this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) >= this.accessMemory(right);
   };
 
   [LTE] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] <= this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) <= this.accessMemory(right);
   };
 
   [GT] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] > this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) > this.accessMemory(right);
   };
 
   [LT] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] < this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) < this.accessMemory(right);
   };
 
   [AND] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] && this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) && this.accessMemory(right);
   };
 
   [OR] = (quadruple) => {
     const [_, left, right, result] = quadruple;
 
-    this.memory.addresses[result] =
-      this.memory.addresses[left] || this.memory.addresses[right];
+    this.currentMemory[result] =
+      this.accessMemory(left) || this.accessMemory(right);
   };
 
   [NOT] = (quadruple) => {
     const [_, toNegate] = quadruple;
 
-    this.memory.addresses[toNegate] = !this.memory.addresses[toNegate];
+    this.currentMemory[toNegate] = !this.accessMemory(toNegate);
   };
 
   [EQUAL] = (quadruple) => {
     const [_, result, toSet] = quadruple;
 
-    this.memory.addresses[result] = this.memory.addresses[toSet];
+    this.currentMemory[result] = this.accessMemory(toSet);
   };
 
   [READ] = async (quadruple) => {
@@ -170,13 +178,13 @@ class VirtualMachine {
     if (type == BOOLEAN) result = result !== "false";
     if (type == STRING) result = result.toString();
 
-    this.memory.addresses[toSet] = result;
+    this.accessMemory(toSet) = result;
   };
 
   [WRITE] = (quadruple) => {
     const [_, toWrite] = quadruple;
 
-    console.log(this.memory.addresses[toWrite]);
+    console.log(this.accessMemory(toWrite));
   };
 
   [GOTO] = (quadruple) => {
@@ -188,14 +196,46 @@ class VirtualMachine {
   [GOTOF] = (quadruple) => {
     const [_, toCheck, target] = quadruple;
 
-    if (!this.memory.addresses[toCheck]) this.instructionPointer = target - 1;
+    if (!this.accessMemory(toCheck)) this.instructionPointer = target - 1;
   };
 
-  [ERA] = () => {};
+  [ERA] = (quadruple) => {
+    const [_, methodAddress] = quadruple;
 
-  [PARAM] = () => {};
+    this.currentMemory[methodAddress] = {}; // Activation Record
+    this.currentMemory = this.accessMemory(methodAddress); // Move to activation record
+    this.methodAddresses.push(methodAddress);
+  };
 
-  [GOSUB] = () => {};
+  [PARAM] = (quadruple) => {
+    const [_, variable, prevMemoryAddress] = quadruple;
+
+    this.currentMemory[variable] = this.accessMemory(prevMemoryAddress);
+  };
+
+  [GOSUB] = (quadruple) => {
+    this.backStack.push(this.instructionPointer);
+
+    this[GOTO](quadruple);
+  };
+
+  [ENDFUNC] = () => {
+    this.instructionPointer = this.backStack.pop();
+    this.currentMemory = this.memory.addresses;
+  };
+
+  [RETURN] = (quadruple) => {
+    const [_, variable] = quadruple;
+    const methodEnded = this.methodAddresses.pop();
+
+    this.memory.addresses[methodEnded] = this.accessMemory(variable);
+
+    while(this.code[this.instructionPointer][0] != ENDFUNC)
+      this.instructionPointer++
+    
+
+    this.instructionPointer--;
+  };
 }
 
 module.exports = VirtualMachine;

@@ -3,6 +3,7 @@ const {
   inverseOperators,
   inverseTypes,
   types,
+  genericTypes,
   operatorToOpcode,
   unaryCube,
   binaryCube,
@@ -57,7 +58,8 @@ class Quadruples {
    * @param {type} string a type
    * @returns boolean if the type is a generic type
    */
-  validateType = ({ type }) => !!inverseTypes[type];
+  validateType = ({ type }) =>
+    !!inverseTypes[type] || type === genericTypes.VOID;
 
   /**
    * Validates an operator and push it to operators stack
@@ -154,8 +156,11 @@ class Quadruples {
     const opcode = operatorToOpcode[operator];
 
     const leftAddress =
-      this.semantics.currentDirectory.varsDirectory[left.value]?.address ||
-      left.value;
+      this.semantics.checkOnPreviousScope({
+        directory: this.semantics.currentDirectory,
+        id: left.value,
+        considerParams: true,
+      })?.address || left.value;
 
     if (
       opcode != OPCODES.READ &&
@@ -189,7 +194,10 @@ class Quadruples {
     const left = this.operationsStack.pop();
     const operator = this.operatorsStack.pop();
 
-    const resultType = binaryCube[right.type][left.type][operator];
+    const resultType =
+      right.type != genericTypes.VOID &&
+      left.type != genericTypes.VOID &&
+      binaryCube[right.type][left.type][operator];
 
     if (!resultType)
       throw new Error(
@@ -226,16 +234,13 @@ class Quadruples {
       });
     }
 
-    let leftAddress;
-    let rightAddress;
-
-    leftAddress =
+    const leftAddress =
       this.semantics.checkOnPreviousScope({
         directory: this.semantics.currentDirectory,
         id: left.value,
         considerParams: true,
       })?.address || left.value;
-    rightAddress =
+    const rightAddress =
       this.semantics.checkOnPreviousScope({
         directory: this.semantics.currentDirectory,
         id: right.value,

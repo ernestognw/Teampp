@@ -83,13 +83,13 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		// const directory = yy.semantics.removePreviousDirectories(yy.semantics.main);
+		// const directocodery = yy.semantics.removePreviousDirectories(yy.semantics.main);
 		// console.log(JSON.stringify(directory));
 		console.log(yy.semantics.quadruples.intermediateCode);
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
 		yy.virtualMachine.exec();
-		// console.log(yy.memory.addresses)
+		console.log(yy.memory.addresses);
   }
 	;
 
@@ -258,9 +258,16 @@ module_header:
 	 module_dec OPEN_PARENTHESIS params CLOSE_PARENTHESIS SEMICOLON decvar
 	;
 
+module_close:
+	closeblock {
+		yy.semantics.quadruples.pushToOperatorsStack({ operator:yy.semantics.quadruples.operators.ENDFUNC })
+		yy.semantics.quadruples.checkOperation({ priority: -3 });
+	}
+	;
+
 modules: 
-	module_header OPEN_BRACKET statements closeblock modules
-	| module_header OPEN_BRACKET closeblock modules
+	module_header OPEN_BRACKET statements module_close modules
+	| module_header OPEN_BRACKET module_close modules
 	| {}
 	;
 
@@ -352,6 +359,7 @@ assign:
 call_expression: 
 	expression {
 		yy.semantics.validateParam();
+		yy.semantics.quadruples.operationsStack.pop();
 	}
 	;
 	
@@ -364,16 +372,26 @@ call_aux:
 var_call:
 	var OPEN_PARENTHESIS {
 		yy.semantics.quadruples.checkingParams = true;
+		yy.semantics.advanceToDirectory({ name: $1 });	
+		yy.semantics.quadruples.pushToOperationsStack({
+			value: yy.semantics.currentDirectory.address,
+			type: yy.semantics.currentDirectory.type
+		})
 		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.ERA);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
-		yy.semantics.advanceToDirectory({ name: $1 })
+		yy.semantics.quadruples.operationsStack.pop();
 	}
 	;
 
 call:
 	var_call call_aux CLOSE_PARENTHESIS {
+		const functionName = yy.semantics.quadruples.getLastOperation().value
+		yy.semantics.validateId({ 
+			id: functionName, 
+			expectFunction: true
+		});
 		yy.semantics.addGoSub({
-			functionName: $1
+			functionName
 		});
 		yy.semantics.resetParamPointer();
 		yy.semantics.backDirectory();
@@ -382,7 +400,19 @@ call:
 	;
 
 return:
-	RETURN OPEN_PARENTHESIS expression CLOSE_PARENTHESIS
+	RETURN OPEN_PARENTHESIS expression CLOSE_PARENTHESIS {
+		yy.semantics.validateReturn({
+			func: yy.semantics.currentDirectory,
+			returnType: yy.semantics.quadruples.getLastOperation().type
+		})
+		yy.semantics.quadruples.pushToOperationsStack({
+			value: yy.semantics.quadruples.getLastOperation().value	,
+			type: yy.semantics.quadruples.getLastOperation().type
+		})
+		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.RETURN);
+		yy.semantics.quadruples.checkOperation({ priority: -3 });
+		yy.semantics.quadruples.operationsStack.pop();
+	}
 	;
 
 read_op:
@@ -570,8 +600,10 @@ float:
 
 char: 
 	CHAR {
+		const char = $1.substring(1, $1.length - 1);
+
 		yy.semantics.setConstant({ 
-			value: $1, 
+			value: char, 
 			type: yy.semantics.quadruples.types.CHAR 
 		})
 	}

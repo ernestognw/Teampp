@@ -22,6 +22,8 @@ const {
   ERA,
   PARAM,
   GOSUB,
+  ENDFUNC,
+  RETURN
 } = operators;
 
 const OPCODES = {
@@ -46,6 +48,8 @@ const OPCODES = {
   ERA: "ERA",
   PARAM: "PARAM",
   GOSUB: "GOSUB",
+  ENDFUNC: "ENDFUNC",
+  RETURN: "RETURN",
 };
 
 const operatorToOpcode = {
@@ -70,6 +74,8 @@ const operatorToOpcode = {
   [ERA]: OPCODES.ERA,
   [PARAM]: OPCODES.PARAM,
   [GOSUB]: OPCODES.GOSUB,
+  [ENDFUNC]: OPCODES.ENDFUNC,
+  [RETURN]: OPCODES.RETURN,
 };
 
 // Only assertion to ensure every operator is being used

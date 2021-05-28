@@ -94,12 +94,13 @@ class Semantics {
     if (
       !this.currentDirectory.isFunction &&
       !addToParams &&
-      !isFunction &&
       this.validateType({ type })
     ) {
       address = this.memory.getAddress({
         type,
-        segment: this.memory.segments.LOCAL,
+        segment: isFunction
+          ? this.memory.segments.STACK
+          : this.memory.segments.LOCAL,
       });
     }
 
@@ -117,9 +118,12 @@ class Semantics {
       previousDirectory: this.currentDirectory,
     };
 
-    if (isFunction)
+    if (isFunction) {
       this.currentDirectory[directoryName][id].target =
         this.quadruples.intermediateCode.length;
+      this.currentDirectory[directoryName][id].varsDirectory[id] =
+        this.currentDirectory[directoryName][id];
+    }
 
     if (addToParams)
       this.currentDirectory.params.push(
@@ -175,11 +179,11 @@ class Semantics {
    *
    * @param {id} string id of the variable
    * @param {expectedType} string the type that the variable is expected to have
+   * @param {expectFunction} boolean if function is expected
    * @returns {toCheck} object variable directory
    */
-  validateId = ({ id, expectedType }) => {
+  validateId = ({ id, expectedType, expectFunction = false }) => {
     const scope = this.currentDirectory.name;
-
     const directory = this.currentDirectory;
     const toCheck = this.checkOnPreviousScope({
       directory,
@@ -192,6 +196,14 @@ class Semantics {
         `${this.lineError()} Identifier ${chalk.blue(
           id
         )} not declared in ${chalk.red(scope)} scope.`
+      );
+    }
+
+    if (expectFunction && !toCheck.isFunction) {
+      throw new Error(
+        `${this.lineError()} Cannot call identifier ${chalk.blue(
+          id
+        )} since it is not a function.`
       );
     }
 
@@ -533,6 +545,17 @@ class Semantics {
     this.quadruples.jumpStack.push(validated.target);
     this.quadruples.operatorsStack.push(this.quadruples.operators.GOSUB);
     this.quadruples.checkOperation({ priority: -3 });
+  };
+
+  validateReturn = ({ returnType, func }) => {
+    if (returnType !== func.type)
+      throw new Error(`
+    ${this.lineError()} Function ${chalk.blue(
+        func.name
+      )} expected to return ${chalk.green(
+        func.type
+      )} type but it returns ${chalk.red(returnType)} instead.
+      `);
   };
 }
 

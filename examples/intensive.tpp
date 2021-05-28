@@ -6,11 +6,11 @@ class Person {
 
   int function example(x : int, y : float);
     vars another[100] : char;
-    vars example, example2 : char; 
+    vars example1, example2 : char; 
   {
     read(another[3]);
     write(1 / 31 + 14 * 223 < (276 * 22231 + (age / 10)) - 2123 * 1.23);
-    return(example);
+    return(example1);
   }
 }
 
@@ -20,13 +20,13 @@ class SpecialPerson inherits Person {
 
   int function example(x : int, y : float);
     vars another[100] : char;
-    vars example, example2 : char; 
+    vars example1, example2 : char; 
   {
     read(another[3]);
     age = 10;
     write(1 / 31 + 14 * 223 > 276 * age - 2123 * 1.23);
     write("Hello world");
-    return(example);
+    return(example1);
   }
 
   boolean function truable();
@@ -92,7 +92,7 @@ main(){
     person.name[specialPerson.name[0][0][2]] = 0;
   }
 
-  one = person.age();
+  one = person.age;
 
   while(ten && 10 < (3 + person.age) && specialPerson.truable()) do {
    one = one + 1;
