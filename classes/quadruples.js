@@ -19,15 +19,12 @@ class Quadruples {
     this.semantics = semantics;
 
     this.intermediateCode = [["GOTO", "", "", ""]];
-    this.tmpPointer = 1;
 
     this.operatorsStack = [];
     this.operationsStack = [];
     this.jumpStack = [];
 
     this.types = types;
-
-    this.checkingParams = false;
 
     this.operators = operators;
   }
@@ -159,7 +156,6 @@ class Quadruples {
       this.semantics.checkOnPreviousScope({
         directory: this.semantics.currentDirectory,
         id: left.value,
-        considerParams: true,
       })?.address || left.value;
 
     if (
@@ -218,15 +214,10 @@ class Quadruples {
 
     if (opcode != OPCODES.EQUAL && opcode != OPCODES.PARAM) {
       // Equal is a special case
-      if (!this.checkingParams && this.semantics.currentDirectory.isFunction) {
-        tmp = `tmp${this.tmpPointer}`;
-        this.tmpPointer++;
-      } else {
-        tmp = this.semantics.memory.getAddress({
-          type: resultType,
-          segment: this.semantics.memory.segments.TEMP,
-        });
-      }
+      tmp = this.semantics.memory.getAddress({
+        type: resultType,
+        segment: this.semantics.memory.segments.TEMP,
+      });
 
       this.pushToOperationsStack({
         value: tmp,
@@ -238,13 +229,11 @@ class Quadruples {
       this.semantics.checkOnPreviousScope({
         directory: this.semantics.currentDirectory,
         id: left.value,
-        considerParams: true,
       })?.address || left.value;
     const rightAddress =
       this.semantics.checkOnPreviousScope({
         directory: this.semantics.currentDirectory,
         id: right.value,
-        considerParams: true,
       })?.address || right.value;
 
     const quadruple = [opcode, leftAddress, rightAddress, tmp];

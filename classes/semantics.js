@@ -80,7 +80,6 @@ class Semantics {
       !!this.checkOnPreviousScope({
         directory: this.currentDirectory,
         id,
-        considerParams: true,
       })
     ) {
       throw new Error(
@@ -186,8 +185,7 @@ class Semantics {
     const directory = this.currentDirectory;
     const toCheck = this.checkOnPreviousScope({
       directory,
-      id,
-      considerParams: !this.quadruples.checkingParams,
+      id
     });
 
     if (!toCheck) {
@@ -340,29 +338,6 @@ class Semantics {
    */
   getCurrentVariable = () =>
     this.currentVariableStack[this.currentVariableStack.length - 1];
-
-  /**
-   * Resets current variable at the end of a variable use and checks if dimensions
-   * are correct
-   */
-  resetCurrentVariable = () => {
-    let currentVariable = this.getCurrentVariable();
-
-    if (currentVariable.dimensions !== currentVariable.dimensionsToCheck) {
-      throw new Error(
-        `${this.lineError()} Identifier ${chalk.blue(
-          currentVariable.name
-        )} is trying to use ${chalk.red(
-          currentVariable.dimensionsToCheck
-        )} dimensions but has ${chalk.green(currentVariable.dimensions)}.`
-      );
-    }
-
-    for (let i = 0; i < this.pointsAdvanced + 1; i++) {
-      this.currentVariableStack.pop();
-      this.pointsAdvanced = 0;
-    }
-  };
 
   /**
    * Tells the semantics to search for a subdirectory when there is a point
@@ -523,6 +498,7 @@ class Semantics {
   };
 
   validateReturn = ({ returnType, func }) => {
+    console.log(this.currentDirectory)
     if (returnType !== func.type)
       throw new Error(`
     ${this.lineError()} Function ${chalk.blue(

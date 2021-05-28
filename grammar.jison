@@ -322,7 +322,6 @@ var:
 			value: yy.semantics.getCurrentVariable().name, 
 			type: yy.semantics.getCurrentVariable().type
 		});
-		yy.semantics.resetCurrentVariable();
 	}
 	;
 
@@ -369,7 +368,6 @@ call_aux:
 
 var_call:
 	var OPEN_PARENTHESIS {
-		yy.semantics.quadruples.checkingParams = true;
 		yy.semantics.advanceToDirectory({ name: $1 });	
 		yy.semantics.quadruples.pushToOperationsStack({
 			value: yy.semantics.currentDirectory.address,
@@ -393,7 +391,6 @@ call:
 		});
 		yy.semantics.resetParamPointer();
 		yy.semantics.backDirectory();
-		yy.semantics.quadruples.checkingParams = false;
 	}
 	;
 
