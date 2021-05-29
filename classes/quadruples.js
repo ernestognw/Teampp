@@ -227,13 +227,11 @@ class Quadruples {
 
     let leftDirectory = this.semantics.currentDirectory;
 
-    if (opcode == OPCODES.PARAM) {
-      // console.log(this.semantics.currentDirectory)
+    if (opcode == OPCODES.PARAM)
       leftDirectory = this.semantics.checkOnPreviousScope({
         directory: this.semantics.currentDirectory,
         id: this.semantics.callingVariable,
       });
-    }
 
     const leftVar = this.semantics.checkOnPreviousScope({
       directory: leftDirectory || this.semantics.currentDirectory,

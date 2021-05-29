@@ -95,7 +95,6 @@ class Semantics {
       });
     }
 
-    // console.log(id, address)
     this.currentDirectory.varsDirectory[id] = {
       name: id,
       type,

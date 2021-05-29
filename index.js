@@ -6,7 +6,7 @@ const filepaths = process.argv.slice(2);
 const files = filepaths.map((filepath) => readFileSync(filepath, "utf8"));
 
 if (!files || files.length === 0) {
-  console.log("Files missing");
+  console.warn("Files missing");
   return;
 }
 
@@ -17,6 +17,6 @@ files.forEach((file) => {
   try {
     parser.parse(file);
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 });
