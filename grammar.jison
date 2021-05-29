@@ -262,9 +262,15 @@ module_close:
 	}
 	;
 
+module_open:
+	OPEN_BRACKET {
+
+	}
+	;
+
 modules: 
-	module_header OPEN_BRACKET statements module_close modules
-	| module_header OPEN_BRACKET module_close modules
+	module_header module_open statements module_close modules
+	| module_header module_open module_close modules
 	| {}
 	;
 

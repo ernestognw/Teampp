@@ -27,11 +27,4 @@ main(){
   read(d);
 
   write(dos(d, c));
-  write(dos(d, c));
-  write(dos(d, c));
-  write(dos(d, c));
-  write(dos(d, c));
-  write(dos(d, c));
-  write(dos(d, c));
-  write(dos(d, c));
 }
