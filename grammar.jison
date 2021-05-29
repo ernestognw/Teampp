@@ -83,7 +83,7 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		console.info(yy.semantics.quadruples.intermediateCode);
+		console.table(yy.semantics.quadruples.intermediateCode);
     console.info(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
 		yy.virtualMachine.exec();
