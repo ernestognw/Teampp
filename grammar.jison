@@ -386,7 +386,7 @@ call:
 			id: yy.semantics.callingVariable, 
 			expectFunction: true
 		});
-		yy.semantics.addGoSub({
+		yy.semantics.quadruples.addGoSub({
 			functionName: yy.semantics.callingVariable
 		});
 		yy.semantics.resetParamPointer();

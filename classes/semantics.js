@@ -472,14 +472,6 @@ class Semantics {
     } while (directory);
   };
 
-  addGoSub = ({ functionName }) => {
-    const validated = this.validateId({ id: functionName });
-
-    this.quadruples.jumpStack.push(validated.target);
-    this.quadruples.operatorsStack.push(this.quadruples.operators.GOSUB);
-    this.quadruples.checkOperation({ priority: -3 });
-  };
-
   validateReturn = ({ returnType, func }) => {
     if (returnType !== func.type)
       throw new Error(`

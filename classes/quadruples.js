@@ -18,7 +18,7 @@ class Quadruples {
   constructor(semantics) {
     this.semantics = semantics;
 
-    this.intermediateCode = [["GOTO", "", "", ""]];
+    this.intermediateCode = [[OPCODES.GOTO, null, null, null]];
 
     this.operatorsStack = [];
     this.operationsStack = [];
@@ -111,13 +111,13 @@ class Quadruples {
 
     const opcode = operatorToOpcode[operator];
 
-    const left = "";
+    const left = null;
 
     const quadruple = [
       opcode,
       left,
-      "", // Not right operator
-      "", // Not result
+      null, // Not right operator
+      null, // Not result
     ];
 
     this.intermediateCode.push(quadruple);
@@ -175,8 +175,8 @@ class Quadruples {
     const quadruple = [
       opcode,
       leftAddress,
-      "", // Not right operator,
-      "",
+      null, // Not right operator,
+      null,
     ];
 
     this.intermediateCode.push(quadruple);
@@ -210,7 +210,7 @@ class Quadruples {
 
     const opcode = operatorToOpcode[operator];
 
-    let tmp = "";
+    let tmp = null;
 
     if (opcode != OPCODES.EQUAL && opcode != OPCODES.PARAM) {
       // Equal is a special case
@@ -282,7 +282,7 @@ class Quadruples {
     const { usePop } = params;
 
     const target = this.jumpStack.pop();
-    const index = this.intermediateCode[target].indexOf("");
+    const index = this.intermediateCode[target].indexOf(null);
 
     const to = usePop ? this.jumpStack.pop() : this.intermediateCode.length;
 
@@ -306,6 +306,14 @@ class Quadruples {
         )} was expected
       `
       );
+  };
+
+  addGoSub = ({ functionName }) => {
+    const validated = this.semantics.validateId({ id: functionName });
+
+    this.jumpStack.push(validated.target);
+    this.operatorsStack.push(this.operators.GOSUB);
+    this.checkOperation({ priority: -3 });
   };
 }
 
