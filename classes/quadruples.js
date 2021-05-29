@@ -234,16 +234,18 @@ class Quadruples {
         ];
     }
 
-    const leftAddress =
-      this.semantics.checkOnPreviousScope({
-        directory: leftDirectory,
-        id: left.value,
-      })?.address || left.value;
-    const rightAddress =
-      this.semantics.checkOnPreviousScope({
-        directory: this.semantics.currentDirectory,
-        id: right.value,
-      })?.address || right.value;
+    const leftVar = this.semantics.checkOnPreviousScope({
+      directory: leftDirectory,
+      id: left.value,
+    });
+
+    const rightVar = this.semantics.checkOnPreviousScope({
+      directory: this.semantics.currentDirectory,
+      id: right.value,
+    });
+
+    const leftAddress = leftVar?.address || left.value;
+    const rightAddress = rightVar?.address || right.value;
 
     const quadruple = [opcode, leftAddress, rightAddress, tmp];
 
