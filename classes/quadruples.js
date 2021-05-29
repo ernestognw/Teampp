@@ -234,11 +234,6 @@ class Quadruples {
         ];
     }
 
-    console.log( this.semantics.checkOnPreviousScope({
-      directory: leftDirectory,
-      id: left.value,
-    }))
-
     const leftAddress =
       this.semantics.checkOnPreviousScope({
         directory: leftDirectory,
@@ -249,8 +244,6 @@ class Quadruples {
         directory: this.semantics.currentDirectory,
         id: right.value,
       })?.address || right.value;
-
-    console.log(leftAddress, rightAddress);
 
     const quadruple = [opcode, leftAddress, rightAddress, tmp];
 

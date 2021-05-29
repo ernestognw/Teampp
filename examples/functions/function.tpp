@@ -11,7 +11,6 @@ int function example(a : int, c : float, x : int);
     write(any);
     y = 'b';
     write(y);
-    x = 10;
     write(x);
     write(b);
     a = b * a + c / d;
@@ -25,7 +24,7 @@ main(){
   d = 13;
   a = a + b;
 
-  a = example(c, a, 1 + 4);
+  a = example(c, a, 10 + 2);
 
   write(a);
 

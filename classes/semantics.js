@@ -412,8 +412,12 @@ class Semantics {
   };
 
   resetParamPointer = () => {
-    const name = this.currentDirectory.name;
-    const expectedParams = this.currentDirectory.params;
+    const directory = this.checkOnPreviousScope({
+      directory: this.currentDirectory,
+      id: this.callingVariable
+    });
+    const name = directory.name;
+    const expectedParams = directory.params;
 
     if (this.paramPointer < expectedParams.length)
       throw new Error(`

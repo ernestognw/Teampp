@@ -244,7 +244,6 @@ class VirtualMachine {
 
   [ENDFUNC] = () => {
     this.instructionPointer = this.backStack.pop();
-    // console.log(this.currentMemory)
     this.currentMemory = this.previousMemories.pop();
 
     const { value, address } = this.returns.pop();

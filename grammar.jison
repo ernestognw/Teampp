@@ -83,7 +83,6 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		// console.log(JSON.stringify(yy.semantics.main));
 		console.log(yy.semantics.quadruples.intermediateCode);
     console.log(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
