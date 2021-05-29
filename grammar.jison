@@ -368,29 +368,23 @@ call_aux:
 
 var_call:
 	var OPEN_PARENTHESIS {
-		yy.semantics.advanceToDirectory({ name: $1 });	
-		yy.semantics.quadruples.pushToOperationsStack({
-			value: yy.semantics.currentDirectory.address,
-			type: yy.semantics.currentDirectory.type
-		})
+		const { name } = yy.semantics.getCurrentVariable()
+		yy.semantics.callingVariable = name;
 		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.ERA);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
-		yy.semantics.quadruples.operationsStack.pop();
 	}
 	;
 
 call:
 	var_call call_aux CLOSE_PARENTHESIS {
-		const functionName = yy.semantics.quadruples.getLastOperation().value
 		yy.semantics.validateId({ 
-			id: functionName, 
+			id: yy.semantics.callingVariable, 
 			expectFunction: true
 		});
 		yy.semantics.addGoSub({
-			functionName
+			functionName: yy.semantics.callingVariable
 		});
 		yy.semantics.resetParamPointer();
-		yy.semantics.backDirectory();
 	}
 	;
 

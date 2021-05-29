@@ -225,9 +225,23 @@ class Quadruples {
       });
     }
 
+    let leftDirectory = this.semantics.currentDirectory;
+
+    if (opcode == OPCODES.PARAM) {
+      leftDirectory =
+        this.semantics.currentDirectory.varsDirectory[
+          this.semantics.callingVariable
+        ];
+    }
+
+    console.log( this.semantics.checkOnPreviousScope({
+      directory: leftDirectory,
+      id: left.value,
+    }))
+
     const leftAddress =
       this.semantics.checkOnPreviousScope({
-        directory: this.semantics.currentDirectory,
+        directory: leftDirectory,
         id: left.value,
       })?.address || left.value;
     const rightAddress =
@@ -235,6 +249,8 @@ class Quadruples {
         directory: this.semantics.currentDirectory,
         id: right.value,
       })?.address || right.value;
+
+    console.log(leftAddress, rightAddress);
 
     const quadruple = [opcode, leftAddress, rightAddress, tmp];
 

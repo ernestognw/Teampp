@@ -24,6 +24,7 @@ class Semantics {
     this.currentVariableStack = [];
     this.isPointPending = false;
     this.pointsAdvanced = 0;
+    this.callingFunction = "";
 
     this.genericTypes = genericTypes;
 
@@ -53,8 +54,8 @@ class Semantics {
 
     let varsDirectory = {};
 
-    if (addToParams)
-      if (this.currentDirectory.paramsDeclared[id])
+    if (addToParams) {
+      if (this.currentDirectory.varsDirectory[id]?.isParam)
         throw new Error(
           `${this.lineError()} Param ${chalk.red(
             id
@@ -62,6 +63,7 @@ class Semantics {
             this.currentDirectory.name
           )} function declaration.`
         );
+    }
 
     if (!typeExists) {
       const { varsDirectory: classVarsDirectory } = this.validateId({
@@ -75,13 +77,7 @@ class Semantics {
       varsDirectory = { ...classVarsDirectory };
     }
 
-    if (
-      !addToParams &&
-      !!this.checkOnPreviousScope({
-        directory: this.currentDirectory,
-        id,
-      })
-    ) {
+    if (!!this.currentDirectory.varsDirectory[id]) {
       throw new Error(
         `${this.lineError()} Variable ${chalk.red(
           id
@@ -90,11 +86,7 @@ class Semantics {
     }
 
     let address;
-    if (
-      !this.currentDirectory.isFunction &&
-      !addToParams &&
-      this.validateType({ type })
-    ) {
+    if (this.validateType({ type })) {
       address = this.memory.getAddress({
         type,
         segment: isFunction
@@ -103,9 +95,7 @@ class Semantics {
       });
     }
 
-    const directoryName = addToParams ? "paramsDeclared" : "varsDirectory";
-
-    this.currentDirectory[directoryName][id] = {
+    this.currentDirectory.varsDirectory[id] = {
       name: id,
       type,
       isFunction,
@@ -113,19 +103,19 @@ class Semantics {
       varsDirectory,
       address,
       params: [],
-      paramsDeclared: {},
+      isParam: addToParams,
     };
 
     if (isFunction) {
-      this.currentDirectory[directoryName][id].target =
+      this.currentDirectory.varsDirectory[id].target =
         this.quadruples.intermediateCode.length;
-      this.currentDirectory[directoryName][id].varsDirectory[id] =
-        this.currentDirectory[directoryName][id];
+      this.currentDirectory.varsDirectory[id].varsDirectory[id] =
+        this.currentDirectory.varsDirectory[id];
     }
 
     if (addToParams)
       this.currentDirectory.params.push(
-        this.currentDirectory[directoryName][id]
+        this.currentDirectory.varsDirectory[id]
       );
 
     if (addNextLevel)
@@ -185,7 +175,7 @@ class Semantics {
     const directory = this.currentDirectory;
     const toCheck = this.checkOnPreviousScope({
       directory,
-      id
+      id,
     });
 
     if (!toCheck) {
@@ -378,8 +368,12 @@ class Semantics {
    *
    */
   validateParam = () => {
-    const name = this.currentDirectory.name;
-    const expectedParams = this.currentDirectory.params;
+    const directory = this.checkOnPreviousScope({
+      directory: this.currentDirectory,
+      id: this.callingVariable
+    });
+    const name = directory.name;
+    const expectedParams = directory.params;
     const param = expectedParams[this.paramPointer];
 
     if (!param)
@@ -399,15 +393,9 @@ class Semantics {
       )} type in parameter ${chalk.green(
         this.paramPointer + 1
       )} but received ${chalk.red(type)}.
-      `);
+        `);
 
     this.paramPointer++;
-
-    let address;
-    if (isNaN(Number(value))) {
-      const validated = this.validateId({ id: value, expectedType: type });
-      address = validated.address;
-    }
 
     this.quadruples.pushToOperationsStack({
       type: expectedType,
@@ -415,7 +403,7 @@ class Semantics {
     });
     this.quadruples.pushToOperationsStack({
       type,
-      value: address || value,
+      value,
     });
     this.quadruples.pushToOperatorsStack({
       operator: operators.PARAM,
@@ -466,9 +454,6 @@ class Semantics {
    * @returns
    */
   checkOnPreviousScope = ({ directory, id }) => {
-    let foundParam;
-    let foundVar;
-
     let back = -1;
 
     do {
@@ -479,14 +464,8 @@ class Semantics {
           ];
 
       back++;
-      if (directory) {
-        if (directory.varsDirectory[id]) foundVar = directory.varsDirectory[id];
-        if (directory.paramsDeclared?.[id])
-          foundParam = directory.paramsDeclared?.[id];
-      }
+      if (directory?.varsDirectory[id]) return directory.varsDirectory[id];
     } while (directory);
-
-    return foundVar || foundParam;
   };
 
   addGoSub = ({ functionName }) => {
@@ -498,7 +477,6 @@ class Semantics {
   };
 
   validateReturn = ({ returnType, func }) => {
-    console.log(this.currentDirectory)
     if (returnType !== func.type)
       throw new Error(`
     ${this.lineError()} Function ${chalk.blue(

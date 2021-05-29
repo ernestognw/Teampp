@@ -57,6 +57,7 @@ class VirtualMachine {
     do {
       value =
         this.previousMemories[this.previousMemories.length - back]?.[address];
+      // console.log(this.previousMemories[this.previousMemories.length - back]);
       back++;
       if (back > this.previousMemories.length) break;
     } while (!value);
@@ -240,6 +241,7 @@ class VirtualMachine {
 
   [ENDFUNC] = () => {
     this.instructionPointer = this.backStack.pop();
+    // console.log(this.currentMemory)
     this.currentMemory = this.previousMemories.pop();
 
     const { value, address } = this.returns.pop();
