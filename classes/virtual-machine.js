@@ -56,9 +56,7 @@ class VirtualMachine {
 
     do {
       value =
-        this.previousMemories[this.previousMemories.length - back]?.[
-          address
-        ];
+        this.previousMemories[this.previousMemories.length - back]?.[address];
       back++;
       if (back > this.previousMemories.length) break;
     } while (!value);

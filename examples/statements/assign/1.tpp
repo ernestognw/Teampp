@@ -6,4 +6,5 @@ main(){
 	a = 1;
 	b = a;
   a = b - 2;
+	write(a);
 }

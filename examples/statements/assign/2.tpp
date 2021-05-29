@@ -14,4 +14,5 @@ main(){
 	d = a / c;
 	e = false;
 	f = !e && d > a;
+	write(f);
 }
