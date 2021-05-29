@@ -46,6 +46,7 @@ class VirtualMachine {
     this.methodAddresses = [];
     this.previousMemories = [];
     this.returns = [];
+    this.deep = 0;
   }
 
   accessMemory = (address) => {
@@ -225,6 +226,8 @@ class VirtualMachine {
     this.previousMemories.push(this.currentMemory);
     this.currentMemory = this.currentMemory[methodAddress]; // Move to activation record
     this.methodAddresses.push(methodAddress);
+    this.deep++;
+    if(this.deep > 5000) throw new Error("Stack overflow. Did you forget your base case?")
   };
 
   [PARAM] = (quadruple) => {
@@ -247,6 +250,7 @@ class VirtualMachine {
     const { value, address } = this.returns.pop();
 
     this.currentMemory[address] = value;
+    this.deep--;
   };
 
   [RETURN] = (quadruple) => {
