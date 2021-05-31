@@ -192,7 +192,7 @@ list_ids:
 
 dimension:
 	LA expression RA {
-		yy.semantics.addDimensionToLastPendingVar()
+		yy.semantics.addDimensionToLastPendingVar();
 	}
 	;
 
@@ -375,13 +375,13 @@ call_aux:
 
 var_call:
 	var OPEN_PARENTHESIS {
-		const { name } = yy.semantics.getCurrentVariable()
+		const { name } = yy.semantics.getLastUsedCurrentVariable();
 		yy.semantics.callingVariable = name;
 		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.ERA);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
 	}
 	;
-
+	
 call:
 	var_call call_aux CLOSE_PARENTHESIS {
 		yy.semantics.validateId({ 
@@ -407,7 +407,6 @@ return:
 		})
 		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.RETURN);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
-		// yy.semantics.quadruples.operationsStack.pop();
 	}
 	;
 

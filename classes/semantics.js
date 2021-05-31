@@ -22,6 +22,7 @@ class Semantics {
     this.paramPointer = 0;
     this.previousDirectoriesStack = [];
     this.currentVariableStack = [];
+    this.currentVariableUsed = [];
     this.isPointPending = false;
     this.pointsAdvanced = 0;
     this.callingFunction = "";
@@ -341,6 +342,7 @@ class Semantics {
     }
 
     this.pointsAdvanced = 0;
+    this.currentVariableUsed.push(this.currentVariableStack.pop());
   };
 
   /**
@@ -348,6 +350,12 @@ class Semantics {
    */
   getCurrentVariable = () =>
     this.currentVariableStack[this.currentVariableStack.length - 1];
+
+  /**
+   * Gets last used current variable
+   */
+  getLastUsedCurrentVariable = () =>
+    this.currentVariableUsed[this.currentVariableUsed.length - 1];
 
   /**
    * Tells the semantics to search for a subdirectory when there is a point
