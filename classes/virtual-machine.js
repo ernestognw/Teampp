@@ -35,6 +35,7 @@ const {
   GOSUB,
   ENDFUNC,
   RETURN,
+  VER,
 } = OPCODES;
 
 class VirtualMachine {
@@ -46,9 +47,16 @@ class VirtualMachine {
     this.methodAddresses = [];
     this.previousMemories = [];
     this.returns = [];
+    this.pendingIndexes = [];
     this.deep = 0;
   }
 
+  /**
+   * Access the current memory, and if there is no variable there, it tries to go up to next scope
+   * until it finds the needed variable
+   * @param {number} address address to access
+   * @returns
+   */
   accessMemory = (address) => {
     this.previousMemories.push(this.currentMemory);
 
@@ -69,6 +77,9 @@ class VirtualMachine {
     return value;
   };
 
+  /**
+   * Executes intermediate code previously set
+   */
   exec = async () => {
     while (this.instructionPointer < this.code.length) {
       const quadruple = this.code[this.instructionPointer];
@@ -81,87 +92,140 @@ class VirtualMachine {
     // console.log(this.memory.addresses);
   };
 
+  /**
+   * Sets intermediate code
+   * @param {array[quadruple]} code
+   * @returns
+   */
   setCode = (code) => (this.code = code);
 
+  /**
+   * Add previous indexes when accessing an array
+   * @param {string} string
+   */
+  addPendingIndexes = ({ address }) => {
+    if (this.pendingIndexes.length === 0) return address;
+
+    const m = [];
+    this.pendingIndexes.reverse().forEach(({ max }, index) => {
+      m.push((m[index - 1] || 1) * max);
+    });
+    m.pop();
+    m.reverse().push(1);
+
+    const offset = this.pendingIndexes.reverse().reduce((acc, { index }, mIndex) => {
+      acc += m[mIndex] * index;
+      return acc;
+    }, 0);
+
+    this.pendingIndexes = [];
+
+    return address + offset;
+  };
+
   [SUM] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) + this.accessMemory(right);
   };
 
   [SUB] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) - this.accessMemory(right);
   };
 
   [MULT] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) * this.accessMemory(right);
   };
 
   [DIV] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) / this.accessMemory(right);
   };
 
   [EQ] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) === this.accessMemory(right);
   };
 
   [NEQ] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) != this.accessMemory(right);
   };
 
   [GTE] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) >= this.accessMemory(right);
   };
 
   [LTE] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) <= this.accessMemory(right);
   };
 
   [GT] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) > this.accessMemory(right);
   };
 
   [LT] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) < this.accessMemory(right);
   };
 
   [AND] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) && this.accessMemory(right);
   };
 
   [OR] = (quadruple) => {
-    const [_, left, right, result] = quadruple;
+    const [_, left, right, address] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] =
       this.accessMemory(left) || this.accessMemory(right);
@@ -170,17 +234,23 @@ class VirtualMachine {
   [NOT] = (quadruple) => {
     const [_, toNegate] = quadruple;
 
-    this.currentMemory[toNegate] = !this.accessMemory(toNegate);
+    const result = this.addPendingIndexes({ address: toNegate });
+
+    this.currentMemory[result] = !this.accessMemory(result);
   };
 
   [EQUAL] = (quadruple) => {
-    const [_, result, toSet] = quadruple;
+    const [_, address, toSet] = quadruple;
+
+    const result = this.addPendingIndexes({ address });
 
     this.currentMemory[result] = this.accessMemory(toSet);
   };
 
   [READ] = async (quadruple) => {
-    const [_, toSet] = quadruple;
+    const [_, address] = quadruple;
+
+    const toSet = this.addPendingIndexes({ address });
 
     const int = readline.createInterface({
       input: process.stdin,
@@ -203,7 +273,9 @@ class VirtualMachine {
   };
 
   [WRITE] = (quadruple) => {
-    const [_, toWrite] = quadruple;
+    const [_, address] = quadruple;
+
+    const toWrite = this.addPendingIndexes({ address });
 
     console.log(this.accessMemory(toWrite));
   };
@@ -229,11 +301,15 @@ class VirtualMachine {
     this.methodAddresses.push(methodAddress);
     this.deep++;
     if (this.deep > 5000)
-      throw new Error("Stack overflow. Did you forget your base case?");
+      throw new Error(
+        "Execution error: Stack overflow. Did you forget your base case?"
+      );
   };
 
   [PARAM] = (quadruple) => {
-    const [_, variable, prevMemoryAddress] = quadruple;
+    const [_, variable, address] = quadruple;
+
+    const prevMemoryAddress = this.addPendingIndexes({ address });
 
     this.currentMemory[variable] = this.accessMemory(prevMemoryAddress);
   };
@@ -255,8 +331,10 @@ class VirtualMachine {
   };
 
   [RETURN] = (quadruple) => {
-    const [_, variable] = quadruple;
+    const [_, address] = quadruple;
     const methodEnded = this.methodAddresses.pop();
+
+    const variable = this.addPendingIndexes({ address });
 
     this.returns.push({
       value: this.accessMemory(variable),
@@ -267,6 +345,17 @@ class VirtualMachine {
       this.instructionPointer++;
 
     this.instructionPointer--;
+  };
+
+  [VER] = (quadruple) => {
+    const [_, address, max] = quadruple;
+
+    const index = this.accessMemory(address);
+
+    this.pendingIndexes.push({ index, max });
+
+    if (index < 0 || index >= max)
+      throw new Error("Execution error: Index out of bounds");
   };
 }
 

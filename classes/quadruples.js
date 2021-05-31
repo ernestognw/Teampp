@@ -212,7 +212,11 @@ class Quadruples {
 
     let tmp = null;
 
-    if (opcode != OPCODES.EQUAL && opcode != OPCODES.PARAM) {
+    if (
+      opcode != OPCODES.EQUAL &&
+      opcode != OPCODES.PARAM &&
+      opcode != OPCODES.VER
+    ) {
       // Equal is a special case
       tmp = this.semantics.memory.getAddress({
         type: resultType,
@@ -308,11 +312,27 @@ class Quadruples {
       );
   };
 
+  /**
+   * Adds go sub for functions
+   * @param {string} functionName name of the function to operate
+   */
   addGoSub = ({ functionName }) => {
     const validated = this.semantics.validateId({ id: functionName });
 
     this.jumpStack.push(validated.target);
     this.operatorsStack.push(this.operators.GOSUB);
+    this.checkOperation({ priority: -3 });
+  };
+
+  /**
+   * Add verification operation for arrays
+   * @param {object} dimension data about the current accesed dimension
+   * @param {dimensionToCheck} dimension variable or address accessing the current dimension
+   */
+  addVer = ({ dimension, dimensionToCheck }) => {
+    this.pushToOperationsStack(dimensionToCheck);
+    this.pushToOperationsStack({ type: types.INT, value: dimension.size });
+    this.operatorsStack.push(this.operators.VER);
     this.checkOperation({ priority: -3 });
   };
 }

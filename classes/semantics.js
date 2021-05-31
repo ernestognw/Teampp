@@ -42,6 +42,7 @@ class Semantics {
    * @param {isFunction} boolean whether the variable is for a function or not
    * @param {dimensions} array number of dimensions for the variable
    * @param {addToParams} boolean whether to add the variable to param array
+   * @param {advance} boolean how many addresses to request
    */
   addVar = ({
     id,
@@ -50,6 +51,7 @@ class Semantics {
     addNextLevel = false,
     dimensions = [],
     addToParams = false,
+    advance = 1,
   }) => {
     const typeExists = this.validateGenericType({ type });
 
@@ -93,6 +95,7 @@ class Semantics {
         segment: isFunction
           ? this.memory.segments.STACK
           : this.memory.segments.LOCAL,
+        advance,
       });
     }
 
@@ -246,8 +249,8 @@ class Semantics {
       dimensionSizes.reverse().forEach(({ size }, index) => {
         m.push((m[index - 1] || 1) * size);
       });
-      m.pop();
-      m.reverse().push(1);
+      const advance = m.pop();
+      m.reverse().push(0);
 
       const dimensions = dimensionSizes
         .reverse()
@@ -257,6 +260,7 @@ class Semantics {
         id: name,
         type,
         dimensions,
+        advance,
       });
     });
 
@@ -313,7 +317,7 @@ class Semantics {
     const variable = this.validateCurrentVariable({ id }); // Check if variable is available in current scope
 
     if (!this.isPointPending) {
-      this.currentVariableStack.push({ ...variable, dimensionsToCheck: 0 });
+      this.currentVariableStack.push({ ...variable, dimensionsToCheck: [] });
     } else {
       let currentVariable = this.getCurrentVariable();
 
@@ -345,8 +349,14 @@ class Semantics {
   resetCurrentVariable = () => {
     let currentVariable = this.getCurrentVariable();
 
+    this.quadruples.pushToOperationsStack({
+      value: currentVariable.name,
+      type: currentVariable.type,
+    });
+
     if (
-      currentVariable.dimensions.length !== currentVariable.dimensionsToCheck
+      currentVariable.dimensions.length !==
+      currentVariable.dimensionsToCheck.length
     ) {
       throw new Error(
         `${this.lineError()} Identifier ${chalk.blue(
@@ -358,6 +368,13 @@ class Semantics {
         )}.`
       );
     }
+
+    currentVariable.dimensions.forEach((dimension, index) =>
+      this.quadruples.addVer({
+        dimension,
+        dimensionToCheck: currentVariable.dimensionsToCheck[index],
+      })
+    );
 
     this.pointsAdvanced = 0;
     this.currentVariableUsed.push(this.currentVariableStack.pop());
@@ -389,7 +406,9 @@ class Semantics {
    * if the variable has enough dimensions at the end of declaration
    */
   addDimensionToCheck = () => {
-    this.getCurrentVariable().dimensionsToCheck++;
+    this.currentVariableStack[
+      this.currentVariableStack.length - 1
+    ].dimensionsToCheck.push(this.quadruples.getLastOperation());
   };
 
   /**
@@ -455,6 +474,7 @@ class Semantics {
       operator: operators.PARAM,
     });
     this.quadruples.checkOperation({ priority: -3 });
+    this.quadruples.operationsStack.pop();
   };
 
   resetParamPointer = () => {

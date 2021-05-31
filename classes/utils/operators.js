@@ -13,6 +13,7 @@ const binaryOperators = {
   OR: "||",
   EQUAL: "=",
   PARAM: "param",
+  VER: "VER",
 };
 
 const unaryOperators = {
@@ -60,6 +61,7 @@ const operatorsPriority = {
   [operators.GOSUB]: -3,
   [operators.ENDFUNC]: -3,
   [operators.RETURN]: -3,
+  [operators.VER]: -3,
 };
 
 // Only assertion to ensure every operator has code

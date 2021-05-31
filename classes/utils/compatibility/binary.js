@@ -18,6 +18,7 @@ const {
   OR,
   EQUAL,
   PARAM,
+  VER,
   ...missing
 } = binaryOperators;
 
@@ -42,6 +43,7 @@ const binaryPrecube = {
       [OR]: null,
       [EQUAL]: INT,
       [PARAM]: INT,
+      [VER]: INT,
     },
     [FLOAT]: {
       [PLUS]: FLOAT,
@@ -58,6 +60,7 @@ const binaryPrecube = {
       [OR]: null,
       [EQUAL]: FLOAT,
       [PARAM]: FLOAT,
+      [VER]: null, // Can only be done between integers
     },
     [CHAR]: {
       [PLUS]: INT,
@@ -74,6 +77,7 @@ const binaryPrecube = {
       [OR]: null,
       [EQUAL]: INT,
       [PARAM]: INT,
+      [VER]: null, // Can only be done between integers
     },
     [BOOLEAN]: {
       [PLUS]: null,
@@ -90,6 +94,7 @@ const binaryPrecube = {
       [OR]: null,
       [EQUAL]: null,
       [PARAM]: null,
+      [VER]: null, // Can only be done between integers
     },
   },
   [FLOAT]: {
@@ -108,6 +113,7 @@ const binaryPrecube = {
       [OR]: null,
       [EQUAL]: FLOAT,
       [PARAM]: FLOAT,
+      [VER]: null, // Can only be done between integers
     },
     [CHAR]: {
       [PLUS]: FLOAT,
@@ -124,6 +130,7 @@ const binaryPrecube = {
       [OR]: null,
       [EQUAL]: FLOAT,
       [PARAM]: FLOAT,
+      [VER]: null, // Can only be done between integers
     },
     [BOOLEAN]: {
       [PLUS]: null,
@@ -140,6 +147,7 @@ const binaryPrecube = {
       [OR]: null,
       [EQUAL]: null,
       [PARAM]: null,
+      [VER]: null, // Can only be done between integers
     },
   },
   [CHAR]: {
@@ -158,6 +166,7 @@ const binaryPrecube = {
       [OR]: null,
       [EQUAL]: CHAR,
       [PARAM]: CHAR,
+      [VER]: null, // Can only be done between integers
     },
     [BOOLEAN]: {
       [PLUS]: null,
@@ -174,6 +183,7 @@ const binaryPrecube = {
       [OR]: null,
       [EQUAL]: null,
       [PARAM]: null,
+      [VER]: null, // Can only be done between integers
     },
   },
   [BOOLEAN]: {
@@ -192,6 +202,7 @@ const binaryPrecube = {
       [OR]: BOOLEAN,
       [EQUAL]: BOOLEAN,
       [PARAM]: BOOLEAN,
+      [VER]: null, // Can only be done between integers
     },
   },
 };

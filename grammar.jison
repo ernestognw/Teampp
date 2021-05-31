@@ -83,7 +83,7 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		console.log(JSON.stringify(yy.semantics.main))
+		// console.log(JSON.stringify(yy.semantics.main))
 		console.table(yy.semantics.quadruples.intermediateCode);
     console.info(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
@@ -318,10 +318,6 @@ var_aux:
 
 var: 
 	var_usage var_aux dimensions_check {
-		yy.semantics.quadruples.pushToOperationsStack({ 
-			value: yy.semantics.getCurrentVariable().name, 
-			type: yy.semantics.getCurrentVariable().type
-		});
 		yy.semantics.resetCurrentVariable();
 	}
 	;
@@ -357,7 +353,6 @@ assign:
 call_expression: 
 	expression {
 		yy.semantics.validateParam();
-		yy.semantics.quadruples.operationsStack.pop();
 	}
 	;
 	

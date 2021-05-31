@@ -125,16 +125,17 @@ class Memory {
   /**
    * Increase temporary map pointer and returns the last available address
    * @param {string} type of the variable
-   * @param {string} segment of of variables
+   * @param {string} segment of variables
+   * @param {number} advance addresses to occupy
    * @returns address
    */
-  getAddress = ({ type, segment }) => {
+  getAddress = ({ type, segment, advance = 1 }) => {
     const map = this.map[segment][type];
     const address = map.pointer;
 
-    if (address > map.high) throw new Error("Too many variables");
+    this.map[segment][type].pointer += advance;
 
-    this.map[segment][type].pointer++;
+    if (address > map.high) throw new Error("Too many variables");
 
     return address;
   };
