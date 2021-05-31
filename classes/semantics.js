@@ -340,10 +340,7 @@ class Semantics {
       );
     }
 
-    for (let i = 0; i < this.pointsAdvanced + 1; i++) {
-      this.currentVariableStack.pop();
-      this.pointsAdvanced = 0;
-    }
+    this.pointsAdvanced = 0;
   };
 
   /**
