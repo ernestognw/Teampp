@@ -324,6 +324,29 @@ class Semantics {
   };
 
   /**
+   * Resets current variable at the end of a variable use and checks if dimensions
+   * are correct
+   */
+  resetCurrentVariable = () => {
+    let currentVariable = this.getCurrentVariable();
+
+    if (currentVariable.dimensions !== currentVariable.dimensionsToCheck) {
+      throw new Error(
+        `${this.lineError()} Identifier ${chalk.blue(
+          currentVariable.name
+        )} is trying to use ${chalk.red(
+          currentVariable.dimensionsToCheck
+        )} dimensions but has ${chalk.green(currentVariable.dimensions)}.`
+      );
+    }
+
+    for (let i = 0; i < this.pointsAdvanced + 1; i++) {
+      this.currentVariableStack.pop();
+      this.pointsAdvanced = 0;
+    }
+  };
+
+  /**
    * Gets current variable
    */
   getCurrentVariable = () =>
@@ -370,7 +393,7 @@ class Semantics {
   validateParam = () => {
     const directory = this.checkOnPreviousScope({
       directory: this.currentDirectory,
-      id: this.callingVariable
+      id: this.callingVariable,
     });
     const name = directory.name;
     const expectedParams = directory.params;
@@ -414,7 +437,7 @@ class Semantics {
   resetParamPointer = () => {
     const directory = this.checkOnPreviousScope({
       directory: this.currentDirectory,
-      id: this.callingVariable
+      id: this.callingVariable,
     });
     const name = directory.name;
     const expectedParams = directory.params;

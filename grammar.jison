@@ -83,7 +83,7 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		console.log(JSON.stringify(yy.semantics.main))
+		// console.log(JSON.stringify(yy.semantics.main))
 		console.table(yy.semantics.quadruples.intermediateCode);
     console.info(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
@@ -378,6 +378,7 @@ var_call:
 		yy.semantics.callingVariable = name;
 		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.ERA);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
+		yy.semantics.resetCurrentVariable();
 	}
 	;
 
