@@ -58,10 +58,11 @@ class VirtualMachine {
     do {
       value =
         this.previousMemories[this.previousMemories.length - back]?.[address];
-      // console.log(this.previousMemories[this.previousMemories.length - back]);
+      // console.log(this.previousMemories[this.previousMemories.length - back], value);
+
       back++;
       if (back > this.previousMemories.length) break;
-    } while (!value);
+    } while (typeof value === "undefined");
 
     this.previousMemories.pop();
 
@@ -227,7 +228,8 @@ class VirtualMachine {
     this.currentMemory = this.currentMemory[methodAddress]; // Move to activation record
     this.methodAddresses.push(methodAddress);
     this.deep++;
-    if(this.deep > 5000) throw new Error("Stack overflow. Did you forget your base case?")
+    if (this.deep > 5000)
+      throw new Error("Stack overflow. Did you forget your base case?");
   };
 
   [PARAM] = (quadruple) => {
