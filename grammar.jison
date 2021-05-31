@@ -83,6 +83,7 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
+		console.log(JSON.stringify(yy.semantics.main))
 		console.table(yy.semantics.quadruples.intermediateCode);
     console.info(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
@@ -543,7 +544,7 @@ for_expression:
 
 for_first_semicolon:
 	SEMICOLON {
-		yy.semantics.quadruples.jumpStack.push(yy.semantics.quadruples.intermediateCode.length + 1);
+		yy.semantics.quadruples.jumpStack.push(yy.semantics.quadruples.intermediateCode.length);
 	}
 	;
 
