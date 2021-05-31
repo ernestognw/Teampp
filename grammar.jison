@@ -83,7 +83,7 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		// console.log(JSON.stringify(yy.semantics.main))
+		console.log(JSON.stringify(yy.semantics.main))
 		console.table(yy.semantics.quadruples.intermediateCode);
     console.info(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);
@@ -191,8 +191,8 @@ list_ids:
 	;
 
 dimension:
-	LA expression RA {
-		yy.semantics.addDimensionToLastPendingVar();
+	LA int RA {
+		yy.semantics.addDimensionToLastPendingVar({ size: $2 });
 	}
 	;
 
@@ -263,15 +263,9 @@ module_close:
 	}
 	;
 
-module_open:
-	OPEN_BRACKET {
-
-	}
-	;
-
 modules: 
-	module_header module_open statements module_close modules
-	| module_header module_open module_close modules
+	module_header OPEN_BRACKET statements module_close modules
+	| module_header OPEN_BRACKET module_close modules
 	| {}
 	;
 

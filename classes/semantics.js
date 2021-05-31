@@ -40,7 +40,7 @@ class Semantics {
    * @param {type} string type of variable
    * @param {addNextLevel} boolean whether is going to start a new sub variable directory
    * @param {isFunction} boolean whether the variable is for a function or not
-   * @param {dimensions} number number of dimensions for the variable
+   * @param {dimensions} array number of dimensions for the variable
    * @param {addToParams} boolean whether to add the variable to param array
    */
   addVar = ({
@@ -48,7 +48,7 @@ class Semantics {
     type,
     isFunction = false,
     addNextLevel = false,
-    dimensions = 0,
+    dimensions = [],
     addToParams = false,
   }) => {
     const typeExists = this.validateGenericType({ type });
@@ -127,9 +127,12 @@ class Semantics {
 
   /**
    * Adds dimension to current variable
+   * @param {size} number size of the dimension
    */
-  addDimensionToLastPendingVar = () => {
-    this.pendingVars[this.pendingVars.length - 1].dimensions++;
+  addDimensionToLastPendingVar = ({ size }) => {
+    this.pendingVars[this.pendingVars.length - 1].dimensions.push({
+      size: Number(size),
+    });
   };
 
   /**
@@ -229,7 +232,7 @@ class Semantics {
    * @param {name} string name of the variable to push into pending vars
    */
   pushToPendingVars = ({ name }) => {
-    this.pendingVars.push({ name, dimensions: 0 });
+    this.pendingVars.push({ name, dimensions: [] });
   };
 
   /**
@@ -238,7 +241,18 @@ class Semantics {
    * @param {type} string type to assing to every single pending var
    */
   addPendingVars = ({ type }) => {
-    this.pendingVars.forEach(({ name, dimensions }) => {
+    this.pendingVars.forEach(({ name, dimensions: dimensionSizes }) => {
+      const m = [];
+      dimensionSizes.reverse().forEach(({ size }, index) => {
+        m.push((m[index - 1] || 1) * size);
+      });
+      m.pop();
+      m.reverse().push(1);
+
+      const dimensions = dimensionSizes
+        .reverse()
+        .map(({ size }, index) => ({ size, m: m[index] }));
+
       this.addVar({
         id: name,
         type,
@@ -331,13 +345,17 @@ class Semantics {
   resetCurrentVariable = () => {
     let currentVariable = this.getCurrentVariable();
 
-    if (currentVariable.dimensions !== currentVariable.dimensionsToCheck) {
+    if (
+      currentVariable.dimensions.length !== currentVariable.dimensionsToCheck
+    ) {
       throw new Error(
         `${this.lineError()} Identifier ${chalk.blue(
           currentVariable.name
         )} is trying to use ${chalk.red(
           currentVariable.dimensionsToCheck
-        )} dimensions but has ${chalk.green(currentVariable.dimensions)}.`
+        )} dimensions but has ${chalk.green(
+          currentVariable.dimensions.length
+        )}.`
       );
     }
 
