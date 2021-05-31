@@ -395,10 +395,10 @@ call:
 
 return:
 	RETURN OPEN_PARENTHESIS expression CLOSE_PARENTHESIS {
-		// yy.semantics.validateReturn({
-		// 	func: yy.semantics.currentDirectory,
-		// 	returnType: yy.semantics.quadruples.getLastOperation().type
-		// })
+		yy.semantics.validateReturn({
+			func: yy.semantics.currentDirectory,
+			returnType: yy.semantics.quadruples.getLastOperation().type
+		})
 		yy.semantics.quadruples.pushToOperationsStack({
 			value: yy.semantics.quadruples.getLastOperation().value	,
 			type: yy.semantics.quadruples.getLastOperation().type
