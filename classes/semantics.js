@@ -369,13 +369,11 @@ class Semantics {
       );
     }
 
-    currentVariable.dimensions.forEach((dimension, index) =>
-      this.quadruples.addVer({
-        dimension,
-        dimensionToCheck: currentVariable.dimensionsToCheck[index],
-      })
-    );
-
+    this.quadruples.addArrayIndex({
+      dimensions: currentVariable.dimensions,
+      dimensionsToCheck: currentVariable.dimensionsToCheck,
+    });
+    
     this.pointsAdvanced = 0;
     this.currentVariableUsed.push(this.currentVariableStack.pop());
   };

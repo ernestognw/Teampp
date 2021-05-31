@@ -3,7 +3,8 @@ const { unaryOperators } = require("../operators");
 
 const { INT, FLOAT, CHAR, BOOLEAN, STRING } = types;
 
-const { NOT, EQUAL, READ, WRITE, GOTOF, ERA, RETURN, ...missing } = unaryOperators;
+const { NOT, EQUAL, READ, WRITE, GOTOF, ERA, RETURN, ADDDIM, ...missing } =
+  unaryOperators;
 
 // Only assertion to ensure every operator is being used
 if (Object.keys(missing).length > 0)
@@ -18,6 +19,7 @@ const unaryCube = {
     [GOTOF]: null,
     [ERA]: INT,
     [RETURN]: INT,
+    [ADDDIM]: INT,
   },
   [FLOAT]: {
     [NOT]: null,
@@ -27,6 +29,7 @@ const unaryCube = {
     [GOTOF]: null,
     [ERA]: FLOAT,
     [RETURN]: FLOAT,
+    [ADDDIM]: FLOAT,
   },
   [CHAR]: {
     [NOT]: null,
@@ -36,6 +39,7 @@ const unaryCube = {
     [GOTOF]: null,
     [ERA]: CHAR,
     [RETURN]: CHAR,
+    [ADDDIM]: CHAR,
   },
   [BOOLEAN]: {
     [NOT]: BOOLEAN,
@@ -45,6 +49,7 @@ const unaryCube = {
     [GOTOF]: BOOLEAN,
     [ERA]: BOOLEAN,
     [RETURN]: BOOLEAN,
+    [ADDDIM]: BOOLEAN,
   },
   // String is only valid for write unary operations. NOT NECESSARY TO COMPARE
   [STRING]: {

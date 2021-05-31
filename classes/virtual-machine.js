@@ -36,6 +36,7 @@ const {
   ENDFUNC,
   RETURN,
   VER,
+  ADDDIM,
 } = OPCODES;
 
 class VirtualMachine {
@@ -48,6 +49,7 @@ class VirtualMachine {
     this.previousMemories = [];
     this.returns = [];
     this.pendingIndexes = [];
+    this.pendingDimensions = [];
     this.deep = 0;
   }
 
@@ -90,6 +92,7 @@ class VirtualMachine {
       this.instructionPointer++;
     }
     // console.log(this.memory.addresses);
+    // console.log(this.pendingIndexes)
   };
 
   /**
@@ -104,22 +107,27 @@ class VirtualMachine {
    * @param {string} string
    */
   addPendingIndexes = ({ address }) => {
-    if (this.pendingIndexes.length === 0) return address;
+    if (this.pendingDimensions.length === 0) return address;
+
+    const amountOfDimensions = this.pendingDimensions.pop();
+
+    const indexesToReduce = this.pendingIndexes.splice(amountOfDimensions * -1);
 
     const m = [];
-    this.pendingIndexes.reverse().forEach(({ max }, index) => {
+    indexesToReduce.reverse().forEach(({ max }, index) => {
       m.push((m[index - 1] || 1) * max);
     });
     m.pop();
     m.reverse().push(1);
 
-    const offset = this.pendingIndexes.reverse().reduce((acc, { index }, mIndex) => {
-      acc += m[mIndex] * index;
-      return acc;
-    }, 0);
+    const offset = indexesToReduce
+      .reverse()
+      .reduce((acc, { index }, mIndex) => {
+        acc += m[mIndex] * index;
+        return acc;
+      }, 0);
 
-    this.pendingIndexes = [];
-
+    // console.log(address + offset, address, offset)
     return address + offset;
   };
 
@@ -347,10 +355,19 @@ class VirtualMachine {
     this.instructionPointer--;
   };
 
-  [VER] = (quadruple) => {
-    const [_, address, max] = quadruple;
+  [ADDDIM] = (quadruple) => {
+    const [_, dimensionsAddress] = quadruple;
 
-    const index = this.accessMemory(address);
+    const dimensions = this.accessMemory(dimensionsAddress);
+
+    this.pendingDimensions.push(dimensions);
+  };
+
+  [VER] = (quadruple) => {
+    const [_, indexAddress, maxAddress] = quadruple;
+
+    const index = this.accessMemory(indexAddress);
+    const max = this.accessMemory(maxAddress);
 
     this.pendingIndexes.push({ index, max });
 

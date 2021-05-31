@@ -24,7 +24,8 @@ const {
   GOSUB,
   ENDFUNC,
   RETURN,
-  VER
+  VER,
+  ADDDIM
 } = operators;
 
 const OPCODES = {
@@ -75,6 +76,7 @@ const OPCODES = {
   ENDFUNC: "ENDFUNC",
   RETURN: "RETURN",
   VER: "VER",
+  ADDDIM: "ADDDIM",
 };
 
 const operatorToOpcode = {
@@ -102,6 +104,7 @@ const operatorToOpcode = {
   [ENDFUNC]: OPCODES.ENDFUNC,
   [RETURN]: OPCODES.RETURN,
   [VER]: OPCODES.VER,
+  [ADDDIM]: OPCODES.ADDDIM,
 };
 
 // Only assertion to ensure every operator is being used

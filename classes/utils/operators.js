@@ -23,6 +23,7 @@ const unaryOperators = {
   GOTOF: "gotof",
   ERA: "era",
   RETURN: "return",
+  ADDDIM: 'adddim'
 };
 
 const standaloneOperators = {
@@ -62,6 +63,7 @@ const operatorsPriority = {
   [operators.ENDFUNC]: -3,
   [operators.RETURN]: -3,
   [operators.VER]: -3,
+  [operators.ADDDIM]: -3,
 };
 
 // Only assertion to ensure every operator has code
