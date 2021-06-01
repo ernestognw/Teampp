@@ -91,8 +91,8 @@ class VirtualMachine {
       await operation(quadruple);
       this.instructionPointer++;
     }
-    // console.log(this.memory.addresses);
-    // console.log(this.pendingIndexes)
+    console.log(this.memory.addresses);
+    // console.log(this.pendingIndexes);
   };
 
   /**
@@ -106,12 +106,16 @@ class VirtualMachine {
    * Add previous indexes when accessing an array
    * @param {string} string
    */
-  addPendingIndexes = ({ address }) => {
-    if (this.pendingDimensions.length === 0) return address;
+  addPendingIndexes = ({ address, pop = true, minLength = 0 }) => {
+    if (this.pendingDimensions.length === minLength) return address;
 
     const amountOfDimensions = this.pendingDimensions.pop();
-
     const indexesToReduce = this.pendingIndexes.splice(amountOfDimensions * -1);
+
+    if(!pop) {
+      this.pendingDimensions.push(amountOfDimensions)
+      this.pendingIndexes = [...this.pendingIndexes, ...indexesToReduce]
+    }
 
     const m = [];
     indexesToReduce.reverse().forEach(({ max }, index) => {
@@ -366,9 +370,11 @@ class VirtualMachine {
   [VER] = (quadruple) => {
     const [_, indexAddress, maxAddress] = quadruple;
 
-    const index = this.accessMemory(indexAddress);
-    const max = this.accessMemory(maxAddress);
+    const indexAddressAdvanced = this.addPendingIndexes({ address: indexAddress, pop: true, minLength: 1 });
 
+    const index = this.accessMemory(indexAddressAdvanced);
+    const max = this.accessMemory(maxAddress); // Maz is always a constant
+    
     this.pendingIndexes.push({ index, max });
 
     if (index < 0 || index >= max)
