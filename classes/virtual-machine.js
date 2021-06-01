@@ -106,15 +106,25 @@ class VirtualMachine {
    * Add previous indexes when accessing an array
    * @param {string} string
    */
-  addPendingIndexes = ({ address, pop = true, minLength = 0 }) => {
-    if (this.pendingDimensions.length === minLength) return address;
+  addPendingIndexes = ({
+    address,
+    pop = true,
+    minLength = 0,
+    resetAll = true,
+  }) => {
+    if (this.pendingDimensions.length <= minLength) return address;
 
     const amountOfDimensions = this.pendingDimensions.pop();
     const indexesToReduce = this.pendingIndexes.splice(amountOfDimensions * -1);
 
-    if(!pop) {
-      this.pendingDimensions.push(amountOfDimensions)
-      this.pendingIndexes = [...this.pendingIndexes, ...indexesToReduce]
+    if (!pop) {
+      this.pendingIndexes = [...this.pendingIndexes, ...indexesToReduce];
+      this.pendingDimensions.push(amountOfDimensions);
+    }
+
+    if (resetAll) {
+      this.pendingIndexes = [];
+      this.pendingDimensions = [];
     }
 
     const m = [];
@@ -131,7 +141,7 @@ class VirtualMachine {
         return acc;
       }, 0);
 
-    // console.log(address + offset, address, offset)
+    // console.log(address + offset, address, offset);
     return address + offset;
   };
 
@@ -370,11 +380,16 @@ class VirtualMachine {
   [VER] = (quadruple) => {
     const [_, indexAddress, maxAddress] = quadruple;
 
-    const indexAddressAdvanced = this.addPendingIndexes({ address: indexAddress, pop: true, minLength: 1 });
+    const indexAddressAdvanced = this.addPendingIndexes({
+      address: indexAddress,
+      pop: false,
+      minLength: 1,
+      resetAll: false
+    });
 
     const index = this.accessMemory(indexAddressAdvanced);
     const max = this.accessMemory(maxAddress); // Maz is always a constant
-    
+
     this.pendingIndexes.push({ index, max });
 
     if (index < 0 || index >= max)
