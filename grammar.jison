@@ -65,13 +65,14 @@ class				{ return 'CLASS'; }
 inherits    { return 'INHERITS'; }
 
 [0-9]+\.[0-9]+ 		  			{ return 'FLOAT'; }
-[0-9]+            				{ return 'INT'; }
+[0-9]+           					{ return 'INT'; }
 (true|false)							{ return 'BOOLEAN'; }
 [A-Za-z_][A-Za-z0-9_]*		{ return 'ID'; }
 \'([A-Za-z]|[0-9])\'			{ return 'CHAR'; }
 \".*\"				      			{ return 'STRING'; }
 [\n]           		 			 	{ }
 .                	  			{ }
+
 
 /lex
 
@@ -561,6 +562,11 @@ int:
 			value: Number($1), 
 			type: yy.semantics.quadruples.types.INT 
 		})
+	} | MINUS INT {
+		yy.semantics.setConstant({ 
+			value: Number($2) * -1, 
+			type: yy.semantics.quadruples.types.INT 
+		})
 	}
 	;
 
@@ -568,6 +574,12 @@ float:
 	FLOAT {
 		yy.semantics.setConstant({ 
 			value: Number($1), 
+			type: yy.semantics.quadruples.types.FLOAT 
+		})
+	}
+	| MINUS FLOAT {
+		yy.semantics.setConstant({ 
+			value: Number($2) * -1, 
 			type: yy.semantics.quadruples.types.FLOAT 
 		})
 	}

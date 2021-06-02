@@ -105,10 +105,10 @@ class VirtualMachine {
 
         if (typeof previousValue !== "undefined") {
           this.previousMemories[this.previousMemories.length - back][address] =
-          value;
+            value;
           return;
         }
-        
+
         back++;
         if (back > this.previousMemories.length) break;
       } while (typeof previousValue === "undefined");
@@ -151,7 +151,7 @@ class VirtualMachine {
     resetAll = true,
   }) => {
     if (this.pendingDimensions.length <= minLength) return address;
-    if(!this.addimMap[address]) return address;
+    if (!this.addimMap[address]) return address;
 
     this.addimMap[address]--;
 
@@ -187,8 +187,10 @@ class VirtualMachine {
   };
 
   [SUM] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
     const result = this.addPendingIndexes({ address });
 
     this.write({
@@ -198,8 +200,10 @@ class VirtualMachine {
   };
 
   [SUB] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
     const result = this.addPendingIndexes({ address });
 
     this.write({
@@ -209,8 +213,10 @@ class VirtualMachine {
   };
 
   [MULT] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
     const result = this.addPendingIndexes({ address });
 
     this.write({
@@ -220,8 +226,10 @@ class VirtualMachine {
   };
 
   [DIV] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
     const result = this.addPendingIndexes({ address });
 
     this.write({
@@ -231,9 +239,11 @@ class VirtualMachine {
   };
 
   [EQ] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
     const result = this.addPendingIndexes({ address });
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
 
     this.write({
       address: result,
@@ -242,8 +252,10 @@ class VirtualMachine {
   };
 
   [NEQ] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
     const result = this.addPendingIndexes({ address });
 
     this.write({
@@ -253,8 +265,10 @@ class VirtualMachine {
   };
 
   [GTE] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
     const result = this.addPendingIndexes({ address });
 
     this.write({
@@ -264,8 +278,10 @@ class VirtualMachine {
   };
 
   [LTE] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
     const result = this.addPendingIndexes({ address });
 
     this.write({
@@ -275,8 +291,10 @@ class VirtualMachine {
   };
 
   [GT] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
     const result = this.addPendingIndexes({ address });
 
     this.write({
@@ -286,8 +304,10 @@ class VirtualMachine {
   };
 
   [LT] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
     const result = this.addPendingIndexes({ address });
 
     this.write({
@@ -297,8 +317,10 @@ class VirtualMachine {
   };
 
   [AND] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
     const result = this.addPendingIndexes({ address });
 
     this.write({
@@ -308,8 +330,10 @@ class VirtualMachine {
   };
 
   [OR] = (quadruple) => {
-    const [_, left, right, address] = quadruple;
+    const [_, leftAddress, rightAddress, address] = quadruple;
 
+    const left = this.addPendingIndexes({ address: leftAddress });
+    const right = this.addPendingIndexes({ address: rightAddress });
     const result = this.addPendingIndexes({ address });
 
     this.write({
@@ -330,9 +354,10 @@ class VirtualMachine {
   };
 
   [EQUAL] = (quadruple) => {
-    const [_, address, toSet] = quadruple;
+    const [_, address, toSetAddress] = quadruple;
 
     const result = this.addPendingIndexes({ address });
+    const toSet = this.addPendingIndexes({ address: toSetAddress });
 
     this.write({
       address: result,
@@ -402,9 +427,10 @@ class VirtualMachine {
   };
 
   [PARAM] = (quadruple) => {
-    const [_, variable, address] = quadruple;
+    const [_, variableAddress, address] = quadruple;
 
     const prevMemoryAddress = this.addPendingIndexes({ address });
+    const variable = this.addPendingIndexes({ address: variableAddress });
 
     this.write({
       address: variable,
