@@ -100,7 +100,6 @@ class Semantics {
         : this.memory.segments.LOCAL,
         advance,
       });
-      console.log(id, type, address)
     }
 
     this.currentDirectory.varsDirectory[id] = {

@@ -5,9 +5,14 @@
 	if(!yy.started) {
 		yy.started = true
 
-		const Memory = require('../../classes/memory.js');
-		const Semantics = require('../../classes/semantics.js');
-		const VirtualMachine = require('../../classes/virtual-machine.js');
+		let baseDir = './'
+
+		if(__dirname.includes('jison'))
+			baseDir = '../../'
+
+		const Memory = require(`${baseDir}classes/memory.js`);
+		const Semantics = require(`${baseDir}classes/semantics.js`);
+		const VirtualMachine = require(`${baseDir}classes/virtual-machine.js`);
 
     yy.memory = new Memory();
 		yy.virtualMachine = new VirtualMachine(yy.memory);
@@ -84,7 +89,7 @@ inherits    { return 'INHERITS'; }
 
 init: 
 	program { 
-		yy.semantics.printDirectory(yy.semantics.main)
+		// yy.semantics.printDirectory(yy.semantics.main)
 		console.table(yy.semantics.quadruples.intermediateCode);
     console.info(`Succesfully compiled with ${this._$.last_line} lines of code`);
 		yy.virtualMachine.setCode(yy.semantics.quadruples.intermediateCode);

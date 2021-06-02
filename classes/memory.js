@@ -171,7 +171,6 @@ class Memory {
     const map = this.map[segment][type];
     const address = map.pointer;
 
-    console.log(map);
     this.map[segment][type].pointer += advance;
 
     if (this.map[segment][type].pointer > map.high)
