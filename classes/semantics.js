@@ -258,6 +258,9 @@ class Semantics {
         .reverse()
         .map(({ size }, index) => ({ size, m: m[index] }));
 
+      for (let i = 0; i < dimensions.length; i++)
+        this.quadruples.operationsStack.pop();
+
       this.addVar({
         id: name,
         type,
@@ -351,6 +354,9 @@ class Semantics {
   resetCurrentVariable = () => {
     let currentVariable = this.getCurrentVariable();
 
+    for (let i = 0; i < currentVariable.dimensions.length; i++)
+      this.quadruples.operationsStack.pop();
+
     this.quadruples.pushToOperationsStack({
       value: currentVariable.name,
       type: currentVariable.type,
@@ -377,7 +383,9 @@ class Semantics {
     });
 
     this.pointsAdvanced = 0;
-    this.currentVariableUsed.push(this.currentVariableStack.pop());
+    const lastVariable = this.currentVariableStack.pop();
+    if (lastVariable.isFunction) this.currentVariableUsed.push(lastVariable);
+    this.currentVariable = [];
   };
 
   /**

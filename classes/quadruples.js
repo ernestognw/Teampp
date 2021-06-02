@@ -162,7 +162,8 @@ class Quadruples {
       opcode != OPCODES.READ &&
       opcode != OPCODES.WRITE &&
       opcode != OPCODES.GOTOF &&
-      opcode != OPCODES.ADDDIM
+      opcode != OPCODES.ADDDIM &&
+      opcode != OPCODES.RETURN
     ) {
       this.pushToOperationsStack({
         value: leftAddress,
@@ -170,8 +171,10 @@ class Quadruples {
       });
     }
 
-    if (opcode === OPCODES.GOTOF)
+    if (opcode === OPCODES.GOTOF) {
       this.jumpStack.push(this.intermediateCode.length);
+      this.operationsStack.pop();
+    }
 
     const quadruple = [
       opcode,

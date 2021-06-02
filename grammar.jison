@@ -390,10 +390,6 @@ return:
 			func: yy.semantics.currentDirectory,
 			returnType: yy.semantics.quadruples.getLastOperation().type
 		})
-		yy.semantics.quadruples.pushToOperationsStack({
-			value: yy.semantics.quadruples.getLastOperation().value	,
-			type: yy.semantics.quadruples.getLastOperation().type
-		})
 		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.RETURN);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
 	}
@@ -423,7 +419,7 @@ writable:
 
 		yy.semantics.setConstant({ 
 			value: string, 
-			type: yy.semantics.quadruples.types.STRING 
+			type: yy.semantics.quadruples.types.STRING
 		});
 	}
 	| expression
