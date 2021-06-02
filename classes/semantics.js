@@ -94,12 +94,13 @@ class Semantics {
       address = this.memory.getAddress({
         type,
         segment: isFunction
-          ? this.memory.segments.STACK
-          : addToParams || this.currentDirectory.isFunction
-          ? this.memory.segments.FUNCTION
-          : this.memory.segments.LOCAL,
+        ? this.memory.segments.STACK
+        : addToParams || this.currentDirectory.isFunction
+        ? this.memory.segments.FUNCTION
+        : this.memory.segments.LOCAL,
         advance,
       });
+      console.log(id, type, address)
     }
 
     this.currentDirectory.varsDirectory[id] = {

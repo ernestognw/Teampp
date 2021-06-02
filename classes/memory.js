@@ -72,85 +72,89 @@ class Memory {
         },
       },
       [this.segments.STACK]: {
-        [INT]: {},
-        [FLOAT]: {
+        [INT]: {
           pointer: 60000,
           low: 60000,
           high: 64999,
         },
-        [CHAR]: {
+        [FLOAT]: {
           pointer: 65000,
           low: 65000,
           high: 69999,
         },
-        [BOOLEAN]: {
+        [CHAR]: {
           pointer: 70000,
           low: 70000,
           high: 74999,
         },
-        [STRING]: {
+        [BOOLEAN]: {
           pointer: 75000,
           low: 75000,
           high: 79999,
         },
-        [VOID]: {
+        [STRING]: {
           pointer: 80000,
           low: 80000,
           high: 84999,
         },
-      },
-      [this.segments.TEMP]: {
-        [INT]: {
+        [VOID]: {
           pointer: 85000,
           low: 85000,
           high: 89999,
         },
-        [FLOAT]: {
+      },
+      [this.segments.TEMP]: {
+        [INT]: {
           pointer: 90000,
           low: 90000,
           high: 94999,
         },
-        [CHAR]: {
+        [FLOAT]: {
           pointer: 95000,
           low: 95000,
           high: 99999,
         },
-        [BOOLEAN]: {
+        [CHAR]: {
           pointer: 100000,
           low: 100000,
           high: 104999,
         },
-        [STRING]: {
+        [BOOLEAN]: {
           pointer: 105000,
           low: 105000,
           high: 109999,
         },
-      },
-      [this.segments.FUNCTION]: {
-        [INT]: {
+        [STRING]: {
           pointer: 110000,
           low: 110000,
           high: 114999,
         },
-        [FLOAT]: {
+      },
+      [this.segments.FUNCTION]: {
+        [INT]: {
           pointer: 115000,
           low: 115000,
           high: 119999,
         },
-        [CHAR]: {
+        [FLOAT]: {
           pointer: 120000,
           low: 120000,
           high: 124999,
         },
-        [BOOLEAN]: {
+        [CHAR]: {
           pointer: 125000,
           low: 125000,
           high: 129999,
         },
-        [STRING]: {
+        [BOOLEAN]: {
           pointer: 130000,
           low: 130000,
           high: 134999,
+        },
+        [STRING]: {
+          pointer: 135000,
+          low: 135000,
+          high: 139999,
         },
       },
     };
@@ -167,6 +171,7 @@ class Memory {
     const map = this.map[segment][type];
     const address = map.pointer;
 
+    console.log(map);
     this.map[segment][type].pointer += advance;
 
     if (this.map[segment][type].pointer > map.high)
