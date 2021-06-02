@@ -9,6 +9,7 @@ class Memory {
       LOCAL: "local",
       STACK: "stack",
       TEMP: "temp",
+      FUNCTION: "function",
     };
     this.map = {
       [this.segments.GLOBAL]: {
@@ -117,6 +118,33 @@ class Memory {
           pointer: 100000,
           low: 100000,
           high: 104999,
+        },
+      },
+      [this.segments.FUNCTION]: {
+        [INT]: {
+          pointer: 105000,
+          low: 105000,
+          high: 109999,
+        },
+        [FLOAT]: {
+          pointer: 110000,
+          low: 110000,
+          high: 114999,
+        },
+        [CHAR]: {
+          pointer: 115000,
+          low: 115000,
+          high: 119999,
+        },
+        [BOOLEAN]: {
+          pointer: 120000,
+          low: 120000,
+          high: 124999,
+        },
+        [STRING]: {
+          pointer: 125000,
+          low: 125000,
+          high: 129999,
         },
       },
     };

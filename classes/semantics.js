@@ -94,6 +94,8 @@ class Semantics {
         type,
         segment: isFunction
           ? this.memory.segments.STACK
+          : addToParams || this.currentDirectory.isFunction
+          ? this.memory.segments.FUNCTION
           : this.memory.segments.LOCAL,
         advance,
       });
@@ -373,7 +375,7 @@ class Semantics {
       dimensions: currentVariable.dimensions,
       dimensionsToCheck: currentVariable.dimensionsToCheck,
     });
-    
+
     this.pointsAdvanced = 0;
     this.currentVariableUsed.push(this.currentVariableStack.pop());
   };
