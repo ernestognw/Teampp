@@ -163,7 +163,7 @@ class Memory {
 
     this.map[segment][type].pointer += advance;
 
-    if (address > map.high) throw new Error("Too many variables");
+    if (this.map[segment][type].pointer > map.high) throw new Error("Too many variables");
 
     return address;
   };
