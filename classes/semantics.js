@@ -182,7 +182,7 @@ class Semantics {
   validateId = ({ id, expectedType, expectFunction = false }) => {
     const scope = this.currentDirectory.name;
     const directory = this.currentDirectory;
-    const toCheck = this.checkOnPreviousScope({
+    let toCheck = this.checkOnPreviousScope({
       directory,
       id,
     });
@@ -383,6 +383,9 @@ class Semantics {
       address: currentVariable.address,
     });
 
+    for (let i = 0; i < this.pointsAdvanced - 1; i++)
+      this.currentVariableStack.pop();
+
     this.pointsAdvanced = 0;
     const lastVariable = this.currentVariableStack.pop();
     if (lastVariable.isFunction) this.currentVariableUsed.push(lastVariable);
@@ -406,6 +409,12 @@ class Semantics {
    * in calls such as foo.bar
    */
   searchForSubvariable = () => {
+    const { name } = this.getCurrentVariable();
+
+    this.advanceToDirectory({
+      name,
+    });
+
     this.isPointPending = true;
     this.pointsAdvanced++;
   };
