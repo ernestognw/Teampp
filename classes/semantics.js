@@ -25,6 +25,7 @@ class Semantics {
     this.currentVariableUsed = [];
     this.isPointPending = false;
     this.pointsAdvanced = 0;
+    this.pointsAdvancedFunction = 0;
     this.callingFunction = "";
 
     this.genericTypes = genericTypes;
@@ -89,7 +90,7 @@ class Semantics {
     }
 
     let address;
-    if (this.validateType({ type })) {
+    if (this.validateType({ type }) || type === genericTypes.VOID) {
       address = this.memory.getAddress({
         type,
         segment: isFunction
@@ -386,9 +387,15 @@ class Semantics {
     for (let i = 0; i < this.pointsAdvanced - 1; i++)
       this.currentVariableStack.pop();
 
-    this.pointsAdvanced = 0;
     const lastVariable = this.currentVariableStack.pop();
-    if (lastVariable.isFunction) this.currentVariableUsed.push(lastVariable);
+    if (lastVariable.isFunction) {
+      this.currentVariableUsed.push(lastVariable);
+      this.pointsAdvancedFunction = this.pointsAdvanced;
+    } else {
+      for (let i = 0; i < this.pointsAdvanced; i++) this.backDirectory();
+    }
+
+    this.pointsAdvanced = 0;
     this.currentVariable = [];
   };
 
@@ -448,7 +455,7 @@ class Semantics {
   };
 
   /**
-   *
+   * Validates that a param is received by current calling function
    */
   validateParam = () => {
     const directory = this.checkOnPreviousScope({
@@ -500,6 +507,7 @@ class Semantics {
       directory: this.currentDirectory,
       id: this.callingVariable,
     });
+
     const name = directory.name;
     const expectedParams = directory.params;
 
@@ -511,6 +519,8 @@ class Semantics {
       `);
 
     this.paramPointer = 0;
+    for (let i = 0; i < this.pointsAdvancedFunction; i++) this.backDirectory();
+    this.pointsAdvancedFunction = 0;
   };
 
   /**
@@ -556,6 +566,12 @@ class Semantics {
     } while (directory);
   };
 
+  /**
+   * Validatest that a function returns the expected type
+   *
+   * @param {returnType} type of function
+   * @param {func} object var directory of function
+   */
   validateReturn = ({ returnType, func }) => {
     if (returnType !== func.type)
       throw new Error(`
@@ -565,6 +581,29 @@ class Semantics {
         func.type
       )} type but it returns ${chalk.red(returnType)} instead.
       `);
+  };
+
+  /**
+   * Prints an object safely without circular references
+   *
+   * @param {*} directory
+   * @param {number} indent
+   */
+  printDirectory = (directory, indent = 2) => {
+    let cache = [];
+    const retVal = JSON.stringify(
+      directory,
+      (_, value) =>
+        typeof value === "object" && value !== null
+          ? cache.includes(value)
+            ? "<Circular Reference>" // Duplicate reference found, discard key
+            : cache.push(value) && value // Store value in our collection
+          : value,
+      indent
+    );
+    cache = null;
+
+    console.log(retVal);
   };
 }
 

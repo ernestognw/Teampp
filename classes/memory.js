@@ -1,5 +1,5 @@
-const { types } = require("./utils");
-const { INT, FLOAT, CHAR, BOOLEAN, STRING } = types;
+const { genericTypes } = require("./utils");
+const { INT, FLOAT, CHAR, BOOLEAN, STRING, VOID } = genericTypes;
 
 class Memory {
   constructor() {
@@ -65,13 +65,14 @@ class Memory {
           low: 50000,
           high: 54999,
         },
-      },
-      [this.segments.STACK]: {
-        [INT]: {
+        [VOID]: {
           pointer: 55000,
           low: 55000,
           high: 59999,
         },
+      },
+      [this.segments.STACK]: {
+        [INT]: {},
         [FLOAT]: {
           pointer: 60000,
           low: 60000,
@@ -92,59 +93,64 @@ class Memory {
           low: 75000,
           high: 79999,
         },
-      },
-      [this.segments.TEMP]: {
-        [INT]: {
+        [VOID]: {
           pointer: 80000,
           low: 80000,
           high: 84999,
         },
-        [FLOAT]: {
+      },
+      [this.segments.TEMP]: {
+        [INT]: {
           pointer: 85000,
           low: 85000,
           high: 89999,
         },
-        [CHAR]: {
+        [FLOAT]: {
           pointer: 90000,
           low: 90000,
           high: 94999,
         },
-        [BOOLEAN]: {
+        [CHAR]: {
           pointer: 95000,
           low: 95000,
           high: 99999,
         },
-        [STRING]: {
+        [BOOLEAN]: {
           pointer: 100000,
           low: 100000,
           high: 104999,
         },
-      },
-      [this.segments.FUNCTION]: {
-        [INT]: {
+        [STRING]: {
           pointer: 105000,
           low: 105000,
           high: 109999,
         },
-        [FLOAT]: {
+      },
+      [this.segments.FUNCTION]: {
+        [INT]: {
           pointer: 110000,
           low: 110000,
           high: 114999,
         },
-        [CHAR]: {
+        [FLOAT]: {
           pointer: 115000,
           low: 115000,
           high: 119999,
         },
-        [BOOLEAN]: {
+        [CHAR]: {
           pointer: 120000,
           low: 120000,
           high: 124999,
         },
-        [STRING]: {
+        [BOOLEAN]: {
           pointer: 125000,
           low: 125000,
           high: 129999,
+        },
+        [STRING]: {
+          pointer: 130000,
+          low: 130000,
+          high: 134999,
         },
       },
     };
@@ -163,7 +169,8 @@ class Memory {
 
     this.map[segment][type].pointer += advance;
 
-    if (this.map[segment][type].pointer > map.high) throw new Error("Too many variables");
+    if (this.map[segment][type].pointer > map.high)
+      throw new Error("Too many variables");
 
     return address;
   };
