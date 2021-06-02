@@ -139,9 +139,11 @@ class Quadruples {
     const left = this.operationsStack.pop();
     const operator = this.operatorsStack.pop();
 
-    const resultType = unaryCube[left.type][operator];
+    const isVoid = left.type === genericTypes.VOID;
 
-    if (!resultType)
+    const resultType = !isVoid && unaryCube[left.type][operator];
+
+    if (!resultType && !isVoid)
       throw new Error(
         `${this.semantics.lineError()} 
         Type Mismatch: Value ${chalk.red(left.value)} of type ${chalk.blue(
@@ -164,10 +166,11 @@ class Quadruples {
       opcode != OPCODES.GOTOF &&
       opcode != OPCODES.RETURN
     ) {
-      this.pushToOperationsStack({
-        value: leftAddress,
-        type: resultType,
-      });
+      if (!isVoid)
+        this.pushToOperationsStack({
+          value: leftAddress,
+          type: resultType,
+        });
     }
 
     if (opcode === OPCODES.GOTOF) {
@@ -338,7 +341,7 @@ class Quadruples {
     if (dimensions.length === 0) return;
 
     this.semantics.setConstant({ type: types.INT, value: dimensions.length });
-    this.operationsStack.push({ type: types.INT, value: address })
+    this.operationsStack.push({ type: types.INT, value: address });
     this.operatorsStack.push(this.operators.ADDDIM);
     this.checkOperation({ priority: -3 });
 

@@ -4,7 +4,6 @@ vars i, max, qty, search, result : int;
 vars array[100] : int;
 
 int function findIndexOf(number : int, length : int);
-vars i : int;
 {   
     for(i = 0; i < length; i = i + 1) {
       if(array[i] == number) {
@@ -13,6 +12,14 @@ vars i : int;
     }
 
     return(-1);
+}
+
+void function readArray(length : int);
+vars i : int;
+{
+  for(i = 0; i < length; i = i + 1) {
+    read(array[i]);
+  }
 }
 
 main(){
@@ -25,9 +32,7 @@ main(){
     write("Error: El número máximo de números es:");
     write(max);
   } else {
-    for(i = 0; i < qty; i = i + 1) {
-      read(array[i]);
-    }
+    readArray(qty);
 
     write("¿Qué número quieres buscar?: ");
     read(search);

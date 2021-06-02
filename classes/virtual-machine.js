@@ -387,7 +387,10 @@ class VirtualMachine {
     if (type == BOOLEAN) result = result !== "false";
     if (type == STRING) result = result.toString();
 
-    this.currentMemory[toSet] = result;
+    this.write({
+      address: toSet,
+      value: result,
+    });
   };
 
   [WRITE] = (quadruple) => {
@@ -448,9 +451,12 @@ class VirtualMachine {
     this.instructionPointer = this.backStack.pop();
     this.currentMemory = this.previousMemories.pop();
 
-    const { value, address } = this.returns.pop();
+    if (this.returns.length > 0) {
+      const { value, address } = this.returns.pop();
 
-    this.currentMemory[address] = value;
+      this.currentMemory[address] = value;
+    }
+
     this.deep--;
   };
 
