@@ -23,9 +23,7 @@ vars a, b, c, d : int;
     }
 
     if(cached[d]){
-      write("here");
       b = cache[d];
-      write(b);
     } else {
       b = fibonacciCached(d);
       cache[d] = b;

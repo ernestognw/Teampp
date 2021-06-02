@@ -50,6 +50,7 @@ class VirtualMachine {
     this.returns = [];
     this.pendingIndexes = [];
     this.pendingDimensions = [];
+    this.addimMap = [];
     this.deep = 0;
   }
 
@@ -150,6 +151,9 @@ class VirtualMachine {
     resetAll = true,
   }) => {
     if (this.pendingDimensions.length <= minLength) return address;
+    if(!this.addimMap[address]) return address;
+
+    this.addimMap[address]--;
 
     const amountOfDimensions = this.pendingDimensions.pop();
     const indexesToReduce = this.pendingIndexes.splice(amountOfDimensions * -1);
@@ -442,8 +446,9 @@ class VirtualMachine {
   };
 
   [ADDDIM] = (quadruple) => {
-    const [_, dimensionsAddress] = quadruple;
+    const [_, dimensionsAddress, targetAddress] = quadruple;
 
+    this.addimMap[targetAddress] = (this.addimMap[targetAddress] || 0) + 1;
     const dimensions = this.accessMemory(dimensionsAddress);
 
     this.pendingDimensions.push(dimensions);

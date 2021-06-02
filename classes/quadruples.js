@@ -162,7 +162,6 @@ class Quadruples {
       opcode != OPCODES.READ &&
       opcode != OPCODES.WRITE &&
       opcode != OPCODES.GOTOF &&
-      opcode != OPCODES.ADDDIM &&
       opcode != OPCODES.RETURN
     ) {
       this.pushToOperationsStack({
@@ -219,6 +218,7 @@ class Quadruples {
     if (
       opcode != OPCODES.EQUAL &&
       opcode != OPCODES.PARAM &&
+      opcode != OPCODES.ADDDIM &&
       opcode != OPCODES.VER
     ) {
       // Equal is a special case
@@ -332,11 +332,13 @@ class Quadruples {
    * Adds corresponding operators to access an index of an array
    * @param {dimensions} array of dimensions
    * @param {dimensionToCheck} array of dimensions to check
+   * @param {address} number of address to apply dimensions
    */
-  addArrayIndex = ({ dimensions, dimensionsToCheck }) => {
+  addArrayIndex = ({ dimensions, dimensionsToCheck, address }) => {
     if (dimensions.length === 0) return;
 
     this.semantics.setConstant({ type: types.INT, value: dimensions.length });
+    this.operationsStack.push({ type: types.INT, value: address })
     this.operatorsStack.push(this.operators.ADDDIM);
     this.checkOperation({ priority: -3 });
 

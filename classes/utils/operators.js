@@ -14,6 +14,7 @@ const binaryOperators = {
   EQUAL: "=",
   PARAM: "param",
   VER: "VER",
+  ADDDIM: "adddim",
 };
 
 const unaryOperators = {
@@ -23,7 +24,6 @@ const unaryOperators = {
   GOTOF: "gotof",
   ERA: "era",
   RETURN: "return",
-  ADDDIM: 'adddim'
 };
 
 const standaloneOperators = {

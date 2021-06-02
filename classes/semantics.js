@@ -380,6 +380,7 @@ class Semantics {
     this.quadruples.addArrayIndex({
       dimensions: currentVariable.dimensions,
       dimensionsToCheck: currentVariable.dimensionsToCheck,
+      address: currentVariable.address,
     });
 
     this.pointsAdvanced = 0;

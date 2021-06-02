@@ -19,6 +19,7 @@ const {
   EQUAL,
   PARAM,
   VER,
+  ADDDIM,
   ...missing
 } = binaryOperators;
 
@@ -44,6 +45,7 @@ const binaryPrecube = {
       [EQUAL]: INT,
       [PARAM]: INT,
       [VER]: INT,
+      [ADDDIM]: INT,
     },
     [FLOAT]: {
       [PLUS]: FLOAT,
@@ -61,6 +63,7 @@ const binaryPrecube = {
       [EQUAL]: FLOAT,
       [PARAM]: FLOAT,
       [VER]: null, // Can only be done between integers
+      [ADDDIM]: null, // Can only be done between integers
     },
     [CHAR]: {
       [PLUS]: INT,
@@ -78,6 +81,7 @@ const binaryPrecube = {
       [EQUAL]: INT,
       [PARAM]: INT,
       [VER]: null, // Can only be done between integers
+      [ADDDIM]: null, // Can only be done between integers
     },
     [BOOLEAN]: {
       [PLUS]: null,
@@ -95,6 +99,7 @@ const binaryPrecube = {
       [EQUAL]: null,
       [PARAM]: null,
       [VER]: null, // Can only be done between integers
+      [ADDDIM]: null, // Can only be done between integers
     },
   },
   [FLOAT]: {
@@ -114,6 +119,7 @@ const binaryPrecube = {
       [EQUAL]: FLOAT,
       [PARAM]: FLOAT,
       [VER]: null, // Can only be done between integers
+      [ADDDIM]: null, // Can only be done between integers
     },
     [CHAR]: {
       [PLUS]: FLOAT,
@@ -131,6 +137,7 @@ const binaryPrecube = {
       [EQUAL]: FLOAT,
       [PARAM]: FLOAT,
       [VER]: null, // Can only be done between integers
+      [ADDDIM]: null, // Can only be done between integers
     },
     [BOOLEAN]: {
       [PLUS]: null,
@@ -148,6 +155,7 @@ const binaryPrecube = {
       [EQUAL]: null,
       [PARAM]: null,
       [VER]: null, // Can only be done between integers
+      [ADDDIM]: null, // Can only be done between integers
     },
   },
   [CHAR]: {
@@ -167,6 +175,7 @@ const binaryPrecube = {
       [EQUAL]: CHAR,
       [PARAM]: CHAR,
       [VER]: null, // Can only be done between integers
+      [ADDDIM]: null, // Can only be done between integers
     },
     [BOOLEAN]: {
       [PLUS]: null,
@@ -184,6 +193,7 @@ const binaryPrecube = {
       [EQUAL]: null,
       [PARAM]: null,
       [VER]: null, // Can only be done between integers
+      [ADDDIM]: null, // Can only be done between integers
     },
   },
   [BOOLEAN]: {
@@ -203,6 +213,7 @@ const binaryPrecube = {
       [EQUAL]: BOOLEAN,
       [PARAM]: BOOLEAN,
       [VER]: null, // Can only be done between integers
+      [ADDDIM]: null, // Can only be done between integers
     },
   },
 };
