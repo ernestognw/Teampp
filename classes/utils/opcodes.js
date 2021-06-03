@@ -25,58 +25,36 @@ const {
   ENDFUNC,
   RETURN,
   VER,
-  ADDDIM
+  ADDDIM,
 } = operators;
 
 const OPCODES = {
-  // SUM: 0x1,
-  // SUB: 0x2,
-  // MULT: 0x3,
-  // DIV: 0x4,
-  // EQ: 0x5,
-  // NEQ: 0x6,
-  // GTE: 0x7,
-  // LTE: 0x8,
-  // GT: 0x9,
-  // LT: 0xA,
-  // AND: 0xB,
-  // OR: 0xC,
-  // NOT: 0xD,
-  // EQUAL: 0xE,
-  // READ: 0xF,
-  // WRITE: 0x10,
-  // GOTO: 0x11,
-  // GOTOF: 0x12,
-  // ERA: 0x13,
-  // PARAM: 0x14,
-  // GOSUB: 0x15,
-  // ENDFUNC: 0x16,
-  // RETURN: 0x17,
-  SUM: "SUM",
-  SUB: "SUB",
-  MULT: "MULT",
-  DIV: "DIV",
-  EQ: "EQ",
-  NEQ: "NEQ",
-  GTE: "GTE",
-  LTE: "LTE",
-  GT: "GT",
-  LT: "LT",
-  AND: "AND",
-  OR: "OR",
-  NOT: "NOT",
-  EQUAL: "EQUAL",
-  READ: "READ",
-  WRITE: "WRITE",
-  GOTO: "GOTO",
-  GOTOF: "GOTOF",
-  ERA: "ERA",
-  PARAM: "PARAM",
-  GOSUB: "GOSUB",
-  ENDFUNC: "ENDFUNC",
-  RETURN: "RETURN",
-  VER: "VER",
-  ADDDIM: "ADDDIM",
+  SUM: 0x1,
+  SUB: 0x2,
+  MULT: 0x3,
+  DIV: 0x4,
+  EQ: 0x5,
+  NEQ: 0x6,
+  GTE: 0x7,
+  LTE: 0x8,
+  GT: 0x9,
+  LT: 0xa,
+  AND: 0xb,
+  OR: 0xc,
+  NOT: 0xd,
+  EQUAL: 0xe,
+  READ: 0xf,
+  WRITE: 0x10,
+  GOTO: 0x11,
+  GOTOF: 0x12,
+  ERA: 0x13,
+  PARAM: 0x14,
+  GOSUB: 0x15,
+  ENDFUNC: 0x16,
+  RETURN: 0x17,
+  RETURN: 0x18,
+  VER: 0x19,
+  ADDDIM: 0x1a,
 };
 
 const operatorToOpcode = {
@@ -108,7 +86,9 @@ const operatorToOpcode = {
 };
 
 // Only assertion to ensure every operator is being used
-if (Object.values(operators).some(operator => !operatorToOpcode[operator]))
-  throw new Error("Development: There are some operators not translated to opcodes");
+if (Object.values(operators).some((operator) => !operatorToOpcode[operator]))
+  throw new Error(
+    "Development: There are some operators not translated to opcodes"
+  );
 
 module.exports = { OPCODES, operatorToOpcode };
