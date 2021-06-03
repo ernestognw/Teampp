@@ -90,7 +90,7 @@ yarn build
 
 It'll create a new folder called `dist` with a single `index.js` file that you can further distribute
 
-## Construido con 🛠️
+## Built with 🛠️
 
 The whole project was built on top of:
 
