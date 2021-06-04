@@ -26,7 +26,7 @@ class Semantics {
     this.isPointPending = false;
     this.pointsAdvanced = 0;
     this.pointsAdvancedFunction = 0;
-    this.callingFunction = "";
+    this.callingVariables = [];
 
     this.genericTypes = genericTypes;
 
@@ -94,10 +94,10 @@ class Semantics {
       address = this.memory.getAddress({
         type,
         segment: isFunction
-        ? this.memory.segments.STACK
-        : addToParams || this.currentDirectory.isFunction
-        ? this.memory.segments.FUNCTION
-        : this.memory.segments.LOCAL,
+          ? this.memory.segments.STACK
+          : addToParams || this.currentDirectory.isFunction
+          ? this.memory.segments.FUNCTION
+          : this.memory.segments.LOCAL,
         advance,
       });
     }
@@ -460,7 +460,7 @@ class Semantics {
   validateParam = () => {
     const directory = this.checkOnPreviousScope({
       directory: this.currentDirectory,
-      id: this.callingVariable,
+      id: this.getLastCallingVariable(),
     });
     const name = directory.name;
     const expectedParams = directory.params;
@@ -502,10 +502,16 @@ class Semantics {
     this.quadruples.operationsStack.pop();
   };
 
+  /**
+   * Get last calling variable
+   */
+  getLastCallingVariable = () =>
+    this.callingVariables[this.callingVariables.length - 1];
+
   resetParamPointer = () => {
     const directory = this.checkOnPreviousScope({
       directory: this.currentDirectory,
-      id: this.callingVariable,
+      id: this.getLastCallingVariable(),
     });
 
     const name = directory.name;
@@ -519,6 +525,7 @@ class Semantics {
       `);
 
     this.paramPointer = 0;
+    this.callingVariables.pop();
     for (let i = 0; i < this.pointsAdvancedFunction; i++) this.backDirectory();
     this.pointsAdvancedFunction = 0;
   };

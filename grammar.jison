@@ -371,7 +371,7 @@ call_aux:
 var_call:
 	var OPEN_PARENTHESIS {
 		const { name } = yy.semantics.getLastUsedCurrentVariable();
-		yy.semantics.callingVariable = name;
+		yy.semantics.callingVariables.push(name);
 		yy.semantics.quadruples.operatorsStack.push(yy.semantics.quadruples.operators.ERA);
 		yy.semantics.quadruples.checkOperation({ priority: -3 });
 	}
@@ -380,11 +380,11 @@ var_call:
 call:
 	var_call call_aux CLOSE_PARENTHESIS {
 		yy.semantics.validateId({ 
-			id: yy.semantics.callingVariable, 
+			id: yy.semantics.getLastCallingVariable(), 
 			expectFunction: true
 		});
 		yy.semantics.quadruples.addGoSub({
-			functionName: yy.semantics.callingVariable
+			functionName: yy.semantics.getLastCallingVariable()
 		});
 		yy.semantics.resetParamPointer();
 	}
