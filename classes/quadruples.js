@@ -154,11 +154,21 @@ class Quadruples {
 
     const opcode = operatorToOpcode[operator];
 
+    const lastPendingClass =
+      this.semantics.pendingClassesStack[
+        this.semantics.pendingClassesStack.length - 1
+      ];
+
+    const pendingClass =
+      lastPendingClass?.name == left.value ? lastPendingClass : null;
+
+    const pastScopedVariable = this.semantics.checkOnPreviousScope({
+      directory: this.semantics.currentDirectory,
+      id: left.value,
+    });
+
     const leftAddress =
-      this.semantics.checkOnPreviousScope({
-        directory: this.semantics.currentDirectory,
-        id: left.value,
-      })?.address || left.value;
+      pendingClass?.address || pastScopedVariable?.address || left.value;
 
     if (
       opcode != OPCODES.READ &&
@@ -254,8 +264,21 @@ class Quadruples {
       id: right.value,
     });
 
-    const leftAddress = leftVar?.address || left.value;
-    const rightAddress = rightVar?.address || right.value;
+    const lastPendingClass =
+      this.semantics.pendingClassesStack[
+        this.semantics.pendingClassesStack.length - 1
+      ];
+
+    const leftPendingClass =
+      lastPendingClass?.name == left.value ? lastPendingClass : null;
+
+    const rightPendingClass =
+      lastPendingClass?.name == right.value ? lastPendingClass : null;
+
+    const leftAddress =
+      leftPendingClass?.address || leftVar?.address || left.value;
+    const rightAddress =
+      rightPendingClass?.address || rightVar?.address || right.value;
 
     const quadruple = [opcode, leftAddress, rightAddress, tmp];
 

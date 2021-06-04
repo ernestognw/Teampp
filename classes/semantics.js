@@ -1,4 +1,5 @@
 const chalk = require("chalk");
+const cloneDeep = require('lodash.clonedeep');
 const Quadruples = require("./quadruples.js");
 const {
   genericTypes,
@@ -27,6 +28,7 @@ class Semantics {
     this.pointsAdvanced = 0;
     this.pointsAdvancedFunction = 0;
     this.callingVariables = [];
+    this.pendingClassesStack = [];
 
     this.genericTypes = genericTypes;
 
@@ -78,7 +80,7 @@ class Semantics {
       // When type is not generic, it is needed to copy a pointer to the varsDirectory
       // of the variable, since they will not change, and will be useful to address
       // future calls such as foo.bar
-      varsDirectory = { ...classVarsDirectory };
+      varsDirectory = cloneDeep(classVarsDirectory);
     }
 
     if (!!this.currentDirectory.varsDirectory[id]) {
@@ -113,6 +115,16 @@ class Semantics {
       isParam: addToParams,
     };
 
+    if (!typeExists) {
+      this.incrementVariableAddresses({
+        directory: this.currentDirectory.varsDirectory[id],
+      });
+      // console.log(
+      //   this.currentDirectory.varsDirectory.person,
+      //   this.currentDirectory.varsDirectory.person2
+      // );
+    }
+
     if (isFunction) {
       this.currentDirectory.varsDirectory[id].target =
         this.quadruples.intermediateCode.length;
@@ -129,6 +141,29 @@ class Semantics {
       this.advanceToDirectory({
         name: id,
       });
+  };
+
+  /**
+   * Takes a variable directory and increments addresses for every subvariable.
+   * Used for object instances
+   *
+   * @param {object} directory of variables to increment
+   */
+  incrementVariableAddresses = ({ directory }) => {
+    Object.keys(directory.varsDirectory).forEach((key) => {
+      const { type } = directory.varsDirectory[key];
+      directory.varsDirectory[key] = {
+        ...directory.varsDirectory[key],
+        address: this.memory.getAddress({
+          type,
+          segment: this.memory.segments.LOCAL,
+        }),
+      };
+      if (directory.name !== key)
+        this.incrementVariableAddresses({
+          directory: directory.varsDirectory[key],
+        });
+    });
   };
 
   /**
@@ -388,6 +423,10 @@ class Semantics {
       this.currentVariableStack.pop();
 
     const lastVariable = this.currentVariableStack.pop();
+
+    if (this.validateGenericType({ type: lastVariable.type }))
+      this.pendingClassesStack.push(lastVariable);
+
     if (lastVariable.isFunction) {
       this.currentVariableUsed.push(lastVariable);
       this.pointsAdvancedFunction = this.pointsAdvanced;
